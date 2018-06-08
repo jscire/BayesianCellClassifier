@@ -1,8 +1,5 @@
 package generalclassifier.utils;
 
-import org.apache.commons.math.FunctionEvaluationException;
-import org.apache.commons.math.analysis.UnivariateRealFunction;
-
 public class Utils {
 
     /**
