@@ -13,7 +13,7 @@ public class LineageTree extends Tree {
 
 
     public enum Fate {
-        // D: divides, A: apoptoses, L: lost cell, N: does nothing (not sure we'll keep that), U: unobserved
+        // D: divides, A: apoptoses, L: lost cell, N: does nothing (not sure we'll keep that), U: unobserved fate
         D, A, L, N, U
     }
 
