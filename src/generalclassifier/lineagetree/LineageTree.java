@@ -17,11 +17,12 @@ public class LineageTree extends Tree {
         D, A, L, N, U
     }
 
+
+    private Cell[] cells;
+
     private Fate[] nodeFates;
 
     private double edgeLengths[];
-
-    public boolean allowTransitionOnEdge = false;
 
     //TODO change that before going for bigger trees
     static final int maxTreeSize = 7; // maximal number of nodes a LineageTree can have

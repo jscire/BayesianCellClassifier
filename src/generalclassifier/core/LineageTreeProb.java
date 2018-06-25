@@ -50,10 +50,14 @@ public class LineageTreeProb extends Distribution {
                     "parameter specifying which element corresponds to the root " +
                     "HSC status.");
 
-    //TODO set up as list to generalize
-    public Input<RealParameter> transitionUponDivisionProbsInput = new Input<>("transitionProbs",
-            "Vector containing transition-upon-division probabilities (q0, q1, q2). These correspond to transitions upon division."); // TODO rename input to be more explicit when this set-up works. For now I leave 'transitionProbs' to not mess up with what we already have that works.
-
+    public Input<List<RealParameter>> matrixOfProbsOfTransitionUponDivision = new Input<>("probsOfTransitionUponDivision",
+            "Flattened 3-dimensional array containing the probabilites of transition upon division." +
+                    "If mkj in array i represents the probability that a cell of type i divides into cells of type k and j (k<= j)," +
+                    "the element of index n*k + j - k(k+1)/2 gives the index of element mkj in the input vector." +
+                    "If j<k, invert k and j. We assume here that the daughter cells are not ordered." +
+                    "This renumbering is equivalent to flattening the array by rows." +
+                    "Note that all vectors in this list must have elements which sum to 1.",
+            new ArrayList<RealParameter>());
 
     public Input<BooleanParameter> matrixOfAllowedTransitionsInput = new Input<> ("allowedTransitions",
             "Flattened matrix of allowed transitions between cell types. " +
@@ -88,16 +92,15 @@ public class LineageTreeProb extends Distribution {
 
         numberOfTypes = fateProbabilitiesInput.get().size();
 
-        //TODO remove when generalized
+        //TODO remove when tested with more than 2 types.
         if(numberOfTypes != 2)
-            throw new IllegalStateException("Number of types is not two. Such a configuration is not allowed by the implementation yet.");
+            throw new IllegalStateException("Number of types is not two. Such a configuration is not tested yet.");
 
         if(shapeWeibullInput.get().size() != numberOfTypes || scaleWeibullInput.get().size() != numberOfTypes)
             throw new IllegalStateException("Inputs fateProbabilities, shapeWeibull and scaleWeibull should have the same number of elements: the number of cell types.");
 
         if(matrixOfAllowedTransitionsInput.get() != null) {
             transitionDuringLifetimeIsAllowed = true;
-
             if(matrixOfAllowedTransitionsInput.get().getDimension() != numberOfTypes * (numberOfTypes -1))
                 throw new IllegalStateException("Incorrect size of matrix of allowed transitions.");
         }
@@ -105,12 +108,22 @@ public class LineageTreeProb extends Distribution {
             transitionDuringLifetimeIsAllowed = false;
         }
 
-        transitionUponDivisionIsAllowed = (transitionUponDivisionProbsInput.get() != null);
+        if(matrixOfProbsOfTransitionUponDivision.get() != null) {
+            transitionUponDivisionIsAllowed=true;
+            if(matrixOfProbsOfTransitionUponDivision.get().size() != numberOfTypes)
+                throw new IllegalStateException("Incorrect size of matrix of probabilities of transition upon division.");
+        }
+        else {
+            transitionUponDivisionIsAllowed = false;
+        }
+
+        //TODO remove
+        //transitionUponDivisionIsAllowed = (transitionUponDivisionProbsInput.get() != null);
 
         if (lossProbInput.get() == null)
             throw new IllegalStateException("lossProb input is missing. Set to zero if cells are never lost.");
 
-        //TODO add checks for parameter input format. In particular, check that fateProbabilities, shapeWeibull and scaleWeibull have correct dimension for each cell type.
+        //TODO add checks for parameter input format. In particular, check that fateProbabilities, transitionProbsUponDivision, shapeWeibull and scaleWeibull have correct dimension for each cell type.
 
     }
 
@@ -262,30 +275,16 @@ public class LineageTreeProb extends Distribution {
 
         }
         else {
-            //TODO figure out a way to generalize transitions upon division to n states
-            // for now only two types (0 and 1)
 
-            if(typeEndParentBranch == 0) {
-                switch (typeStartChildBranch1 + typeStartChildBranch2) {
-                    case 0: // both daughters are of the type of the mother cell: 0 -> 0 + 0
-                        return transitionUponDivisionProbsInput.get().getValue(2);
-
-                    case 1: // asymmetric division 0 -> 0 + 1
-                        return transitionUponDivisionProbsInput.get().getValue(1);
-
-                    case 2: // 0 -> 1 + 1
-                        return transitionUponDivisionProbsInput.get().getValue(0);
-
-                    default:
-                        throw new IllegalStateException("Invalid cell types. For now max n is 2");
-                }
+            if(typeStartChildBranch1 > typeStartChildBranch2) {
+                int temp = typeStartChildBranch2;
+                typeStartChildBranch2 = typeStartChildBranch1;
+                typeStartChildBranch1 = temp;
             }
-            else if (typeStartChildBranch1 == 1 && typeStartChildBranch2 == 1) {
-                return 1;
-            }
-            else { // TODO change when generalized
-                return 0;
-            }
+
+            int indexInFlattenedArray = numberOfTypes * typeStartChildBranch1 + typeStartChildBranch2 - typeStartChildBranch1 * (typeStartChildBranch1+1)/2;
+
+            return matrixOfProbsOfTransitionUponDivision.get().get(typeEndParentBranch).getValue(indexInFlattenedArray);
         }
     }
 

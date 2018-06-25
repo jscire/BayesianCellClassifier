@@ -38,12 +38,16 @@ public class LikelihoodTests extends TestCase{
         shapeWeibull.add(new RealParameter("1 1"));
         shapeWeibull.add(new RealParameter("1 1"));
 
+        List<RealParameter> probsTransitionUponDivision = new ArrayList<>();
+        probsTransitionUponDivision.add(new RealParameter("0.5 0.3 0.2"));
+        probsTransitionUponDivision.add(new RealParameter("0 0 1.0"));
+
+        probTree.setInputValue("probsOfTransitionUponDivision", probsTransitionUponDivision);
         probTree.setInputValue("fateProbabilities", fateProbabilities);
         probTree.setInputValue("scaleWeibull",scaleWeibull);
         probTree.setInputValue("shapeWeibull",shapeWeibull);
         probTree.setInputValue("lossProb", new RealParameter("0.1"));
         probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-        probTree.setInputValue("transitionProbs", new RealParameter("0.2 0.3 0.5"));
 
         double logP;
 
@@ -176,12 +180,16 @@ public class LikelihoodTests extends TestCase{
         shapeWeibull.add(new RealParameter("1 1.5 1.3"));
         shapeWeibull.add(new RealParameter("1 1.2"));
 
+        List<RealParameter> probsTransitionUponDivision = new ArrayList<>();
+        probsTransitionUponDivision.add(new RealParameter("0.5 0.3 0.2"));
+        probsTransitionUponDivision.add(new RealParameter("0 0 1.0"));
+
+        probTree.setInputValue("probsOfTransitionUponDivision", probsTransitionUponDivision);
         probTree.setInputValue("fateProbabilities", fateProbabilities);
         probTree.setInputValue("scaleWeibull",scaleWeibull);
         probTree.setInputValue("shapeWeibull",shapeWeibull);
         probTree.setInputValue("lossProb", new RealParameter("0.1"));
         probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-        probTree.setInputValue("transitionProbs", new RealParameter("0.2 0.3 0.5"));
         probTree.setInputValue("allowedTransitions", new BooleanParameter("1 0"));
 
         double logP;
