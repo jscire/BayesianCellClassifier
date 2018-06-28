@@ -11,6 +11,13 @@ public class LineageTree extends Tree {
             "Newick string describing lineage tree.",
             Input.Validate.REQUIRED);
 
+    public Input<String> experimentalMeasuresFileInput = new Input<>("measures",
+            "CSV file containing all the measures performed on this tree.");
+
+    public Input<String> frameRateInput = new Input<>("frameRate",
+            "Specify only if time is not explicitly measured in input csv file." +
+                    "Accepted values:  'day', 'hour', 'minute', 'second'");
+
 
     public enum Fate {
         // D: divides, A: apoptoses, L: lost cell, N: does nothing (not sure we'll keep that), U: unobserved
