@@ -1,13 +1,15 @@
 package generalclassifier.lineagetree;
 
+import beast.evolution.tree.Node;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
-import org.apache.commons.math3.analysis.function.Exp;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-public class Cell {
+//TODO remove everything that is not used
+public class Cell extends Node {
 
     public enum Fate {
         // D: divides, A: apoptoses, L: lost cell, N: does nothing (not sure we'll keep that), U: unobserved
@@ -16,40 +18,22 @@ public class Cell {
 
     Fate fate;
     int trackNumber;
+    double edgeLength;
 
-    List<double[]> timePoints = new ArrayList<> ();
+   // List<double[]> timePoints = new ArrayList<> ();
+
     List<ExperimentalMeasure> measures = new ArrayList<> ();
 
-    double lifetime;
-    double area;
-    double eccentricity;
-    double perimeter;
-    double averageSpeed;
-
-
-
-    public Cell(){
-    }
+    List<Double> timePoints = new ArrayList<>();
 
     public Cell(int trackNumber) {
         this.trackNumber = trackNumber;
     }
 
-    public Cell(int trackNumber, List<ExperimentalMeasure> measures) {
+    public Cell(int trackNumber, List<MeasureType> measureTypes) {
         this.trackNumber = trackNumber;
-        this.measures = measures;
-    }
-
-    public Cell(double branchlength) {
-        this.lifetime = branchlength;
-    }
-
-    public void setMeasures(CSVParser parser) {
-        for(MeasureType measureType : MeasureType.values()) {
-            if(measureType.isMeasureInCSV(parser)) {
-                ExperimentalMeasure measure = new ExperimentalMeasure(measureType);
-                measures.add(measure);
-            }
+        for (MeasureType measureType : measureTypes) {
+            this.measures.add(new ExperimentalMeasure(measureType));
         }
     }
 
@@ -57,62 +41,214 @@ public class Cell {
         this.measures = measures;
     }
 
-    public void addTimePoint(CSVRecord record) {
-        double[] timePoint = new double[measures.size()];
-        for (int i = 0; i < measures.size(); i++) {
-            timePoint[i] = Double.parseDouble(measures.get(i).getValueInRecord(record));
+    public void summarizeMeasures() {
+        int inputForSpeedCalculation = 0;
+
+        ExperimentalMeasure xPos = new ExperimentalMeasure();
+        ExperimentalMeasure yPos = new ExperimentalMeasure();
+
+        if(timePoints.size() == 0)
+            throw new IllegalStateException("Summary is impossible. Time points have not been defined, call setTimePointsAndCleanUpMeasures method first.");
+
+        for (ExperimentalMeasure measure : measures) {
+            if(measure.calculationMethod != ExperimentalMeasure.CalculationMethod.undefined &&
+                    measure.calculationMethod != ExperimentalMeasure.CalculationMethod.averageInstantSpeed) {
+                measure.summarize(timePoints);
+            }
+            // perform checks to see if we'll have to
+            if(measure.measureType == MeasureType.XPosition) {
+                xPos = measure;
+                inputForSpeedCalculation ++;
+            }
+            else if(measure.measureType == MeasureType.YPosition){
+                yPos = measure;
+                inputForSpeedCalculation ++;
+            }
         }
-        timePoints.add(timePoint);
+
+        // assuming no duplicates here (only one measure each for xPos and yPos)
+        if (inputForSpeedCalculation == 2) {
+            this.setInstantSpeedAndSummarize(xPos, yPos);
+        }
     }
 
-    public double getLifetime() {
-        return this.lifetime;
+    public void addDataPoint(CSVRecord record) {
+        for (int i = 0; i < measures.size(); i++) {
+            measures.get(i).addDataPointFromRecord(record);
+        }
     }
 
-    public void setLifetime(double branchLength) {
-        this.lifetime = branchLength;
+    /**
+     * Note: this method relies on the fact that daughter cells are numbered 2n and 2n+1, with n the label of the mother cell.
+     * @param cells
+     * @param rootKey
+     * @return
+     */
+    public static Cell buildTreeAndGetRoot (Map<Integer, Cell> cells, int rootKey) {
+
+        if(cells.size() == 0) throw new IllegalArgumentException("Empty set of cells.");
+
+        Cell rootCell = cells.get(rootKey);
+
+        // set everything relative to node height and branch lengths
+        rootCell.setTimePointsAndCleanUpMeasures();
+        rootCell.setHeight(rootCell.timePoints.get(rootCell.timePoints.size() - 1));
+        rootCell.setEdgeLength();
+
+        // summarize each measure following the appropriate calculation method
+        rootCell.summarizeMeasures();
+
+        //TODO rework on how the fate is attributed to the cell
+        rootCell.setFate(Fate.D);
+
+        if(cells.containsKey(2*rootKey)) {
+            Cell child1 = buildTreeAndGetRoot(cells, 2*rootKey);
+            child1.setParent(rootCell);
+            rootCell.addChild(child1);
+        }
+        if(cells.containsKey(2*rootKey + 1)) {
+            Cell child2 = buildTreeAndGetRoot(cells, 2*rootKey + 1);
+            child2.setParent(rootCell);
+            rootCell.addChild(child2);
+        }
+
+        return rootCell;
     }
 
-    public Fate getFate() {
+
+    public double getEdgeLength(){
+        return this.edgeLength;
+    }
+
+    public void setEdgeLength() {
+        this.edgeLength = timePoints.get(timePoints.size()) -  timePoints.get(0);
+    }
+
+    public Fate getFate(){
         return this.fate;
     }
 
+    //TODO not enough to allow for more fates than just dividers (need to read it from the csv file)
     public void setFate(Fate f) {
         this.fate = f;
     }
 
+    /**
+     * Renumber all the nodes in the tree following the conventions dictated by Beast2.
+     * Leaves must be numbered 0 to n. Internal nodes are n+1 to 2n-2. the root is numbered 2n -1.
+     * Warning: this method is written with application to root cells only in mind.
+     */
+    public void labelNodesInTree() {
+
+
+        List<Cell> leaves = (List<Cell>) (List) this.getAllLeafNodes();
+        int count = 0;
+        for (Cell cell : leaves) {
+            cell.setNr(count);
+            count ++;
+        }
+
+        List<Cell> internalNodes = this.getAllInternalNodes();
+        for (Cell cell : internalNodes) {
+            cell.setNr(count);
+            count ++;
+        }
+        // last, label the root
+        this.setNr(count);
+    }
+
+    /**
+     * get all internal nodes under this node, does not include the node it is applied to.
+     */
+    public List<Cell> getAllInternalNodes() {
+        final List<Cell> internalNodes = new ArrayList<>();
+        if(!this.isLeaf()) {
+            for(Cell child : (List<Cell>) (List) this.getChildren())
+                child.getAllInternalNodes(internalNodes);
+        }
+        return internalNodes;
+    }
+
+    // recursive
+    public void getAllInternalNodes(final List<Cell> internalNodes) {
+        if(!this.isLeaf()) {
+            internalNodes.add(this);
+        }
+
+        for (Cell child : (List<Cell>) (List) getChildren())
+            child.getAllInternalNodes(internalNodes);
+    }
 
 
 
-//    public double getArea() {
-//        return area;
-//    }
-//
-//    public void setArea(double area) {
-//        this.area = area;
-//    }
-//
-//    public double getEccentricity() {
-//        return eccentricity;
-//    }
-//
-//    public void setEccentricity(double eccentricity) {
-//        this.eccentricity = eccentricity;
-//    }
-//
-//    public double getAverageSpeed() {
-//        return averageSpeed;
-//    }
-//
-//    public void setAverageSpeed(double averageSpeed) {
-//        this.averageSpeed = averageSpeed;
-//    }
-//
-//    public double getPerimeter() {
-//        return perimeter;
-//    }
-//
-//    public void setPerimeter(double perimeter) {
-//        this.perimeter = perimeter;
-//    }
+
+    /**
+     * Try to set timePoints to be the proper time measures,
+     * If they don't exist,
+     */
+    //TODO add height to the cell
+    //TODO propagate the fact that unscaled time, with a certain frame rate, if no proper time measure.
+    public void setTimePointsAndCleanUpMeasures(){
+        int unscaledTimeInd = -1;
+        int properTimeInd = -1;
+
+        for (int i = 0; i < measures.size(); i++) {
+            if(measures.get(i).measureType == MeasureType.ElapsedTime)
+                properTimeInd = i;
+            else if(measures.get(i).measureType == MeasureType.Lifetime)
+                unscaledTimeInd = i;
+        }
+
+        if(properTimeInd > -1) { // the proper time measure is present
+            // be careful with the order in which elements are removed to avoid problems with renumbering
+            if(properTimeInd > unscaledTimeInd) {
+                timePoints = measures.remove(properTimeInd).dataPoints;
+                measures.remove(unscaledTimeInd);
+            }
+            else {
+                measures.remove(unscaledTimeInd);
+                timePoints = measures.remove(properTimeInd).dataPoints;
+            }
+        }
+        else {
+            if(unscaledTimeInd <0) throw new IllegalStateException("No time point column found. This is not compatible with the current implementation.");
+            timePoints = measures.remove(unscaledTimeInd).dataPoints;
+        }
+    }
+
+    /**
+     * Note: If only one timePoint, no speed is calculated.
+     * @param xPos
+     * @param yPos
+     */
+    void setInstantSpeedAndSummarize(ExperimentalMeasure xPos, ExperimentalMeasure yPos) {
+        if((timePoints.size() != xPos.dataPoints.size()) || (yPos.dataPoints.size() != timePoints.size()))
+            throw new IllegalArgumentException("All three inputs should be of the same size.");
+
+        if(timePoints.size() < 1) return;
+
+        ExperimentalMeasure instantSpeed = new ExperimentalMeasure(MeasureType.AverageSpeed, ExperimentalMeasure.CalculationMethod.averageInstantSpeed);
+
+        double dist;
+        double time;
+
+        double sumOfSpeeds = 0;
+
+        for (int i = 1; i < timePoints.size(); i++) {
+
+            dist = Math.sqrt(Math.pow(xPos.dataPoints.get(i) - xPos.dataPoints.get(i-1),2)
+                    + Math.pow(yPos.dataPoints.get(i) - yPos.dataPoints.get(i-1),2));
+            time = timePoints.get(i) - timePoints.get(i-1);
+
+            sumOfSpeeds += dist/time;
+            instantSpeed.dataPoints.add(dist/time);
+        }
+
+        instantSpeed.summaryValue = sumOfSpeeds/(timePoints.size() -1);
+
+        this.measures.add(instantSpeed);
+    }
+
+
+
 }

@@ -2,9 +2,7 @@ package generalclassifier.lineagetree;
 
 import org.apache.commons.csv.CSVRecord;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 public class ExperimentalMeasure {
 
@@ -44,6 +42,14 @@ public class ExperimentalMeasure {
 
     MeasureType measureType;
 
+    List<Double> dataPoints = new ArrayList<>();
+
+    double summaryValue;
+
+    ExperimentalMeasure() {
+        // do nothing
+    }
+
     ExperimentalMeasure(MeasureType measureType) {
         this.measureType = measureType;
         this.calculationMethod = mapMeasureToMethod.get(measureType);
@@ -63,6 +69,52 @@ public class ExperimentalMeasure {
     }
 
 
+    void summarize(List<Double> timePoints) {
+        double res = 0;
+
+        if(dataPoints.size() != timePoints.size())
+            throw new IllegalArgumentException("The number of measure points does not match the number of time points.");
+
+        int lastIndex = timePoints.size()-1;
+
+        switch (this.calculationMethod) {
+            case maxRate :
+                double instantRate;
+                for (int i = 1; i <= lastIndex; i++) {
+                    instantRate = (dataPoints.get(i) - dataPoints.get(i-1))/(timePoints.get(i) - timePoints.get(i-1));
+                    if(instantRate > res)
+                        res = instantRate;
+                }
+                break;
+
+            case averageRate :
+                res = (dataPoints.get(lastIndex) - dataPoints.get(0))/(timePoints.get(lastIndex) - timePoints.get(0));
+                break;
+
+            case averageValue:
+                // sum all the observed values
+                for (int i = 0; i <= lastIndex ; i++) {
+                    res += dataPoints.get(i);
+                }
+                res /= (lastIndex + 1); // take the mean
+                break;
+
+            case differenceStartToEnd:
+                res = dataPoints.get(lastIndex) - dataPoints.get(0);
+                break;
+
+            case averageInstantSpeed:
+            case undefined:
+            default:
+                throw new IllegalArgumentException("Cannot summarize this measure. Method is: " + this.calculationMethod);
+
+        }
+        summaryValue = res;
+    }
+
+
+
+
     /**
      *
      * @param record
@@ -75,6 +127,15 @@ public class ExperimentalMeasure {
                 return record.get(name);
         }
         return null;
+    }
+
+    void addDataPointFromRecord(CSVRecord record) {
+        for (String name : this.measureType.getNames()) {
+            if(record.isMapped(name)) {
+                dataPoints.add(Double.parseDouble(record.get(name)));
+                break;
+            }
+        }
     }
 
 //    boolean isMeasureInRecord(CSVRecord record) {

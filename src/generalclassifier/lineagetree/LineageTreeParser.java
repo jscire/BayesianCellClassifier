@@ -26,20 +26,19 @@ public class LineageTreeParser {
         this.inputFileName = inputFile;
     }
 
-    public Map<Integer, Cell> parse() throws IOException {
+    public Map<Integer, Cell> parseRawCells() throws IOException {
         File csvData = new File(inputFileName);
-//        CSVFormat format = CSVFormat.newFormat(',').withHeader();
         CSVParser parser = CSVParser.parse(new FileReader(csvData), CSVFormat.EXCEL.withHeader());
 
         int maxCellNumber = 0;
         Map<Integer, Cell> cells = new HashMap<>();
 
 
-        ArrayList<ExperimentalMeasure> measuresInCSV = new ArrayList<>();
+        ArrayList<MeasureType> measuresInCSV = new ArrayList<>();
         // add all measure that are actually in the CSV file to the list of measuresInCSV
         for(MeasureType measureType : MeasureType.values()) {
             if(measureType.isMeasureInCSV(parser))
-                measuresInCSV.add(new ExperimentalMeasure(measureType));
+                measuresInCSV.add(measureType);
         }
 
 
@@ -57,11 +56,12 @@ public class LineageTreeParser {
             }
 
             // assign the experimental measures in this line to the corresponding cell
-            cells.get(cellNumber).addTimePoint(csvRecord);
+            cells.get(cellNumber).addDataPoint(csvRecord);
         }
 
         return cells;
     }
+
 
     boolean isEmptyRecord(CSVRecord record) {
         return record.get("TrackNumber").isEmpty();
@@ -91,7 +91,7 @@ public class LineageTreeParser {
 
             if(isCellNumberInRecord(csvRecord, cell.trackNumber))
                 // if current line (record) contains this cellNumber, add a timePoint to the stored observations
-                cell.addTimePoint(csvRecord);
+                cell.addDataPoint(csvRecord);
 
             else if(isCellNumberInRecord(csvRecord, 2 * cell.trackNumber)
                     || isCellNumberInRecord(csvRecord, 2 * cell.trackNumber + 1))
@@ -142,7 +142,7 @@ public class LineageTreeParser {
         LineageTreeParser parser =  new LineageTreeParser("../Data/Examples/toyFile.csv");
 
         try {
-            Map<Integer, Cell> cells = parser.parse();
+            Map<Integer, Cell> cells = parser.parseRawCells();
             System.out.println("Job done.");
         } catch (Exception e){
             System.out.println(e.getMessage());
