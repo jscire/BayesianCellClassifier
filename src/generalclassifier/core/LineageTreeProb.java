@@ -7,8 +7,8 @@ import beast.core.parameter.BooleanParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 
+import generalclassifier.lineagetree.Cell;
 import generalclassifier.lineagetree.LineageTree;
-import static generalclassifier.lineagetree.LineageTree.Fate.*;
 import generalclassifier.utils.Utils;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -140,7 +140,7 @@ public class LineageTreeProb extends Distribution {
 
         //for now prior is that frequency is equal for all types TODO allow for more flexibility
         try {
-            logP = Math.log(calculatePruningProb(tree.getRoot(), rootNodeType)[rootNodeType] * 1.0/numberOfTypes);
+            logP = Math.log(calculatePruningProb((Cell) tree.getRoot(), rootNodeType)[rootNodeType] * 1.0/numberOfTypes);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -149,48 +149,48 @@ public class LineageTreeProb extends Distribution {
     }
 
 
-    public double getProbabilityCellBranch(Node node, int typeStartBranch, int typeEndBranch) {
+    public double getProbabilityCellBranch(Cell node, int typeStartBranch, int typeEndBranch) {
 
         int nodeIdx = node.getNr();
         double branchProb=0;
 
-        if(tree.getNodeFate(nodeIdx) == L) return lossProbInput.get().getValue();
+        if(node.getFate() == Cell.Fate.L) return lossProbInput.get().getValue();
 
         if(typeStartBranch == typeEndBranch) { // no type transition
 
-            if (tree.getNodeFate(nodeIdx) == D || tree.getNodeFate(nodeIdx) == A) {
+            if (node.getFate() == Cell.Fate.D || node.getFate() == Cell.Fate.A) {
 
-                int cellFate = tree.getNodeFate(nodeIdx) == D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
+                int cellFate = node.getFate() == Cell.Fate.D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
                 branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getArrayValue(cellFate)
-                        * Utils.getWeibullDensity(tree.getEdgeLength(nodeIdx),
+                        * Utils.getWeibullDensity(node.getEdgeLength(),
                         scaleWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate),
                         shapeWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate));
 
             }
-            else if (tree.getNodeFate(nodeIdx) == N) { //TODO potentially remove this fate (and have only unobserved instead)
+            else if (node.getFate() == Cell.Fate.N) { //TODO potentially remove this fate (and have only unobserved instead)
 
                 branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getValue(2)
                         + fateProbabilitiesInput.get().get(typeEndBranch).getValue(0) // cell divides after end of branch
-                        * Math.exp(-Math.pow(tree.getEdgeLength(nodeIdx) / scaleWeibullInput.get().get(typeEndBranch).getValue(0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)))
+                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)))
                         + fateProbabilitiesInput.get().get(typeEndBranch).getValue(1) // cell dies after end of branch
-                        * Math.exp(-Math.pow(tree.getEdgeLength(nodeIdx) / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
+                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
 
                 if (transitionDuringLifetimeIsAllowed && fateProbabilitiesInput.get().get(typeEndBranch).getDimension() > 3) // check if this state can transition
                     //TODO if more than 1 fate that the cell can transition to, take it into account, either by summing the different probas or by having one big proba for all
                     branchProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(3) // cell transitions after end of branch
-                        * Math.exp(-Math.pow(tree.getEdgeLength(nodeIdx) / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
+                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
 
             }
-            else if (tree.getNodeFate(nodeIdx) == U) {
+            else if (node.getFate() == Cell.Fate.U) {
 
                 branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getValue(0) // cell divides after end of branch
-                        * Math.exp(-Math.pow(tree.getEdgeLength(nodeIdx) / scaleWeibullInput.get().get(typeEndBranch).getValue(0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)))
+                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)))
                         + fateProbabilitiesInput.get().get(typeEndBranch).getValue(1) // cell dies after end of branch
-                        * Math.exp(-Math.pow(tree.getEdgeLength(nodeIdx) / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
+                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
 
                 if (transitionDuringLifetimeIsAllowed && fateProbabilitiesInput.get().get(typeEndBranch).getDimension() > 3) // check if this state can transition
                     branchProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(3) // cell transitions after end of branch
-                            * Math.exp(-Math.pow(tree.getEdgeLength(nodeIdx) / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
+                            * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
 
             }
             else {
@@ -206,13 +206,13 @@ public class LineageTreeProb extends Distribution {
             if (!transitionDuringLifetimeIsAllowed || !matrixOfAllowedTransitionsInput.get().getValue(indexTransition))
                 return 0; // configuration has probability zero (impossible type transition)
             else {
-                if (tree.getNodeFate(nodeIdx) == D || tree.getNodeFate(nodeIdx) == A) {
-                    int cellEndFate = tree.getNodeFate(nodeIdx) == D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
+                if (node.getFate() == Cell.Fate.D || node.getFate() == Cell.Fate.A) {
+                    int cellEndFate = node.getFate() == Cell.Fate.D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
 
                     // integration over transition point
                     // the "2" below refers to the fate transitioner. TODO refactor this "2", make cleaner which fate is which, when generalising
                     DensityProbOfStateTransition f = new DensityProbOfStateTransition(
-                            tree.getEdgeLength(nodeIdx),
+                            node.getEdgeLength(),
                             shapeWeibullInput.get().get(typeStartBranch).getValue(2),
                             scaleWeibullInput.get().get(typeStartBranch).getValue(2),
                             shapeWeibullInput.get().get(typeEndBranch).getValue(cellEndFate),
@@ -228,10 +228,10 @@ public class LineageTreeProb extends Distribution {
                     }
 
                 }
-                else if (tree.getNodeFate(nodeIdx) == N) { //TODO potentially remove this fate (and have only unobserved instead)
+                else if (node.getFate() == Cell.Fate.N) { //TODO potentially remove this fate (and have only unobserved instead)
 
                     DensityProbTransitionBeforeEndAndDivisionDeathAfter f = new DensityProbTransitionBeforeEndAndDivisionDeathAfter(
-                            tree.getEdgeLength(nodeIdx),
+                            node.getEdgeLength(),
                             shapeWeibullInput.get().get(typeStartBranch).getValue(2),
                             scaleWeibullInput.get().get(typeStartBranch).getValue(2),
                             shapeWeibullInput.get().get(typeEndBranch).getValue(0),
@@ -251,7 +251,7 @@ public class LineageTreeProb extends Distribution {
                         branchProb = 0; //TODO deal with that integration problem
                     }
                 }
-                else if (tree.getNodeFate(nodeIdx) == U) {
+                else if (node.getFate() == Cell.Fate.U) {
                     //TODO implement.
                     // will be similar to fate N but removing the possibility that fate N appears.
                 }
@@ -266,7 +266,7 @@ public class LineageTreeProb extends Distribution {
         return branchProb;
     }
 
-    public double getProbabilityAtDivisionNode(Node node, int typeEndParentBranch, int typeStartChildBranch1, int typeStartChildBranch2) {
+    public double getProbabilityAtDivisionNode(Cell node, int typeEndParentBranch, int typeStartChildBranch1, int typeStartChildBranch2) {
 
         if (!transitionUponDivisionIsAllowed) {
             if (typeEndParentBranch == typeStartChildBranch1 && typeStartChildBranch1 == typeStartChildBranch2)
@@ -295,7 +295,7 @@ public class LineageTreeProb extends Distribution {
      * @param nodeType, -1 if unspecified
      * @return
      */
-    public double[] calculatePruningProb(Node node, int nodeType) { // here nodeType referes to the type of the node at the beginning of the branch
+    public double[] calculatePruningProb(Cell node, int nodeType) { // here nodeType referes to the type of the node at the beginning of the branch
 
         if(node.isLeaf()) { // if a node is a leaf here then it is the root. otherwise leaves are caught below in a previous recursive call of calculatePruningProb
             double[] result = new double[numberOfTypes];
@@ -309,17 +309,17 @@ public class LineageTreeProb extends Distribution {
         double[] pruningProbaFirstChild;
 
         if (node.getChild(childIndex).isLeaf())
-            pruningProbaFirstChild = getProbaAtLeaves(node.getChild(childIndex), -1);
+            pruningProbaFirstChild = getProbaAtLeaves((Cell) node.getChild(childIndex), -1);
         else
-            pruningProbaFirstChild = calculatePruningProb(node.getChild(childIndex), -1);
+            pruningProbaFirstChild = calculatePruningProb((Cell) node.getChild(childIndex), -1);
 
         childIndex = 1;
         double[] pruningProbaSecondChild;
 
         if (node.getChild(childIndex).isLeaf())
-            pruningProbaSecondChild = getProbaAtLeaves(node.getChild(childIndex), -1);
+            pruningProbaSecondChild = getProbaAtLeaves((Cell) node.getChild(childIndex), -1);
         else
-            pruningProbaSecondChild = calculatePruningProb(node.getChild(childIndex), -1);
+            pruningProbaSecondChild = calculatePruningProb( (Cell) node.getChild(childIndex), -1);
 
 
         double[] probsEndBranch = new double[numberOfTypes];
@@ -360,7 +360,7 @@ public class LineageTreeProb extends Distribution {
         return probsStartBranch;
     }
 
-    public double[] getProbaAtLeaves(Node leaf, int leafType) { // here leafType refers to the type of the cell at the end of branch
+    public double[] getProbaAtLeaves(Cell leaf, int leafType) { // here leafType refers to the type of the cell at the end of branch
         //TODO improve: for now, we're just starting with an equal proba for each type.
         double[] startingProbas  = new double[numberOfTypes];
         for (int i = 0; i < numberOfTypes; i++) {
