@@ -9,7 +9,7 @@ public class ExperimentalMeasure {
     static Map<MeasureType, CalculationMethod> mapMeasureToMethod = createMeasureMethodMap();
 
     private static Map<MeasureType, CalculationMethod> createMeasureMethodMap() {
-        Map<MeasureType, CalculationMethod> result = new HashMap<MeasureType, CalculationMethod>();
+        Map<MeasureType, CalculationMethod> result = new HashMap<>();
 
         result.put(MeasureType.Eccentricity, CalculationMethod.averageValue);
 
@@ -20,7 +20,10 @@ public class ExperimentalMeasure {
         result.put(MeasureType.CD41, CalculationMethod.averageRate);
         result.put(MeasureType.FcgRIII, CalculationMethod.averageRate);
         result.put(MeasureType.ROS, CalculationMethod.averageRate);
-        result.put(MeasureType.TMRM, CalculationMethod.averageRate);
+
+        result.put(MeasureType.TMRMmean, CalculationMethod.averageRate);
+        result.put(MeasureType.TMRMmax, CalculationMethod.maxRate);
+
         result.put(MeasureType.CD71APC, CalculationMethod.averageRate);
         result.put(MeasureType.CD71PE, CalculationMethod.averageRate);
 
@@ -32,7 +35,7 @@ public class ExperimentalMeasure {
         result.put(MeasureType.XPosition, CalculationMethod.undefined);
         result.put(MeasureType.YPosition, CalculationMethod.undefined);
 
-        result.put(MeasureType.AverageSpeed, CalculationMethod.averageInstantSpeed);
+        result.put(MeasureType.InstantSpeed, CalculationMethod.averageInstantSpeed);
 
         return Collections.unmodifiableMap(result);
     }
@@ -44,7 +47,7 @@ public class ExperimentalMeasure {
 
     List<Double> dataPoints = new ArrayList<>();
 
-    double summaryValue;
+    double summaryValue = Double.NaN;
 
     ExperimentalMeasure() {
         // do nothing

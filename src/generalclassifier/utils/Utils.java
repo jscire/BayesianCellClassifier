@@ -1,5 +1,9 @@
 package generalclassifier.utils;
 
+import generalclassifier.lineagetree.MeasureType;
+import org.apache.commons.math.distribution.NormalDistribution;
+import org.apache.commons.math.distribution.NormalDistributionImpl;
+
 public class Utils {
 
     /**
@@ -100,6 +104,47 @@ public class Utils {
                 ? Double.NEGATIVE_INFINITY
                 : Math.log(1 - Math.exp(-Math.exp(k * Math.log(x/lambda))));
     }
+
+
+    public static double getNormalDensity(double x, double mu, double sigma) {
+        return 1.0/Math.sqrt(2*Math.PI*sigma*sigma)*Math.exp(-(x - mu)*(x-mu)/(2*sigma*sigma));
+    }
+
+    public static double getTruncatedNormalDensity(double x, int nodeType, InputPair input, MeasureType measureType) {
+
+        NormalDistribution dist = new NormalDistributionImpl(input.getMean().get().getArrayValue(nodeType),
+                                                            input.getStandardDev().get().getArrayValue(nodeType));
+
+        double upperBound = measureType.getHardUpperBound();
+        double lowerBound = measureType.getHardLowerBound();
+
+        if(lowerBound == Double.NEGATIVE_INFINITY && upperBound == Double.POSITIVE_INFINITY) return dist.density(x);
+
+        double scaleFactor = 1.0;
+
+        try{
+            if(upperBound == Double.POSITIVE_INFINITY) {
+                scaleFactor = 1.0 / (1.0 - dist.cumulativeProbability(lowerBound));
+            }
+            else if(lowerBound == Double.NEGATIVE_INFINITY) {
+                scaleFactor = 1.0 / dist.cumulativeProbability(upperBound);
+            }
+            else {
+                scaleFactor = 1.0/(dist.cumulativeProbability(upperBound) - dist.cumulativeProbability(lowerBound));
+            }
+        }
+        catch(Exception e) {
+            System.out.println("Cumulative probability of normal distribution crashed." +
+                    "\nLower bound" + lowerBound +
+                    "\nUpper bound" + upperBound +
+                    "\nx: " + x +
+                    "\nmean: " + dist.getMean() +
+                    "\nsd: " + dist.getStandardDeviation());
+        }
+
+        return scaleFactor * dist.density(x);
+    }
+
 
 
 

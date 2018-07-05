@@ -1,7 +1,6 @@
 package generalclassifier.lineagetree;
 
 import beast.evolution.tree.Node;
-import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 
 import java.util.ArrayList;
@@ -22,7 +21,9 @@ public class Cell extends Node {
 
    // List<double[]> timePoints = new ArrayList<> ();
 
-    List<ExperimentalMeasure> measures = new ArrayList<> ();
+    List<MeasureType> measureTypes = new ArrayList<>();
+
+    protected List<ExperimentalMeasure> measures = new ArrayList<> ();
 
     List<Double> timePoints = new ArrayList<>();
 
@@ -32,44 +33,59 @@ public class Cell extends Node {
 
     public Cell(int trackNumber, List<MeasureType> measureTypes) {
         this.trackNumber = trackNumber;
+        this.measureTypes = measureTypes;
         for (MeasureType measureType : measureTypes) {
             this.measures.add(new ExperimentalMeasure(measureType));
         }
     }
 
-    public void setMeasures(List<ExperimentalMeasure> measures) {
-        this.measures = measures;
+    public double getEdgeLength(){
+        return this.edgeLength;
     }
 
-    public void summarizeMeasures() {
-        int inputForSpeedCalculation = 0;
+    public void setEdgeLength() {
+        this.edgeLength = timePoints.get(timePoints.size()) -  timePoints.get(0);
+    }
 
-        ExperimentalMeasure xPos = new ExperimentalMeasure();
-        ExperimentalMeasure yPos = new ExperimentalMeasure();
+    public Fate getFate(){
+        return this.fate;
+    }
 
-        if(timePoints.size() == 0)
-            throw new IllegalStateException("Summary is impossible. Time points have not been defined, call setTimePointsAndCleanUpMeasures method first.");
+    //TODO not enough to allow for more fates than just dividers (need to read actually it from the csv file)
+    public void setFate(Fate f) {
+        this.fate = f;
+    }
 
-        for (ExperimentalMeasure measure : measures) {
-            if(measure.calculationMethod != ExperimentalMeasure.CalculationMethod.undefined &&
-                    measure.calculationMethod != ExperimentalMeasure.CalculationMethod.averageInstantSpeed) {
-                measure.summarize(timePoints);
-            }
-            // perform checks to see if we'll have to
-            if(measure.measureType == MeasureType.XPosition) {
-                xPos = measure;
-                inputForSpeedCalculation ++;
-            }
-            else if(measure.measureType == MeasureType.YPosition){
-                yPos = measure;
-                inputForSpeedCalculation ++;
+    public boolean hasMeasure(MeasureType measureType) {
+        return measureTypes.contains(measureType); // todo check that actually returns true when measure is in the list
+    }
+
+    /**
+     * Only apply to a measure that was measured for this cell
+     * and a measure that has been summarized (ExperimentalMeasure.summarize() was called)
+     * @param measureType
+     * @return summary value
+     */
+    public double getSummaryValue(MeasureType measureType) {
+        double measuredValue = Double.NaN;
+
+        for(ExperimentalMeasure measure : measures) {
+            if(measure.measureType == measureType) {
+                measuredValue = measure.summaryValue;
+                break;
             }
         }
 
-        // assuming no duplicates here (only one measure each for xPos and yPos)
-        if (inputForSpeedCalculation == 2) {
-            this.setInstantSpeedAndSummarize(xPos, yPos);
-        }
+        if(measuredValue == Double.NaN)
+            throw new IllegalStateException("Measure does not exist for this cell, or was not summarized.");
+
+        return measuredValue;
+    }
+
+
+
+    public List<MeasureType> getMeasureTypes(){
+        return this.measureTypes;
     }
 
     public void addDataPoint(CSVRecord record) {
@@ -80,7 +96,7 @@ public class Cell extends Node {
 
     /**
      * Note: this method relies on the fact that daughter cells are numbered 2n and 2n+1, with n the label of the mother cell.
-     * @param cells
+     * @param cells is the output of LineageTreeParser.parseRawCells()
      * @param rootKey
      * @return
      */
@@ -99,6 +115,7 @@ public class Cell extends Node {
         rootCell.summarizeMeasures();
 
         //TODO rework on how the fate is attributed to the cell
+        // only dividers are allowed for now
         rootCell.setFate(Fate.D);
 
         if(cells.containsKey(2*rootKey)) {
@@ -113,24 +130,6 @@ public class Cell extends Node {
         }
 
         return rootCell;
-    }
-
-
-    public double getEdgeLength(){
-        return this.edgeLength;
-    }
-
-    public void setEdgeLength() {
-        this.edgeLength = timePoints.get(timePoints.size()) -  timePoints.get(0);
-    }
-
-    public Fate getFate(){
-        return this.fate;
-    }
-
-    //TODO not enough to allow for more fates than just dividers (need to read it from the csv file)
-    public void setFate(Fate f) {
-        this.fate = f;
     }
 
     /**
@@ -179,9 +178,6 @@ public class Cell extends Node {
             child.getAllInternalNodes(internalNodes);
     }
 
-
-
-
     /**
      * Try to set timePoints to be the proper time measures,
      * If they don't exist,
@@ -216,10 +212,39 @@ public class Cell extends Node {
         }
     }
 
+    public void summarizeMeasures() {
+        int inputForSpeedCalculation = 0;
+
+        ExperimentalMeasure xPos = new ExperimentalMeasure();
+        ExperimentalMeasure yPos = new ExperimentalMeasure();
+
+        if(timePoints.size() == 0)
+            throw new IllegalStateException("Summary is impossible. Time points have not been defined, call setTimePointsAndCleanUpMeasures method first.");
+
+        for (ExperimentalMeasure measure : measures) {
+            if(measure.calculationMethod != ExperimentalMeasure.CalculationMethod.undefined &&
+                    measure.calculationMethod != ExperimentalMeasure.CalculationMethod.averageInstantSpeed) {
+                measure.summarize(timePoints);
+            }
+            // perform checks to see if we'll have to
+            if(measure.measureType == MeasureType.XPosition) {
+                xPos = measure;
+                inputForSpeedCalculation ++;
+            }
+            else if(measure.measureType == MeasureType.YPosition){
+                yPos = measure;
+                inputForSpeedCalculation ++;
+            }
+        }
+
+        // assuming no duplicates here (only one measure each for xPos and yPos)
+        if (inputForSpeedCalculation == 2) {
+            this.setInstantSpeedAndSummarize(xPos, yPos);
+        }
+    }
+
     /**
      * Note: If only one timePoint, no speed is calculated.
-     * @param xPos
-     * @param yPos
      */
     void setInstantSpeedAndSummarize(ExperimentalMeasure xPos, ExperimentalMeasure yPos) {
         if((timePoints.size() != xPos.dataPoints.size()) || (yPos.dataPoints.size() != timePoints.size()))
@@ -227,7 +252,7 @@ public class Cell extends Node {
 
         if(timePoints.size() < 1) return;
 
-        ExperimentalMeasure instantSpeed = new ExperimentalMeasure(MeasureType.AverageSpeed, ExperimentalMeasure.CalculationMethod.averageInstantSpeed);
+        ExperimentalMeasure instantSpeed = new ExperimentalMeasure(MeasureType.InstantSpeed, ExperimentalMeasure.CalculationMethod.averageInstantSpeed);
 
         double dist;
         double time;
@@ -248,7 +273,6 @@ public class Cell extends Node {
 
         this.measures.add(instantSpeed);
     }
-
 
 
 }

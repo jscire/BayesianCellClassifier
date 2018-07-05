@@ -9,6 +9,8 @@ import beast.evolution.tree.Node;
 
 import generalclassifier.lineagetree.Cell;
 import generalclassifier.lineagetree.LineageTree;
+import generalclassifier.lineagetree.MeasureType;
+import generalclassifier.utils.InputPair;
 import generalclassifier.utils.Utils;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -18,7 +20,7 @@ import java.io.*;
 import java.util.*;
 
 
-public class LineageTreeProb extends Distribution {
+public class  LineageTreeProb extends Distribution {
 
     public Input<LineageTree> lineageTreeInput = new Input<>("tree",
             "Lineage tree.",
@@ -64,9 +66,124 @@ public class LineageTreeProb extends Distribution {
                     "If mij is the boolean that characterizes transitions from type i to j, the element of index i*(n-1)+j if i>j, or i*(n-1) + j-1 otherwise, gives the index of element mij. n is the number of types.");
 
 
+    // possibly rework on the way inputs are written in. This is a first draft
+    Map<InputPair, MeasureType> mapMeasureTypeToInput = createMapOfMeasureInputs();
+
+    private Map<InputPair, MeasureType> createMapOfMeasureInputs(){
+        Map<InputPair, MeasureType> result = new HashMap<>();
+
+
+        Input<RealParameter> meanNormalAreaGrowthRateInput = new Input<>("meanAreaGrowthRate",
+                "");
+        Input<RealParameter> sdNormalAreaGrowthRateInput = new Input<>("sdAreaGrowthRate",
+                "");
+        InputPair areaGrowthRateInput = new InputPair(meanNormalAreaGrowthRateInput, sdNormalAreaGrowthRateInput);
+
+        Input<RealParameter> meanNormalPerimeterGrowthRateInput = new Input<>("meanPerimeterGrowthRate",
+                "");
+        Input<RealParameter> sdNormalPerimeterGrowthRateInput = new Input<>("sdPerimeterGrowthRate",
+                "");
+        InputPair perimeterGrowthRateInput = new InputPair(meanNormalPerimeterGrowthRateInput, sdNormalPerimeterGrowthRateInput);
+
+        Input<RealParameter> meanNormalEccentricityInput = new Input<>("meanEccentricity",
+                "");
+        Input<RealParameter> sdNormalEccentricityInput = new Input<>("sdEccentricity",
+                "");
+        InputPair eccentricityInput = new InputPair(meanNormalEccentricityInput, sdNormalEccentricityInput);
+
+
+        Input<RealParameter> meanNormalInstantSpeedInput = new Input<>("meanInstantSpeed",
+                "");
+        Input<RealParameter> sdNormalInstantSpeedInput = new Input<>("sdInstantSpeed",
+                "");
+        InputPair instantSpeedInput = new InputPair(meanNormalInstantSpeedInput, sdNormalInstantSpeedInput);
+
+        Input<RealParameter> meanNormalCD41ProductionRateInput = new Input<>("meanCD41ProductionRate",
+                "");
+        Input<RealParameter> sdNormalCD41ProductionRateInput = new Input<>("sdCD41ProductionRate",
+                "");
+        InputPair CD41ProductionRateInput = new InputPair(meanNormalCD41ProductionRateInput, sdNormalCD41ProductionRateInput);
+        
+
+        Input<RealParameter> meanNormalFcgRIIIProductionRateInput = new Input<>("meanFcgRIIIProductionRate",
+                "");
+        Input<RealParameter> sdNormalFcgRIIIProductionRateInput = new Input<>("sdFcgRIIIProductionRate",
+                "");
+        InputPair FcgRIIIProductionRateInput = new InputPair(meanNormalFcgRIIIProductionRateInput, sdNormalFcgRIIIProductionRateInput);
+
+
+
+        Input<RealParameter> meanNormalROSProductionRateInput = new Input<>("meanROSProductionRate",
+                "");
+        Input<RealParameter> sdNormalROSProductionRateInput = new Input<>("sdROSProductionRate",
+                "");
+        InputPair ROSProductionRateInput = new InputPair(meanNormalROSProductionRateInput, sdNormalROSProductionRateInput);
+
+
+        Input<RealParameter> meanNormalTMRMProductionRateInput = new Input<>("meanTMRMProductionRate",
+                "");
+        Input<RealParameter> sdNormalTMRMProductionRateInput = new Input<>("sdTMRMProductionRate",
+                "");
+        InputPair TMRMProductionRateInput = new InputPair(meanNormalTMRMProductionRateInput, sdNormalTMRMProductionRateInput);
+
+
+        Input<RealParameter> meanNormalSca1ProductionRateInput = new Input<>("meanSca1ProductionRate",
+                "");
+        Input<RealParameter> sdNormalSca1ProductionRateInput = new Input<>("sdSca1ProductionRate",
+                "");
+        InputPair Sca1ProductionRateInput = new InputPair(meanNormalSca1ProductionRateInput, sdNormalSca1ProductionRateInput);
+
+
+        Input<RealParameter> meanNormalIg2afcProductionRateInput = new Input<>("meanIg2afcProductionRate",
+                "");
+        Input<RealParameter> sdNormalIg2afcProductionRateInput = new Input<>("sdIg2afcProductionRate",
+                "");
+        InputPair Ig2afcProductionRateInput = new InputPair(meanNormalIg2afcProductionRateInput, sdNormalIg2afcProductionRateInput);
+
+
+        Input<RealParameter> meanNormalCD71APCProductionRateInput = new Input<>("meanCD71APCProductionRate",
+                "");
+        Input<RealParameter> sdNormalCD71APCProductionRateInput = new Input<>("sdCD71APCProductionRate",
+                "");
+        InputPair CD71APCProductionRateInput = new InputPair(meanNormalCD71APCProductionRateInput, sdNormalCD71APCProductionRateInput);
+
+
+        Input<RealParameter> meanNormalCD71PEProductionRateInput = new Input<>("meanCD71PEProductionRate",
+                "");
+        Input<RealParameter> sdNormalCD71PEProductionRateInput = new Input<>("sdCD71PEProductionRate",
+                "");
+        InputPair CD71PEProductionRateInput = new InputPair(meanNormalCD71PEProductionRateInput, sdNormalCD71PEProductionRateInput);
+
+
+        Input<RealParameter> meanNormalcMycGFPMaxRateInput = new Input<>("meancMycGFPMaxRate",
+                "");
+        Input<RealParameter> sdNormalcMycGFPMaxRateInput = new Input<>("sdcMycGFPMaxRate",
+                "");
+        InputPair cMycGFPMaxRateInput = new InputPair(meanNormalcMycGFPMaxRateInput, sdNormalcMycGFPMaxRateInput);
+        
+
+        result.put(areaGrowthRateInput, MeasureType.Area);
+        result.put(perimeterGrowthRateInput, MeasureType.Perimeter);
+        result.put(eccentricityInput, MeasureType.Eccentricity);
+        result.put(instantSpeedInput, MeasureType.InstantSpeed);
+        result.put(CD41ProductionRateInput, MeasureType.CD41);
+        result.put(FcgRIIIProductionRateInput, MeasureType.FcgRIII);
+        result.put(ROSProductionRateInput, MeasureType.ROS);
+        result.put(TMRMProductionRateInput, MeasureType.TMRMmean);
+        result.put(TMRMProductionRateInput, MeasureType.TMRMmax);
+        result.put(Sca1ProductionRateInput, MeasureType.Sca1);
+        result.put(Ig2afcProductionRateInput, MeasureType.Ig2afc);
+        result.put(CD71APCProductionRateInput, MeasureType.CD71APC);
+        result.put(CD71PEProductionRateInput, MeasureType.CD71PE);
+        result.put(cMycGFPMaxRateInput, MeasureType.cMycGFP);
+
+        return Collections.unmodifiableMap(result);
+    }
+
     LineageTree tree;
 
     boolean rootIsHSC;
+    //TODO allow for specifying the types of leaves or even other cells of the tree.
 
     boolean transitionUponDivisionIsAllowed;
     boolean transitionDuringLifetimeIsAllowed;
@@ -101,8 +218,11 @@ public class LineageTreeProb extends Distribution {
 
         if(matrixOfAllowedTransitionsInput.get() != null) {
             transitionDuringLifetimeIsAllowed = true;
-            if(matrixOfAllowedTransitionsInput.get().getDimension() != numberOfTypes * (numberOfTypes -1))
-                throw new IllegalStateException("Incorrect size of matrix of allowed transitions.");
+            throw new IllegalStateException("Transitions on branches are not fully implemented yet");
+
+            //TODO uncomment check below when exception above is not thrown anymore (when transitions on branches are implemented)
+//            if(matrixOfAllowedTransitionsInput.get().getDimension() != numberOfTypes * (numberOfTypes -1))
+//                throw new IllegalStateException("Incorrect size of matrix of allowed transitions.");
         }
         else {
             transitionDuringLifetimeIsAllowed = false;
@@ -110,6 +230,7 @@ public class LineageTreeProb extends Distribution {
 
         if(matrixOfProbsOfTransitionUponDivision.get() != null) {
             transitionUponDivisionIsAllowed=true;
+
             if(matrixOfProbsOfTransitionUponDivision.get().size() != numberOfTypes)
                 throw new IllegalStateException("Incorrect size of matrix of probabilities of transition upon division.");
         }
@@ -148,10 +269,110 @@ public class LineageTreeProb extends Distribution {
         return logP;
     }
 
+    /**
+     * Calculate the conditional probability for current node using pruning algorithm
+     * Assumes the node is not a leaf
+     * @param node
+     * @param nodeType, -1 if unspecified
+     * @return
+     */
+    public double[] calculatePruningProb(Cell node, int nodeType) { // here nodeType refers to the type of the node at the beginning of the branch
+
+        if(node.isLeaf()) { // if a node is a leaf here then it is the root. otherwise leaves are caught below in a previous recursive call of calculatePruningProb
+            double[] result = new double[numberOfTypes];
+            result[nodeType] = getProbaAtLeaves(node, -1)[nodeType];
+            return result;
+        }
+
+
+        //TODO: potential for parallelization here
+        int childIndex = 0;
+        double[] pruningProbaFirstChild;
+
+        if (node.getChild(childIndex).isLeaf())
+            pruningProbaFirstChild = getProbaAtLeaves((Cell) node.getChild(childIndex), -1);
+        else
+            pruningProbaFirstChild = calculatePruningProb((Cell) node.getChild(childIndex), -1);
+
+        childIndex = 1;
+        double[] pruningProbaSecondChild;
+
+        if (node.getChild(childIndex).isLeaf())
+            pruningProbaSecondChild = getProbaAtLeaves((Cell) node.getChild(childIndex), -1);
+        else
+            pruningProbaSecondChild = calculatePruningProb( (Cell) node.getChild(childIndex), -1);
+
+
+        double[] probsEndBranch = new double[numberOfTypes];
+        for (int i = 0; i < numberOfTypes; i++) {
+            for (int j = 0; j < numberOfTypes; j++) {
+                for (int k = 0; k < numberOfTypes; k++) {
+                    // TODO there is room for improvement here, at least for getProbabilityAtDivision, because calculations are repeated since symmetric on j and k.
+                    // for now getProbabilityAtDivision calculations are very lightweight, only two types, so it's not an issue, but it may become one if really n types
+                    probsEndBranch[i] += getProbabilityAtDivisionNode(i, j, k) * pruningProbaFirstChild[j] * pruningProbaSecondChild[k];
+                }
+            }
+        }
+
+        double[] probsStartBranch = new double[numberOfTypes];
+
+        if(nodeType == -1) { // type of node is not fixed
+            for (int i = 0; i < numberOfTypes; i++) {
+                for (int j = 0; j < numberOfTypes; j++) {
+                    probsStartBranch[i] += getProbabilityCellBranch(node, i, j) * probsEndBranch[j];
+                }
+            }
+        }
+        else if (nodeType > -1 && nodeType < numberOfTypes) { // type of this node is fixed
+            for (int i = 0; i < numberOfTypes; i++) {
+                if (i != nodeType)
+                    probsStartBranch[i] = 0;
+                else {
+                    for (int j = 0; j < numberOfTypes; j++) {
+                        probsStartBranch[i] += getProbabilityCellBranch(node, i, j) * probsEndBranch[j];
+                    }
+                }
+            }
+        }
+        else {
+            throw new IllegalStateException("Undefined nodeType. Value must be -1 if unspecified, and -1 < i < numberofTypes otherwise");
+        }
+
+        return probsStartBranch;
+    }
+
+    public double[] getProbaAtLeaves(Cell leaf, int leafType) { // here leafType refers to the type of the cell at the end of branch
+        //TODO improve: for now, we're just starting with an equal proba for each type.
+        double[] startingProbas  = new double[numberOfTypes];
+        for (int i = 0; i < numberOfTypes; i++) {
+            startingProbas[i] = 1.0/numberOfTypes;
+        }
+
+        double[] resultProbs = new double[numberOfTypes];
+
+
+        if(leafType == -1) { // type of leaf is not fixed
+            for (int i = 0; i < numberOfTypes; i++) {
+                resultProbs[i] = 0;
+                for (int j = 0; j < numberOfTypes; j++) {
+                    resultProbs[i] += getProbabilityCellBranch(leaf, i, j) * startingProbas[j];
+                }
+            }
+        }
+        else if (leafType > -1 && leafType < numberOfTypes) { // type of this leaf is fixed
+            for (int i = 0; i < numberOfTypes; i++) {
+                resultProbs[i] = getProbabilityCellBranch(leaf, i, leafType) * startingProbas[leafType];
+            }
+        }
+        else {
+            throw new IllegalStateException("Undefined leafType. Value must be -1 if unspecified, and -1 < i < numberOfTypes otherwise");
+        }
+
+        return resultProbs;
+    }
 
     public double getProbabilityCellBranch(Cell node, int typeStartBranch, int typeEndBranch) {
 
-        int nodeIdx = node.getNr();
         double branchProb=0;
 
         if(node.getFate() == Cell.Fate.L) return lossProbInput.get().getValue();
@@ -178,7 +399,7 @@ public class LineageTreeProb extends Distribution {
                 if (transitionDuringLifetimeIsAllowed && fateProbabilitiesInput.get().get(typeEndBranch).getDimension() > 3) // check if this state can transition
                     //TODO if more than 1 fate that the cell can transition to, take it into account, either by summing the different probas or by having one big proba for all
                     branchProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(3) // cell transitions after end of branch
-                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
+                            * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
 
             }
             else if (node.getFate() == Cell.Fate.U) {
@@ -197,8 +418,13 @@ public class LineageTreeProb extends Distribution {
                 throw new IllegalStateException("Invalid cell fate.");
             }
 
+            // account for the
+            branchProb += getProbabilityCellMeasures(node, typeStartBranch, typeEndBranch);
+
         }
         else { // typeStartBranch != typeEndBranch
+
+            //TODO transition on branches are not properly implemented yet.
 
             //get index of transition in the matrixOfAllowedTransitions
             int indexTransition = typeStartBranch > typeEndBranch ? typeStartBranch * (numberOfTypes - 1) + typeEndBranch : typeStartBranch * (numberOfTypes - 1) + typeEndBranch - 1;
@@ -266,13 +492,32 @@ public class LineageTreeProb extends Distribution {
         return branchProb;
     }
 
-    public double getProbabilityAtDivisionNode(Cell node, int typeEndParentBranch, int typeStartChildBranch1, int typeStartChildBranch2) {
+    public double getProbabilityCellMeasures(Cell node, int typeStartBranch, int typeEndBranch) {
+        double branchProb = 1;
+
+        //TODO implement transitions on branches
+        if(typeEndBranch != typeStartBranch) {
+            return 0;
+        }
+
+        for (InputPair input : mapMeasureTypeToInput.keySet()) {
+            MeasureType measureType = mapMeasureTypeToInput.get(input);
+
+            // if input is provided by user and the cell actually contains info about the measure
+            if(input.getMean().get() != null && node.hasMeasure(measureType)) {
+                double x = node.getSummaryValue(mapMeasureTypeToInput.get(input));
+                branchProb *= Utils.getTruncatedNormalDensity(x, typeEndBranch, input, measureType);
+            }
+        }
+        return branchProb;
+    }
+
+    public double getProbabilityAtDivisionNode(int typeEndParentBranch, int typeStartChildBranch1, int typeStartChildBranch2) {
 
         if (!transitionUponDivisionIsAllowed) {
             if (typeEndParentBranch == typeStartChildBranch1 && typeStartChildBranch1 == typeStartChildBranch2)
                 return 1;
             else return 0; // if one of the three states is different, local configuration is impossible without transition upon division
-
         }
         else {
 
@@ -288,107 +533,6 @@ public class LineageTreeProb extends Distribution {
         }
     }
 
-    /**
-     * Calculate the conditional probability for current node using pruning algorithm
-     * Assumes the node is not a leaf
-     * @param node
-     * @param nodeType, -1 if unspecified
-     * @return
-     */
-    public double[] calculatePruningProb(Cell node, int nodeType) { // here nodeType referes to the type of the node at the beginning of the branch
-
-        if(node.isLeaf()) { // if a node is a leaf here then it is the root. otherwise leaves are caught below in a previous recursive call of calculatePruningProb
-            double[] result = new double[numberOfTypes];
-            result[nodeType] = getProbaAtLeaves(node, -1)[nodeType];
-            return result;
-        }
-
-
-        //TODO: potential for parallelization here
-        int childIndex = 0;
-        double[] pruningProbaFirstChild;
-
-        if (node.getChild(childIndex).isLeaf())
-            pruningProbaFirstChild = getProbaAtLeaves((Cell) node.getChild(childIndex), -1);
-        else
-            pruningProbaFirstChild = calculatePruningProb((Cell) node.getChild(childIndex), -1);
-
-        childIndex = 1;
-        double[] pruningProbaSecondChild;
-
-        if (node.getChild(childIndex).isLeaf())
-            pruningProbaSecondChild = getProbaAtLeaves((Cell) node.getChild(childIndex), -1);
-        else
-            pruningProbaSecondChild = calculatePruningProb( (Cell) node.getChild(childIndex), -1);
-
-
-        double[] probsEndBranch = new double[numberOfTypes];
-        for (int i = 0; i < numberOfTypes; i++) {
-            for (int j = 0; j < numberOfTypes; j++) {
-                for (int k = 0; k < numberOfTypes; k++) {
-                    // TODO there is room for improvement here, at least for getProbabilityAtDivision, because calculations are repeated since symmetric on j and k.
-                    // for now getProbabilityAtDivision calculations are very lightweight, only two types, so it's not an issue, but it may become one if really n types
-                    probsEndBranch[i] += getProbabilityAtDivisionNode(node, i, j, k) * pruningProbaFirstChild[j] * pruningProbaSecondChild[k];
-                }
-            }
-        }
-
-        double[] probsStartBranch = new double[numberOfTypes];
-
-        if(nodeType == -1) { // type of node is not fixed
-            for (int i = 0; i < numberOfTypes; i++) {
-                for (int j = 0; j < numberOfTypes; j++) {
-                    probsStartBranch[i] += getProbabilityCellBranch(node, i, j) * probsEndBranch[j];
-                }
-            }
-        }
-        else if (nodeType > -1 && nodeType < numberOfTypes) { // type of this node is fixed
-            for (int i = 0; i < numberOfTypes; i++) {
-                if (i != nodeType)
-                    probsStartBranch[i] = 0;
-                else {
-                    for (int j = 0; j < numberOfTypes; j++) {
-                        probsStartBranch[i] += getProbabilityCellBranch(node, i, j) * probsEndBranch[j];
-                    }
-                }
-            }
-        }
-        else {
-            throw new IllegalStateException("Undefined nodeType. Value must be -1 if unspecified, and -1 < i < numberofTypes otherwise");
-        }
-
-        return probsStartBranch;
-    }
-
-    public double[] getProbaAtLeaves(Cell leaf, int leafType) { // here leafType refers to the type of the cell at the end of branch
-        //TODO improve: for now, we're just starting with an equal proba for each type.
-        double[] startingProbas  = new double[numberOfTypes];
-        for (int i = 0; i < numberOfTypes; i++) {
-            startingProbas[i] = 1.0/numberOfTypes;
-        }
-
-        double[] resultProbs = new double[numberOfTypes];
-
-
-        if(leafType == -1) { // type of leaf is not fixed
-            for (int i = 0; i < numberOfTypes; i++) {
-                resultProbs[i] = 0;
-                for (int j = 0; j < numberOfTypes; j++) {
-                    resultProbs[i] += getProbabilityCellBranch(leaf, i, j) * startingProbas[j];
-                }
-            }
-        }
-        else if (leafType > -1 && leafType < numberOfTypes) { // type of this leaf is fixed
-            for (int i = 0; i < numberOfTypes; i++) {
-                resultProbs[i] = getProbabilityCellBranch(leaf, i, leafType) * startingProbas[leafType];
-            }
-        }
-        else {
-            throw new IllegalStateException("Undefined leafType. Value must be -1 if unspecified, and -1 < i < numberOfTypes otherwise");
-        }
-
-        return resultProbs;
-    }
 
 
     @Override

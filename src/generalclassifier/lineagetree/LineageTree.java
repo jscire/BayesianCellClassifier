@@ -6,7 +6,9 @@ import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class LineageTree extends Tree {
@@ -20,8 +22,8 @@ public class LineageTree extends Tree {
 
     static final int rootCellNumberInInput = 1;
 
-    private Cell[] cells;
-
+    //TODO remove
+   // List<MeasureType> measureTypes = new ArrayList<>();
 
     @Override
     public void initAndValidate() {
@@ -39,9 +41,11 @@ public class LineageTree extends Tree {
         Cell rootCell = Cell.buildTreeAndGetRoot(cells, rootCellNumberInInput);
         rootCell.labelNodesInTree();
 
-
         setRoot(rootCell);
         initArrays();
+
+        //TODO remove
+       // this.measureTypes = rootCell.getMeasureTypes();
 
         // apply an offset to the nodeheights so that they conform to the standard format
         double maxHeight = 0;

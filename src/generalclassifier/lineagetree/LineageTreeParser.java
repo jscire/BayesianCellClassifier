@@ -26,6 +26,7 @@ public class LineageTreeParser {
         this.inputFileName = inputFile;
     }
 
+    //TODO deal with NA values
     public Map<Integer, Cell> parseRawCells() throws IOException {
         File csvData = new File(inputFileName);
         CSVParser parser = CSVParser.parse(new FileReader(csvData), CSVFormat.EXCEL.withHeader());
@@ -41,15 +42,15 @@ public class LineageTreeParser {
                 measuresInCSV.add(measureType);
         }
 
-
+        // iterate over the lines of the csv files until an empty line is reached
         for (CSVRecord csvRecord : parser) {
-
             if(isEmptyRecord(csvRecord)) break;
 
-            // get number of cell in current line
+            // get number of the cell in current line
             int cellNumber = getCellNumberInRecord(csvRecord);
 
             if(!cells.containsKey(cellNumber)) {
+                // update maxCellNumber if needed
                 if(maxCellNumber < cellNumber) maxCellNumber = cellNumber;
                 // add a cell with the new track number
                 cells.put(cellNumber, new Cell(cellNumber, measuresInCSV));
@@ -58,7 +59,6 @@ public class LineageTreeParser {
             // assign the experimental measures in this line to the corresponding cell
             cells.get(cellNumber).addDataPoint(csvRecord);
         }
-
         return cells;
     }
 
