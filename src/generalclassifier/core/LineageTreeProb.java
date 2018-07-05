@@ -674,7 +674,13 @@ public class  LineageTreeProb extends Distribution {
     }
 
     public static void main(String[] args) throws IOException {
+        String fileName = "../Data/Examples/toyFile.csv";
+        LineageTree tree =  new LineageTree();
+        tree.setInputValue("measures", fileName);
 
+        tree.initAndValidate();
+
+        System.out.println(tree.toString());
     }
 
 

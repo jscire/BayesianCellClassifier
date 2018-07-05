@@ -44,7 +44,7 @@ public class Cell extends Node {
     }
 
     public void setEdgeLength() {
-        this.edgeLength = timePoints.get(timePoints.size()) -  timePoints.get(0);
+        this.edgeLength = timePoints.get(timePoints.size()-1) -  timePoints.get(0);
     }
 
     public Fate getFate(){
