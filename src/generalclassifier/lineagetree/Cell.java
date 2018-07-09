@@ -44,7 +44,10 @@ public class Cell extends Node {
     }
 
     public void setEdgeLength() {
-        this.edgeLength = timePoints.get(timePoints.size()-1) -  timePoints.get(0);
+        //TODO remove
+//        this.edgeLength = timePoints.get(timePoints.size()-1) -  timePoints.get(0);
+        //TODO maybe replace +1 with +0.5?
+        this.edgeLength = timePoints.get(timePoints.size()-1) -  timePoints.get(0) + 1; // add 1 to account for the fact that a cell can only last 1 timeInterval (only seen once, but doesnot have a lifetime of zero)
     }
 
     public Fate getFate(){
@@ -75,9 +78,6 @@ public class Cell extends Node {
                 break;
             }
         }
-
-        if(measuredValue == Double.NaN)
-            throw new IllegalStateException("Measure does not exist for this cell, or was not summarized.");
 
         return measuredValue;
     }
@@ -182,6 +182,7 @@ public class Cell extends Node {
      * Try to set timePoints to be the proper time measures,
      * If they don't exist,
      */
+    //TODO for now
     //TODO add height to the cell
     //TODO propagate the fact that unscaled time, with a certain frame rate, if no proper time measure.
     public void setTimePointsAndCleanUpMeasures(){
@@ -198,8 +199,14 @@ public class Cell extends Node {
         if(properTimeInd > -1) { // the proper time measure is present
             // be careful with the order in which elements are removed to avoid problems with renumbering
             if(properTimeInd > unscaledTimeInd) {
-                timePoints = measures.remove(properTimeInd).dataPoints;
-                measures.remove(unscaledTimeInd);
+//                timePoints = measures.remove(properTimeInd).dataPoints;
+//                measures.remove(unscaledTimeInd);
+
+                //For now, the proper time points are never taken into account
+                //This is done to simplify things when dealing with cells where only one time point is taken
+                //This makes us assume that all time points are separated by the same amount of time
+                measures.remove(properTimeInd);
+                timePoints = measures.remove(unscaledTimeInd).dataPoints;
             }
             else {
                 measures.remove(unscaledTimeInd);
@@ -250,7 +257,6 @@ public class Cell extends Node {
         if((timePoints.size() != xPos.dataPoints.size()) || (yPos.dataPoints.size() != timePoints.size()))
             throw new IllegalArgumentException("All three inputs should be of the same size.");
 
-        if(timePoints.size() < 1) return;
 
         ExperimentalMeasure instantSpeed = new ExperimentalMeasure(MeasureType.InstantSpeed, ExperimentalMeasure.CalculationMethod.averageInstantSpeed);
 
@@ -258,6 +264,11 @@ public class Cell extends Node {
         double time;
 
         double sumOfSpeeds = 0;
+
+        if(timePoints.size() < 1)  {
+            instantSpeed.dataPoints.add(Double.NaN);
+            return;
+        }
 
         for (int i = 1; i < timePoints.size(); i++) {
 

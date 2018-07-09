@@ -83,6 +83,10 @@ public class ExperimentalMeasure {
         switch (this.calculationMethod) {
             case maxRate :
                 double instantRate;
+                if(lastIndex == 0) {
+                    res = Double.NaN;
+                    break;
+                }
                 for (int i = 1; i <= lastIndex; i++) {
                     instantRate = (dataPoints.get(i) - dataPoints.get(i-1))/(timePoints.get(i) - timePoints.get(i-1));
                     if(instantRate > res)
@@ -91,6 +95,10 @@ public class ExperimentalMeasure {
                 break;
 
             case averageRate :
+                if(lastIndex == 0) {
+                    res = Double.NaN;
+                    break;
+                }
                 res = (dataPoints.get(lastIndex) - dataPoints.get(0))/(timePoints.get(lastIndex) - timePoints.get(0));
                 break;
 

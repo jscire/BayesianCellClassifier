@@ -139,7 +139,7 @@ public class LineageTreeParser {
     }
 
     public static void main(String[] parms) {
-        LineageTreeParser parser =  new LineageTreeParser("../Data/Examples/toyFile.csv");
+        LineageTreeParser parser =  new LineageTreeParser("../Data/Examples/testFile_shortLife.csv");
 
         try {
             Map<Integer, Cell> cells = parser.parseRawCells();

@@ -38,6 +38,15 @@ public class  LineageTreeProb extends Distribution {
             "List of vectors containing Weibull shape parameters for each type for division, apoptosis and type-transition (if defined) times.",
             new ArrayList<RealParameter>(), Input.Validate.REQUIRED);
 
+    public Input<List<RealParameter>> transitionUponDivisionProbsInput = new Input<>("transitionUponDivisionProbs",
+            "List of flattened 2-dimensional arrays containing the probabilites of transition between states upon division." +
+                    "If mkj in array i represents the probability that a cell of type i divides into cells of type k and j (k<= j)," +
+                    "the element of index n*k + j - k(k+1)/2 gives the index of element mkj in the input vector." +
+                    "If j<k, invert k and j. We assume here that the daughter cells are not ordered and so that the arrays are symmetric before being truncated." +
+                    "This renumbering is equivalent to flattening the array by rows." +
+                    "Note that all vectors in this list must have elements which sum up to 1.",
+            new ArrayList<RealParameter>(), Input.Validate.REQUIRED);
+
 
     public Input<RealParameter> lossProbInput = new Input<>("lossProb",
             "Probability of losing any given cell",
@@ -52,113 +61,87 @@ public class  LineageTreeProb extends Distribution {
                     "parameter specifying which element corresponds to the root " +
                     "HSC status.");
 
-    public Input<List<RealParameter>> matrixOfProbsOfTransitionUponDivision = new Input<>("probsOfTransitionUponDivision",
-            "Flattened 3-dimensional array containing the probabilites of transition upon division." +
-                    "If mkj in array i represents the probability that a cell of type i divides into cells of type k and j (k<= j)," +
-                    "the element of index n*k + j - k(k+1)/2 gives the index of element mkj in the input vector." +
-                    "If j<k, invert k and j. We assume here that the daughter cells are not ordered." +
-                    "This renumbering is equivalent to flattening the array by rows." +
-                    "Note that all vectors in this list must have elements which sum to 1.",
-            new ArrayList<RealParameter>());
-
     public Input<BooleanParameter> matrixOfAllowedTransitionsInput = new Input<> ("allowedTransitions",
             "Flattened matrix of allowed transitions between cell types. " +
                     "If mij is the boolean that characterizes transitions from type i to j, the element of index i*(n-1)+j if i>j, or i*(n-1) + j-1 otherwise, gives the index of element mij. n is the number of types.");
 
+    // TODO possibly rework on the way inputs are written in. This is a first draft
+    public Input<RealParameter> meanNormalAreaGrowthRateInput = new Input<>("meanAreaGrowthRate",
+            "");
+    public Input<RealParameter> sdNormalAreaGrowthRateInput = new Input<>("sdAreaGrowthRate",
+            "");
+    public Input<RealParameter> meanNormalPerimeterGrowthRateInput = new Input<>("meanPerimeterGrowthRate",
+            "");
+    public Input<RealParameter> sdNormalPerimeterGrowthRateInput = new Input<>("sdPerimeterGrowthRate",
+            "");
+    public Input<RealParameter> meanNormalEccentricityInput = new Input<>("meanEccentricity",
+            "");
+    public Input<RealParameter> sdNormalEccentricityInput = new Input<>("sdEccentricity",
+            "");
+    public Input<RealParameter> meanNormalInstantSpeedInput = new Input<>("meanInstantSpeed",
+            "");
+    public Input<RealParameter> sdNormalInstantSpeedInput = new Input<>("sdInstantSpeed",
+            "");
+    public Input<RealParameter> meanNormalCD41ProductionRateInput = new Input<>("meanCD41ProductionRate",
+            "");
+    public Input<RealParameter> sdNormalCD41ProductionRateInput = new Input<>("sdCD41ProductionRate",
+            "");
+    public Input<RealParameter> meanNormalFcgRIIIProductionRateInput = new Input<>("meanFcgRIIIProductionRate",
+            "");
+    public Input<RealParameter> sdNormalFcgRIIIProductionRateInput = new Input<>("sdFcgRIIIProductionRate",
+            "");
+    public Input<RealParameter> meanNormalROSProductionRateInput = new Input<>("meanROSProductionRate",
+            "");
+    public Input<RealParameter> sdNormalROSProductionRateInput = new Input<>("sdROSProductionRate",
+            "");
+    public Input<RealParameter> meanNormalTMRMProductionRateInput = new Input<>("meanTMRMProductionRate",
+            "");
+    public Input<RealParameter> sdNormalTMRMProductionRateInput = new Input<>("sdTMRMProductionRate",
+            "");
+    public Input<RealParameter> meanNormalTMRMMaxRateInput = new Input<>("meanTMRMMaxRate",
+            "");
+    public Input<RealParameter> sdNormalTMRMMaxRateInput = new Input<>("sdTMRMMaxRate",
+            "");
+    public Input<RealParameter> meanNormalSca1ProductionRateInput = new Input<>("meanSca1ProductionRate",
+            "");
+    public Input<RealParameter> sdNormalSca1ProductionRateInput = new Input<>("sdSca1ProductionRate",
+            "");
+    public Input<RealParameter> meanNormalIg2afcProductionRateInput = new Input<>("meanIg2afcProductionRate",
+            "");
+    public Input<RealParameter> sdNormalIg2afcProductionRateInput = new Input<>("sdIg2afcProductionRate",
+            "");
+    public Input<RealParameter> meanNormalCD71APCProductionRateInput = new Input<>("meanCD71APCProductionRate",
+            "");
+    public Input<RealParameter> sdNormalCD71APCProductionRateInput = new Input<>("sdCD71APCProductionRate",
+            "");
+    public Input<RealParameter> meanNormalCD71PEProductionRateInput = new Input<>("meanCD71PEProductionRate",
+            "");
+    public Input<RealParameter> sdNormalCD71PEProductionRateInput = new Input<>("sdCD71PEProductionRate",
+            "");
+    public Input<RealParameter> meanNormalcMycGFPMaxRateInput = new Input<>("meancMycGFPMaxRate",
+            "");
+    public Input<RealParameter> sdNormalcMycGFPMaxRateInput = new Input<>("sdcMycGFPMaxRate",
+            "");
 
-    // possibly rework on the way inputs are written in. This is a first draft
+
     Map<InputPair, MeasureType> mapMeasureTypeToInput = createMapOfMeasureInputs();
 
     private Map<InputPair, MeasureType> createMapOfMeasureInputs(){
         Map<InputPair, MeasureType> result = new HashMap<>();
 
-
-        Input<RealParameter> meanNormalAreaGrowthRateInput = new Input<>("meanAreaGrowthRate",
-                "");
-        Input<RealParameter> sdNormalAreaGrowthRateInput = new Input<>("sdAreaGrowthRate",
-                "");
         InputPair areaGrowthRateInput = new InputPair(meanNormalAreaGrowthRateInput, sdNormalAreaGrowthRateInput);
-
-        Input<RealParameter> meanNormalPerimeterGrowthRateInput = new Input<>("meanPerimeterGrowthRate",
-                "");
-        Input<RealParameter> sdNormalPerimeterGrowthRateInput = new Input<>("sdPerimeterGrowthRate",
-                "");
         InputPair perimeterGrowthRateInput = new InputPair(meanNormalPerimeterGrowthRateInput, sdNormalPerimeterGrowthRateInput);
-
-        Input<RealParameter> meanNormalEccentricityInput = new Input<>("meanEccentricity",
-                "");
-        Input<RealParameter> sdNormalEccentricityInput = new Input<>("sdEccentricity",
-                "");
         InputPair eccentricityInput = new InputPair(meanNormalEccentricityInput, sdNormalEccentricityInput);
-
-
-        Input<RealParameter> meanNormalInstantSpeedInput = new Input<>("meanInstantSpeed",
-                "");
-        Input<RealParameter> sdNormalInstantSpeedInput = new Input<>("sdInstantSpeed",
-                "");
         InputPair instantSpeedInput = new InputPair(meanNormalInstantSpeedInput, sdNormalInstantSpeedInput);
-
-        Input<RealParameter> meanNormalCD41ProductionRateInput = new Input<>("meanCD41ProductionRate",
-                "");
-        Input<RealParameter> sdNormalCD41ProductionRateInput = new Input<>("sdCD41ProductionRate",
-                "");
         InputPair CD41ProductionRateInput = new InputPair(meanNormalCD41ProductionRateInput, sdNormalCD41ProductionRateInput);
-        
-
-        Input<RealParameter> meanNormalFcgRIIIProductionRateInput = new Input<>("meanFcgRIIIProductionRate",
-                "");
-        Input<RealParameter> sdNormalFcgRIIIProductionRateInput = new Input<>("sdFcgRIIIProductionRate",
-                "");
         InputPair FcgRIIIProductionRateInput = new InputPair(meanNormalFcgRIIIProductionRateInput, sdNormalFcgRIIIProductionRateInput);
-
-
-
-        Input<RealParameter> meanNormalROSProductionRateInput = new Input<>("meanROSProductionRate",
-                "");
-        Input<RealParameter> sdNormalROSProductionRateInput = new Input<>("sdROSProductionRate",
-                "");
         InputPair ROSProductionRateInput = new InputPair(meanNormalROSProductionRateInput, sdNormalROSProductionRateInput);
-
-
-        Input<RealParameter> meanNormalTMRMProductionRateInput = new Input<>("meanTMRMProductionRate",
-                "");
-        Input<RealParameter> sdNormalTMRMProductionRateInput = new Input<>("sdTMRMProductionRate",
-                "");
         InputPair TMRMProductionRateInput = new InputPair(meanNormalTMRMProductionRateInput, sdNormalTMRMProductionRateInput);
-
-
-        Input<RealParameter> meanNormalSca1ProductionRateInput = new Input<>("meanSca1ProductionRate",
-                "");
-        Input<RealParameter> sdNormalSca1ProductionRateInput = new Input<>("sdSca1ProductionRate",
-                "");
+        InputPair TMRMMaxRateInput = new InputPair(meanNormalTMRMMaxRateInput, sdNormalTMRMMaxRateInput);
         InputPair Sca1ProductionRateInput = new InputPair(meanNormalSca1ProductionRateInput, sdNormalSca1ProductionRateInput);
-
-
-        Input<RealParameter> meanNormalIg2afcProductionRateInput = new Input<>("meanIg2afcProductionRate",
-                "");
-        Input<RealParameter> sdNormalIg2afcProductionRateInput = new Input<>("sdIg2afcProductionRate",
-                "");
         InputPair Ig2afcProductionRateInput = new InputPair(meanNormalIg2afcProductionRateInput, sdNormalIg2afcProductionRateInput);
-
-
-        Input<RealParameter> meanNormalCD71APCProductionRateInput = new Input<>("meanCD71APCProductionRate",
-                "");
-        Input<RealParameter> sdNormalCD71APCProductionRateInput = new Input<>("sdCD71APCProductionRate",
-                "");
         InputPair CD71APCProductionRateInput = new InputPair(meanNormalCD71APCProductionRateInput, sdNormalCD71APCProductionRateInput);
-
-
-        Input<RealParameter> meanNormalCD71PEProductionRateInput = new Input<>("meanCD71PEProductionRate",
-                "");
-        Input<RealParameter> sdNormalCD71PEProductionRateInput = new Input<>("sdCD71PEProductionRate",
-                "");
         InputPair CD71PEProductionRateInput = new InputPair(meanNormalCD71PEProductionRateInput, sdNormalCD71PEProductionRateInput);
-
-
-        Input<RealParameter> meanNormalcMycGFPMaxRateInput = new Input<>("meancMycGFPMaxRate",
-                "");
-        Input<RealParameter> sdNormalcMycGFPMaxRateInput = new Input<>("sdcMycGFPMaxRate",
-                "");
         InputPair cMycGFPMaxRateInput = new InputPair(meanNormalcMycGFPMaxRateInput, sdNormalcMycGFPMaxRateInput);
         
 
@@ -170,7 +153,7 @@ public class  LineageTreeProb extends Distribution {
         result.put(FcgRIIIProductionRateInput, MeasureType.FcgRIII);
         result.put(ROSProductionRateInput, MeasureType.ROS);
         result.put(TMRMProductionRateInput, MeasureType.TMRMmean);
-        result.put(TMRMProductionRateInput, MeasureType.TMRMmax);
+        result.put(TMRMMaxRateInput, MeasureType.TMRMmax);
         result.put(Sca1ProductionRateInput, MeasureType.Sca1);
         result.put(Ig2afcProductionRateInput, MeasureType.Ig2afc);
         result.put(CD71APCProductionRateInput, MeasureType.CD71APC);
@@ -228,18 +211,15 @@ public class  LineageTreeProb extends Distribution {
             transitionDuringLifetimeIsAllowed = false;
         }
 
-        if(matrixOfProbsOfTransitionUponDivision.get() != null) {
+        if(transitionUponDivisionProbsInput.get().get(0) != null) {
             transitionUponDivisionIsAllowed=true;
 
-            if(matrixOfProbsOfTransitionUponDivision.get().size() != numberOfTypes)
-                throw new IllegalStateException("Incorrect size of matrix of probabilities of transition upon division.");
+            if(transitionUponDivisionProbsInput.get().size() != numberOfTypes)
+                throw new IllegalStateException("Incorrect size of list of probabilities of transition upon division.");
         }
         else {
             transitionUponDivisionIsAllowed = false;
         }
-
-        //TODO remove
-        //transitionUponDivisionIsAllowed = (transitionUponDivisionProbsInput.get() != null);
 
         if (lossProbInput.get() == null)
             throw new IllegalStateException("lossProb input is missing. Set to zero if cells are never lost.");
@@ -257,6 +237,7 @@ public class  LineageTreeProb extends Distribution {
         else
             rootIsHSC = rootIsHSCInput.get().getValue();
 
+        //TODO rework on this when adding more types
         int rootNodeType = rootIsHSC? 0 : 1;
 
         //for now prior is that frequency is equal for all types TODO allow for more flexibility
@@ -418,8 +399,8 @@ public class  LineageTreeProb extends Distribution {
                 throw new IllegalStateException("Invalid cell fate.");
             }
 
-            // account for the
-            branchProb += getProbabilityCellMeasures(node, typeStartBranch, typeEndBranch);
+            // account for the experimental measures performed on the cells
+            branchProb *= getProbabilityCellMeasures(node, typeStartBranch, typeEndBranch);
 
         }
         else { // typeStartBranch != typeEndBranch
@@ -503,9 +484,23 @@ public class  LineageTreeProb extends Distribution {
         for (InputPair input : mapMeasureTypeToInput.keySet()) {
             MeasureType measureType = mapMeasureTypeToInput.get(input);
 
+            //TODO remove (for debugging)
+//            boolean isMeasureMeasured = node.hasMeasure(measureType);
+//            boolean isInputHere = (input.getMean().get() != null);
+
             // if input is provided by user and the cell actually contains info about the measure
             if(input.getMean().get() != null && node.hasMeasure(measureType)) {
                 double x = node.getSummaryValue(mapMeasureTypeToInput.get(input));
+                if(Double.isNaN(x)) continue; // skip this measure if there is no summary value
+                //TODO remove, for debugging
+                if(Utils.getTruncatedNormalDensity(x, typeEndBranch, input, measureType) == 0) {
+                    System.out.println("Problem here, branchProb is zero.");
+                }
+
+                //TODO remove, for debugging
+                if( Utils.getTruncatedNormalDensity(x, typeEndBranch, input, measureType) < 1e-80)
+                    System.out.println("Problem here, branchProb is going to be very low.");
+
                 branchProb *= Utils.getTruncatedNormalDensity(x, typeEndBranch, input, measureType);
             }
         }
@@ -529,11 +524,9 @@ public class  LineageTreeProb extends Distribution {
 
             int indexInFlattenedArray = numberOfTypes * typeStartChildBranch1 + typeStartChildBranch2 - typeStartChildBranch1 * (typeStartChildBranch1+1)/2;
 
-            return matrixOfProbsOfTransitionUponDivision.get().get(typeEndParentBranch).getValue(indexInFlattenedArray);
+            return transitionUponDivisionProbsInput.get().get(typeEndParentBranch).getValue(indexInFlattenedArray);
         }
     }
-
-
 
     @Override
     public List<String> getArguments() {
@@ -674,13 +667,139 @@ public class  LineageTreeProb extends Distribution {
     }
 
     public static void main(String[] args) throws IOException {
-        String fileName = "../Data/Examples/toyFile.csv";
+        String fileName = "../Data/Examples/MinusInfinityLik4.csv";
         LineageTree tree =  new LineageTree();
-        tree.setInputValue("measures", fileName);
+        tree.setInputValue("measuresCSVFile", fileName);
 
         tree.initAndValidate();
 
         System.out.println(tree.toString());
+
+        LineageTreeProb probTree = new LineageTreeProb();
+        probTree.setInputValue("tree", tree);
+
+        List<RealParameter> fateProbabilities = new ArrayList<>();
+        fateProbabilities.add(new RealParameter("1.0 0. 0."));
+        fateProbabilities.add(new RealParameter("1.0 0. 0."));
+
+        List<RealParameter> scaleWeibull = new ArrayList<>();
+        scaleWeibull.add(new RealParameter("10 10"));
+        scaleWeibull.add(new RealParameter("10 10"));
+
+        List<RealParameter> shapeWeibull = new ArrayList<>();
+        shapeWeibull.add(new RealParameter("1 1"));
+        shapeWeibull.add(new RealParameter("1 1"));
+
+        List<RealParameter> transitionUponDivisionProbs = new ArrayList<>();
+        transitionUponDivisionProbs.add(new RealParameter("0.3 0.3 0.4"));
+        transitionUponDivisionProbs.add(new RealParameter("0 0 1.0"));
+
+        RealParameter meanNormalAreaGrowthRateInput = new RealParameter("20.0 20.0");
+        RealParameter sdNormalAreaGrowthRateInput = new RealParameter("20.0 20.0");
+
+        RealParameter meanNormalEccentricityInput = new RealParameter("0.5 .5");
+        RealParameter sdNormalEccentricityInput = new RealParameter("0.3 0.3");
+
+        RealParameter meanNormalInstantSpeedInput = new RealParameter("10. 10.");
+        RealParameter sdNormalInstantSpeedInput = new RealParameter("10.0 10.0");
+
+        RealParameter meanNormalTMRMProductionRateInput = new RealParameter("5.0 5.0");
+        RealParameter sdNormalTMRMProductionRateInput = new RealParameter("2.0 2.0");
+
+        RealParameter meanNormalTMRMMaxRateInput = new RealParameter("20.0 20.0");
+        RealParameter sdNormalTMRMMaxRateInput = new RealParameter("40.0 40.0");
+
+        RealParameter meanNormalROSProductionRateInput = new RealParameter("1.0 1.0");
+        RealParameter sdNormalROSProductionRateInput = new RealParameter("2.0 2.0");
+
+        RealParameter meanNormalCD71APCProductionRateInput = new RealParameter("5.0 5.0");
+        RealParameter sdNormalCD71APCProductionRateInput = new RealParameter("2.0 2.0");
+
+        RealParameter meanNormalCD71PEProductionRateInput = new RealParameter("5.0 5.0");
+        RealParameter sdNormalCD71PEProductionRateInput = new RealParameter("10.0 10.0");
+
+        RealParameter meanNormalcMycGFPMaxRateInput = new RealParameter("1.0 1.0");
+        RealParameter sdNormalcMycGFPMaxRateInput = new RealParameter("10.0 10.0");
+
+//        RealParameter meanNormalPerimeterGrowthRateInput = new RealParameter("0. 1.");
+//        RealParameter sdNormalPerimeterGrowthRateInput = new RealParameter("5.0 10.0");
+
+        probTree.setInputValue("transitionUponDivisionProbs", transitionUponDivisionProbs);
+        probTree.setInputValue("fateProbabilities", fateProbabilities);
+        probTree.setInputValue("scaleWeibull",scaleWeibull);
+        probTree.setInputValue("shapeWeibull",shapeWeibull);
+        probTree.setInputValue("lossProb", new RealParameter("0."));
+        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
+
+        probTree.setInputValue("meanAreaGrowthRate", meanNormalAreaGrowthRateInput);
+        probTree.setInputValue("sdAreaGrowthRate", sdNormalAreaGrowthRateInput);
+
+        probTree.setInputValue("meanEccentricity", meanNormalEccentricityInput);
+        probTree.setInputValue("sdEccentricity", sdNormalEccentricityInput);
+
+        probTree.setInputValue("meanInstantSpeed", meanNormalInstantSpeedInput);
+        probTree.setInputValue("sdInstantSpeed", sdNormalInstantSpeedInput);
+
+        probTree.setInputValue("meanTMRMProductionRate", meanNormalTMRMProductionRateInput);
+        probTree.setInputValue("sdTMRMProductionRate", sdNormalTMRMProductionRateInput);
+
+
+        probTree.setInputValue("meanTMRMMaxRate", meanNormalTMRMMaxRateInput);
+        probTree.setInputValue("sdTMRMMaxRate", sdNormalTMRMMaxRateInput);
+
+
+        probTree.setInputValue("meanROSProductionRate", meanNormalROSProductionRateInput);
+        probTree.setInputValue("sdROSProductionRate", sdNormalROSProductionRateInput);
+
+        probTree.setInputValue("meanCD71APCProductionRate", meanNormalCD71APCProductionRateInput);
+        probTree.setInputValue("sdCD71APCProductionRate", sdNormalCD71APCProductionRateInput);
+
+        probTree.setInputValue("meanCD71PEProductionRate", meanNormalCD71PEProductionRateInput);
+        probTree.setInputValue("sdCD71PEProductionRate", sdNormalCD71PEProductionRateInput);
+
+        probTree.setInputValue("meancMycGFPMaxRate", meanNormalcMycGFPMaxRateInput);
+        probTree.setInputValue("sdcMycGFPMaxRate", sdNormalcMycGFPMaxRateInput);
+
+//        probTree.setInputValue("",);
+//        probTree.setInputValue("",);
+//
+//        probTree.setInputValue("",);
+//        probTree.setInputValue("",);
+//
+//        probTree.setInputValue("",);
+//        probTree.setInputValue("",);
+//
+//        probTree.setInputValue("",);
+//        probTree.setInputValue("",);
+//
+//        probTree.setInputValue("",);
+//        probTree.setInputValue("",);
+//
+//        probTree.setInputValue("",);
+//        probTree.setInputValue("",);
+//
+//        probTree.setInputValue("",);
+//        probTree.setInputValue("",);
+//
+//        probTree.setInputValue("",);
+//        probTree.setInputValue("",);
+
+
+        //probTree.setInputValue("meanPerimeterGrowthRate", meanNormalPerimeterGrowthRateInput);
+//        probTree.setInputValue("sdPerimeterGrowthRate", sdNormalPerimeterGrowthRateInput);
+//        probTree.setInputValue("meanCD41ProductionRate", meanNormalCD41ProductionRateInput);
+//        probTree.setInputValue("sdCD41ProductionRate", sdNormalCD41ProductionRateInput);
+//
+//        probTree.setInputValue("meanFcgRIIIProductionRate", meanNormalFcgRIIIProductionRateInput);
+//        probTree.setInputValue("sdFcgRIIIProductionRate", sdNormalFcgRIIIProductionRateInput);
+        
+        probTree.initAndValidate();
+        double logP;
+        logP = probTree.calculateLogP();
+
+        System.out.println("logP = " + logP);
+
+        System.out.println(Math.log(Double.MAX_VALUE));
     }
 
 

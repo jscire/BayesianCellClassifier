@@ -13,7 +13,7 @@ import java.util.Map;
 
 public class LineageTree extends Tree {
 
-    public Input<String> experimentalMeasuresFileInput = new Input<>("measures",
+    public Input<String> experimentalMeasuresFileInput = new Input<>("measuresCSVFile",
             "CSV file containing all the measures performed on this tree.");
 
     public Input<String> frameRateInput = new Input<>("frameRate",
@@ -70,6 +70,11 @@ public class LineageTree extends Tree {
         return null;
     }
 
+    //TODO implement proper toString method to at least print the cell tracknumbers in the metadata.
+    @Override
+    public String toString() {
+        return super.toString();
+    }
 
     //TODO that's a dirty attempt to go around the fact that nodes in Tree should be numbered the standard way for BEAST, not the way they are in the input data
     //TODO does it even make sense to do things that way?
@@ -83,9 +88,10 @@ public class LineageTree extends Tree {
 
     public static void main(String[] parms) {
 
-        String fileName = "../Data/Examples/toyFile.csv";
+//        String fileName = "../Data/Examples/toyFile.csv";
+        String fileName = "../Data/Examples/testFile_shortLife.csv";
         LineageTree tree =  new LineageTree();
-        tree.setInputValue("measures", fileName);
+        tree.setInputValue("measuresCSVFile", fileName);
 
         tree.initAndValidate();
 
