@@ -323,16 +323,16 @@ public class  LineageTreeProb extends Distribution {
     }
 
     public double[] getProbaAtLeaves(Cell leaf, int leafType) { // here leafType refers to the type of the cell at the end of branch
-        //TODO improve: for now, we're just starting with an equal proba for each type.
         double[] startingProbas  = new double[numberOfTypes];
-        for (int i = 0; i < numberOfTypes; i++) {
-            startingProbas[i] = 1.0/numberOfTypes;
-        }
-
         double[] resultProbs = new double[numberOfTypes];
 
 
         if(leafType == -1) { // type of leaf is not fixed
+            // initialize all the starting probabilities
+            for (int i = 0; i < numberOfTypes; i++) {
+                startingProbas[i] = 1.0;
+            }
+
             for (int i = 0; i < numberOfTypes; i++) {
                 resultProbs[i] = 0;
                 for (int j = 0; j < numberOfTypes; j++) {
@@ -341,6 +341,8 @@ public class  LineageTreeProb extends Distribution {
             }
         }
         else if (leafType > -1 && leafType < numberOfTypes) { // type of this leaf is fixed
+            startingProbas[leafType] = 1.0;
+
             for (int i = 0; i < numberOfTypes; i++) {
                 resultProbs[i] = getProbabilityCellBranch(leaf, i, leafType) * startingProbas[leafType];
             }
@@ -501,6 +503,7 @@ public class  LineageTreeProb extends Distribution {
                 if( Utils.getTruncatedNormalDensity(x, typeEndBranch, input, measureType) < 1e-80)
                     System.out.println("Problem here, branchProb is going to be very low.");
 
+                //TODO instead of truncated normal density, have normal density.
                 branchProb *= Utils.getTruncatedNormalDensity(x, typeEndBranch, input, measureType);
             }
         }
