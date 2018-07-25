@@ -365,11 +365,18 @@ public class  LineageTreeProb extends Distribution {
             if (node.getFate() == Cell.Fate.D || node.getFate() == Cell.Fate.A) {
 
                 int cellFate = node.getFate() == Cell.Fate.D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
-                branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getArrayValue(cellFate)
-                        * Utils.getWeibullDensity(node.getEdgeLength(),
-                        scaleWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate),
-                        shapeWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate));
 
+                if(node == tree.getRoot()) { //TODO check that this check works as intended
+                    // if cell is root cell, take its observed lifetime as the minimal bound of its real lifetime
+                    branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getArrayValue(cellFate)
+                            * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate), shapeWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate)));
+                } else {
+                    // observed lifetime is the real lifetime of the cell
+                    branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getArrayValue(cellFate)
+                            * Utils.getWeibullDensity(node.getEdgeLength(),
+                            scaleWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate),
+                            shapeWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate));
+                }
             }
             else if (node.getFate() == Cell.Fate.N) { //TODO potentially remove this fate (and have only unobserved instead)
 
@@ -393,6 +400,7 @@ public class  LineageTreeProb extends Distribution {
                         * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
 
                 if (transitionDuringLifetimeIsAllowed && fateProbabilitiesInput.get().get(typeEndBranch).getDimension() > 3) // check if this state can transition
+                    //TODO if more than 1 fate that the cell can transition to, take it into account, either by summing the different probas or by having one big proba for all
                     branchProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(3) // cell transitions after end of branch
                             * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
 
