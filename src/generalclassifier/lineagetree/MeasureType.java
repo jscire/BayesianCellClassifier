@@ -39,9 +39,7 @@ public enum MeasureType {
         this.hardUpperBound = upper;
     }
 
-    MeasureType() {
-        this.namesInInputFile = new String[]{""};
-    }
+    MeasureType() {this.namesInInputFile = new String[]{""}; }
 
     public String[] getNames() {
         return namesInInputFile;

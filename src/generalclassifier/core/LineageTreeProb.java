@@ -354,6 +354,7 @@ public class  LineageTreeProb extends Distribution {
         return resultProbs;
     }
 
+    //TODO currently changing everything to log, when done, remove this method
     public double getProbabilityCellBranch(Cell node, int typeStartBranch, int typeEndBranch) {
 
         double branchProb=0;
@@ -475,6 +476,138 @@ public class  LineageTreeProb extends Distribution {
         return branchProb;
     }
 
+    public double getLogProbabilityCellBranch(Cell node, int typeStartBranch, int typeEndBranch) {
+
+        double branchLogProb=Double.NEGATIVE_INFINITY;
+
+        if(node.getFate() == Cell.Fate.L) return Math.log(lossProbInput.get().getValue());
+
+        if(typeStartBranch == typeEndBranch) { // no type transition
+
+            if (node.getFate() == Cell.Fate.D || node.getFate() == Cell.Fate.A) {
+
+                int cellFate = node.getFate() == Cell.Fate.D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
+                branchLogProb = Math.log(fateProbabilitiesInput.get().get(typeEndBranch).getArrayValue(cellFate))
+                        + Utils.getWeibullLogDensity(node.getEdgeLength(),
+                        scaleWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate),
+                        shapeWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate));
+
+            }
+            else if (node.getFate() == Cell.Fate.U) {
+
+                branchLogProb = fateProbabilitiesInput.get().get(typeEndBranch).getValue(0) // cell divides after end of branch
+                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)))
+                        + fateProbabilitiesInput.get().get(typeEndBranch).getValue(1) // cell dies after end of branch
+                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
+
+                if (transitionDuringLifetimeIsAllowed && fateProbabilitiesInput.get().get(typeEndBranch).getDimension() > 3) // check if this state can transition
+                    branchLogProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(3) // cell transitions after end of branch
+                            * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
+
+            }
+            else {
+                throw new IllegalStateException("Invalid cell fate.");
+            }
+
+            // account for the experimental measures performed on the cells
+            branchLogProb *= getProbabilityCellMeasures(node, typeStartBranch, typeEndBranch);
+
+        }
+        else { // typeStartBranch != typeEndBranch
+
+            //TODO transition on branches are not properly implemented yet.
+
+            //get index of transition in the matrixOfAllowedTransitions
+            int indexTransition = typeStartBranch > typeEndBranch ? typeStartBranch * (numberOfTypes - 1) + typeEndBranch : typeStartBranch * (numberOfTypes - 1) + typeEndBranch - 1;
+
+            if (!transitionDuringLifetimeIsAllowed || !matrixOfAllowedTransitionsInput.get().getValue(indexTransition))
+                return 0; // configuration has probability zero (impossible type transition)
+            else {
+                if (node.getFate() == Cell.Fate.D || node.getFate() == Cell.Fate.A) {
+                    int cellEndFate = node.getFate() == Cell.Fate.D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
+
+                    // integration over transition point
+                    // the "2" below refers to the fate transitioner. TODO refactor this "2", make cleaner which fate is which, when generalising
+                    DensityProbOfStateTransition f = new DensityProbOfStateTransition(
+                            node.getEdgeLength(),
+                            shapeWeibullInput.get().get(typeStartBranch).getValue(2),
+                            scaleWeibullInput.get().get(typeStartBranch).getValue(2),
+                            shapeWeibullInput.get().get(typeEndBranch).getValue(cellEndFate),
+                            scaleWeibullInput.get().get(typeEndBranch).getValue(cellEndFate));
+
+                    try {
+                        double integrationRes = numericalIntegrator.integrate(maxEval, f, 0, 1);
+                        // the "3" below refers to the fate transitioner. TODO refactor this "3", make cleaner which fate is which, when generalising
+                        branchLogProb = integrationRes * fateProbabilitiesInput.get().get(typeStartBranch).getValue(3) * fateProbabilitiesInput.get().get(typeEndBranch).getValue(cellEndFate);
+                    }
+                    catch (Exception e) { //TODO solve the pb with some integrations that don't happen: it's a pb with properly exploring the state space
+                        branchLogProb = 0;
+                    }
+
+                }
+                else if (node.getFate() == Cell.Fate.N) { //TODO potentially remove this fate (and have only unobserved instead)
+
+                    DensityProbTransitionBeforeEndAndDivisionDeathAfter f = new DensityProbTransitionBeforeEndAndDivisionDeathAfter(
+                            node.getEdgeLength(),
+                            shapeWeibullInput.get().get(typeStartBranch).getValue(2),
+                            scaleWeibullInput.get().get(typeStartBranch).getValue(2),
+                            shapeWeibullInput.get().get(typeEndBranch).getValue(0),
+                            scaleWeibullInput.get().get(typeEndBranch).getValue(0),
+                            shapeWeibullInput.get().get(typeEndBranch).getValue(1),
+                            scaleWeibullInput.get().get(typeEndBranch).getValue(1),
+                            fateProbabilitiesInput.get().get(typeEndBranch).getValue(0),
+                            fateProbabilitiesInput.get().get(typeEndBranch).getValue(1),
+                            fateProbabilitiesInput.get().get(typeEndBranch).getValue(2));
+
+                    try {
+                        double integrationRes = numericalIntegrator.integrate(maxEval, f, 0, 1);
+                        branchLogProb = fateProbabilitiesInput.get().get(typeStartBranch).getValue(3) * integrationRes; // cell transitions before end of branch, resulting cell does not do anything before end of branch
+
+                    }
+                    catch (Exception e) {
+                        branchLogProb = 0; //TODO deal with that integration problem
+                    }
+                }
+                else if (node.getFate() == Cell.Fate.U) {
+                    //TODO implement.
+                    // will be similar to fate N but removing the possibility that fate N appears.
+                }
+                else {
+                    throw new IllegalStateException("Invalid cell fate.");
+                }
+            }
+
+
+        }
+        branchLogProb *= (1 - lossProbInput.get().getValue());
+        return branchLogProb;
+    }
+
+    public double getLogProbabilityCellMeasures(Cell node, int typeStartBranch, int typeEndBranch) {
+        double branchLogProb = 0;
+
+        //TODO implement transitions on branches
+        if(typeEndBranch != typeStartBranch) {
+            return Double.NEGATIVE_INFINITY;
+        }
+
+        for (InputPair input : mapMeasureTypeToInput.keySet()) {
+            MeasureType measureType = mapMeasureTypeToInput.get(input);
+
+            // if input is provided by user and the cell actually contains info about the measure
+            if(input.getMean().get() != null && node.hasMeasure(measureType)) {
+
+                double x = node.getSummaryValue(mapMeasureTypeToInput.get(input));
+
+                if(Double.isNaN(x)) continue; // skip this measure if there is no summary value
+
+                branchLogProb += Utils.getNormalLogDensityForTypeAndInput(x, typeEndBranch, input);
+            }
+        }
+        return branchLogProb;
+    }
+
+    //TODO currently changing everything to log, when done, remove this method
     public double getProbabilityCellMeasures(Cell node, int typeStartBranch, int typeEndBranch) {
         double branchProb = 1;
 
@@ -510,6 +643,29 @@ public class  LineageTreeProb extends Distribution {
         return branchProb;
     }
 
+
+    public double getLogProbabilityAtDivisionNode(int typeEndParentBranch, int typeStartChildBranch1, int typeStartChildBranch2) {
+
+        if (!transitionUponDivisionIsAllowed) {
+            if (typeEndParentBranch == typeStartChildBranch1 && typeStartChildBranch1 == typeStartChildBranch2)
+                return 0;
+            else return Double.NEGATIVE_INFINITY; // if one of the three states is different, local configuration is impossible without transition upon division
+        }
+        else {
+
+            if(typeStartChildBranch1 > typeStartChildBranch2) { // order the types of the children to later find correct index in the array of transition probs
+                int temp = typeStartChildBranch2;
+                typeStartChildBranch2 = typeStartChildBranch1;
+                typeStartChildBranch1 = temp;
+            }
+
+            int indexInFlattenedArray = numberOfTypes * typeStartChildBranch1 + typeStartChildBranch2 - typeStartChildBranch1 * (typeStartChildBranch1+1)/2;
+
+            return Math.log(transitionUponDivisionProbsInput.get().get(typeEndParentBranch).getValue(indexInFlattenedArray));
+        }
+    }
+
+    //TODO currently changing everything to log, when done, remove this method
     public double getProbabilityAtDivisionNode(int typeEndParentBranch, int typeStartChildBranch1, int typeStartChildBranch2) {
 
         if (!transitionUponDivisionIsAllowed) {
