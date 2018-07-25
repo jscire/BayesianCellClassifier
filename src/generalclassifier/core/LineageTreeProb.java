@@ -168,6 +168,9 @@ public class  LineageTreeProb extends Distribution {
     boolean rootIsHSC;
     //TODO allow for specifying the types of leaves or even other cells of the tree.
 
+    //TODO remove, just for benchmarking
+    boolean dologCalc = false;
+
     boolean transitionUponDivisionIsAllowed;
     boolean transitionDuringLifetimeIsAllowed;
 
@@ -242,7 +245,11 @@ public class  LineageTreeProb extends Distribution {
 
         //for now prior is that frequency is equal for all types TODO allow for more flexibility
         try {
-            logP = Math.log(calculatePruningProb((Cell) tree.getRoot(), rootNodeType)[rootNodeType] * 1.0/numberOfTypes);
+            //TODO remove doLogCalc, just for benchmarking
+            if(dologCalc)
+                logP = calculatePruningLogProb((Cell) tree.getRoot(), rootNodeType)[rootNodeType] - Math.log(numberOfTypes);
+            else
+                logP = Math.log(calculatePruningProb((Cell) tree.getRoot(), rootNodeType)[rootNodeType] * 1.0/numberOfTypes);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -257,6 +264,7 @@ public class  LineageTreeProb extends Distribution {
      * @param nodeType, -1 if unspecified
      * @return
      */
+    //TODO currently changing everything to log, when done, remove this method
     public double[] calculatePruningProb(Cell node, int nodeType) { // here nodeType refers to the type of the node at the beginning of the branch
 
         if(node.isLeaf()) { // if a node is a leaf here then it is the root. otherwise leaves are caught below in a previous recursive call of calculatePruningProb
@@ -290,6 +298,9 @@ public class  LineageTreeProb extends Distribution {
                 for (int k = 0; k < numberOfTypes; k++) {
                     // TODO there is room for improvement here, at least for getProbabilityAtDivision, because calculations are repeated since symmetric on j and k.
                     // for now getProbabilityAtDivision calculations are very lightweight, only two types, so it's not an issue, but it may become one if really n types
+                    //TODO remove
+                    double a = getProbabilityAtDivisionNode(i, j, k);
+
                     probsEndBranch[i] += getProbabilityAtDivisionNode(i, j, k) * pruningProbaFirstChild[j] * pruningProbaSecondChild[k];
                 }
             }
@@ -322,6 +333,90 @@ public class  LineageTreeProb extends Distribution {
         return probsStartBranch;
     }
 
+    /**
+     * Calculate the conditional probability for current node using pruning algorithm
+     * Assumes the node is not a leaf
+     * @param node
+     * @param nodeType, -1 if unspecified
+     * @return
+     */
+    public double[] calculatePruningLogProb(Cell node, int nodeType) { // here nodeType refers to the type of the node at the beginning of the branch
+
+        if(node.isLeaf()) { // if a node is a leaf here then it is the root. otherwise leaves are caught below in a previous recursive call of calculatePruningProb
+            double[] result = new double[numberOfTypes];
+            result[nodeType] = getLogProbaAtLeaves(node, -1)[nodeType];
+            return result;
+        }
+
+
+        //TODO: potential for parallelization here
+        int childIndex = 0;
+        double[] pruningLogProbaFirstChild;
+
+        if (node.getChild(childIndex).isLeaf())
+            pruningLogProbaFirstChild = getLogProbaAtLeaves((Cell) node.getChild(childIndex), -1);
+        else
+            pruningLogProbaFirstChild = calculatePruningLogProb((Cell) node.getChild(childIndex), -1);
+
+        childIndex = 1;
+        double[] pruningLogProbaSecondChild;
+
+        if (node.getChild(childIndex).isLeaf())
+            pruningLogProbaSecondChild = getLogProbaAtLeaves((Cell) node.getChild(childIndex), -1);
+        else
+            pruningLogProbaSecondChild = calculatePruningLogProb( (Cell) node.getChild(childIndex), -1);
+
+
+        double[] probsEndBranch = new double[numberOfTypes];
+        for (int i = 0; i < numberOfTypes; i++) {
+            for (int j = 0; j < numberOfTypes; j++) {
+                for (int k = 0; k < numberOfTypes; k++) {
+                    // TODO there is room for improvement here, at least for getProbabilityAtDivision, because calculations are repeated since symmetric on j and k.
+                    // for now getProbabilityAtDivision calculations are very lightweight, only two types, so it's not an issue, but it may become one if really n types
+
+                    //TODO remove (for debugging)
+                    double a = getLogProbabilityAtDivisionNode(i, j, k);
+                    double b = Math.exp(getLogProbabilityAtDivisionNode(i, j, k));
+
+                    probsEndBranch[i] += Math.exp(getLogProbabilityAtDivisionNode(i, j, k) + pruningLogProbaFirstChild[j] + pruningLogProbaSecondChild[k]);
+                }
+            }
+        }
+
+        double[] probsStartBranch = new double[numberOfTypes];
+
+        if(nodeType == -1) { // type of node is not fixed
+            for (int i = 0; i < numberOfTypes; i++) {
+                for (int j = 0; j < numberOfTypes; j++) {
+                    probsStartBranch[i] += Math.exp(getLogProbabilityCellBranch(node, i, j)) * probsEndBranch[j];
+                }
+            }
+        }
+        else if (nodeType > -1 && nodeType < numberOfTypes) { // type of this node is fixed
+            for (int i = 0; i < numberOfTypes; i++) {
+                if (i != nodeType)
+                    probsStartBranch[i] = 0;
+                else {
+                    for (int j = 0; j < numberOfTypes; j++) {
+                        probsStartBranch[i] += Math.exp(getLogProbabilityCellBranch(node, i, j)) * probsEndBranch[j];
+                    }
+                }
+            }
+        }
+        else {
+            throw new IllegalStateException("Undefined nodeType. Value must be -1 if unspecified, and -1 < i < numberofTypes otherwise");
+        }
+
+        double[] logProbsStartBranch = new double[numberOfTypes];
+        for (int i = 0; i < numberOfTypes; i++) {
+            logProbsStartBranch[i] = Math.log(probsStartBranch[i]);
+        }
+
+        return logProbsStartBranch;
+    }
+
+
+    //TODO currently changing everything to log, when done, remove this method
     public double[] getProbaAtLeaves(Cell leaf, int leafType) { // here leafType refers to the type of the cell at the end of branch
         double[] startingProbas  = new double[numberOfTypes];
         double[] resultProbs = new double[numberOfTypes];
@@ -352,6 +447,43 @@ public class  LineageTreeProb extends Distribution {
         }
 
         return resultProbs;
+    }
+
+    public double[] getLogProbaAtLeaves(Cell leaf, int leafType) { // here leafType refers to the type of the cell at the end of branch
+        double[] startingLogProbas  = new double[numberOfTypes];
+        double[] resultLogProbs = new double[numberOfTypes];
+
+
+        if(leafType == -1) { // type of leaf is not fixed
+            // initialize all the starting probabilities
+            for (int i = 0; i < numberOfTypes; i++) {
+                startingLogProbas[i] = 0.0;
+            }
+
+            double[] resultProbs = new double[numberOfTypes];
+            for (int i = 0; i < numberOfTypes; i++) {
+                resultProbs[i] = 0;
+                for (int j = 0; j < numberOfTypes; j++) {
+                    resultProbs[i] += Math.exp(getLogProbabilityCellBranch(leaf, i, j) + startingLogProbas[j]);
+                }
+            }
+
+            for (int i = 0; i < numberOfTypes; i++) {
+                resultLogProbs[i] = Math.log(resultProbs[i]);
+            }
+        }
+        else if (leafType > -1 && leafType < numberOfTypes) { // type of this leaf is fixed
+            startingLogProbas[leafType] = 0.0;
+
+            for (int i = 0; i < numberOfTypes; i++) {
+                resultLogProbs[i] = getLogProbabilityCellBranch(leaf, i, leafType) + startingLogProbas[leafType];
+            }
+        }
+        else {
+            throw new IllegalStateException("Undefined leafType. Value must be -1 if unspecified, and -1 < i < numberOfTypes otherwise");
+        }
+
+        return resultLogProbs;
     }
 
     //TODO currently changing everything to log, when done, remove this method
@@ -487,6 +619,7 @@ public class  LineageTreeProb extends Distribution {
             if (node.getFate() == Cell.Fate.D || node.getFate() == Cell.Fate.A) {
 
                 int cellFate = node.getFate() == Cell.Fate.D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
+
                 branchLogProb = Math.log(fateProbabilitiesInput.get().get(typeEndBranch).getArrayValue(cellFate))
                         + Utils.getWeibullLogDensity(node.getEdgeLength(),
                         scaleWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate),
@@ -494,15 +627,18 @@ public class  LineageTreeProb extends Distribution {
 
             }
             else if (node.getFate() == Cell.Fate.U) {
+                double branchProb;
 
-                branchLogProb = fateProbabilitiesInput.get().get(typeEndBranch).getValue(0) // cell divides after end of branch
+                branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getValue(0) // cell divides after end of branch
                         * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)))
                         + fateProbabilitiesInput.get().get(typeEndBranch).getValue(1) // cell dies after end of branch
                         * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
 
                 if (transitionDuringLifetimeIsAllowed && fateProbabilitiesInput.get().get(typeEndBranch).getDimension() > 3) // check if this state can transition
-                    branchLogProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(3) // cell transitions after end of branch
+                    branchProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(3) // cell transitions after end of branch
                             * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
+
+                branchLogProb = Math.log(branchProb);
 
             }
             else {
@@ -510,18 +646,19 @@ public class  LineageTreeProb extends Distribution {
             }
 
             // account for the experimental measures performed on the cells
-            branchLogProb *= getProbabilityCellMeasures(node, typeStartBranch, typeEndBranch);
+            branchLogProb += getLogProbabilityCellMeasures(node, typeStartBranch, typeEndBranch);
 
         }
         else { // typeStartBranch != typeEndBranch
 
             //TODO transition on branches are not properly implemented yet.
+            //TODO transform everything to log space. (it's not at the moment)
 
             //get index of transition in the matrixOfAllowedTransitions
             int indexTransition = typeStartBranch > typeEndBranch ? typeStartBranch * (numberOfTypes - 1) + typeEndBranch : typeStartBranch * (numberOfTypes - 1) + typeEndBranch - 1;
 
             if (!transitionDuringLifetimeIsAllowed || !matrixOfAllowedTransitionsInput.get().getValue(indexTransition))
-                return 0; // configuration has probability zero (impossible type transition)
+                return Double.NEGATIVE_INFINITY; // configuration has probability zero (impossible type transition)
             else {
                 if (node.getFate() == Cell.Fate.D || node.getFate() == Cell.Fate.A) {
                     int cellEndFate = node.getFate() == Cell.Fate.D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
@@ -545,7 +682,7 @@ public class  LineageTreeProb extends Distribution {
                     }
 
                 }
-                else if (node.getFate() == Cell.Fate.N) { //TODO potentially remove this fate (and have only unobserved instead)
+                else if (node.getFate() == Cell.Fate.N) { //TODO remove this fate (and have only unobserved instead)
 
                     DensityProbTransitionBeforeEndAndDivisionDeathAfter f = new DensityProbTransitionBeforeEndAndDivisionDeathAfter(
                             node.getEdgeLength(),
@@ -579,7 +716,8 @@ public class  LineageTreeProb extends Distribution {
 
 
         }
-        branchLogProb *= (1 - lossProbInput.get().getValue());
+
+        branchLogProb += Math.log(1 - lossProbInput.get().getValue());
         return branchLogProb;
     }
 
@@ -637,7 +775,8 @@ public class  LineageTreeProb extends Distribution {
                     System.out.println("Problem here, branchProb is going to be very low.");
 
                 //TODO instead of truncated normal density, have normal density.
-                branchProb *= Utils.getTruncatedNormalDensity(x, typeEndBranch, input, measureType);
+//                branchProb *= Utils.getTruncatedNormalDensity(x, typeEndBranch, input, measureType);
+                branchProb *= Utils.getNormalDensity(x, input.getMean().get().getArrayValue(typeEndBranch), input.getStandardDev().get().getArrayValue(typeEndBranch));
             }
         }
         return branchProb;
