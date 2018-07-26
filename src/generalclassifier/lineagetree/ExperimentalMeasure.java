@@ -120,6 +120,13 @@ public class ExperimentalMeasure {
                 throw new IllegalArgumentException("Cannot summarize this measure. Method is: " + this.calculationMethod);
 
         }
+
+        //TODO this is a crude way of dealing with the fact that for a lot of measures, negative observed rates are considered to be zero
+        // it's crude because, in MeasureType, it's not clear that the bounds refer to the transformed values (like rates) instead of the observed values themselves
+        if( res < this.measureType.getHardLowerBound()) {
+            res = this.measureType.getHardLowerBound();
+        }
+
         summaryValue = res;
     }
 

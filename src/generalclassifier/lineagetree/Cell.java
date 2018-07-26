@@ -72,6 +72,9 @@ public class Cell extends Node {
     public double getSummaryValue(MeasureType measureType) {
         double measuredValue = Double.NaN;
 
+        if(this.isRoot() && !measureType.isAccurateMeasureForRootCell()) // return Double.NaN if root cell and inaccurate measure for roots
+            return measuredValue;
+
         for(ExperimentalMeasure measure : measures) {
             if(measure.measureType == measureType) {
                 measuredValue = measure.summaryValue;
