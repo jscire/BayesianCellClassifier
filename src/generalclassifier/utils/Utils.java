@@ -105,6 +105,10 @@ public class Utils {
                 : Math.log(1 - Math.exp(-Math.exp(k * Math.log(x/lambda))));
     }
 
+    public static double getLogNormalDensity(double x, double mu, double sigma) {
+        return 1.0/ (x * sigma * Math.sqrt(2*Math.PI)) * Math.exp(-(Math.log(x) - mu)*(Math.log(x)-mu)/(2*sigma*sigma));
+    }
+
 
     public static double getNormalDensity(double x, double mu, double sigma) {
         return 1.0/Math.sqrt(2*Math.PI*sigma*sigma)*Math.exp(-(x - mu)*(x-mu)/(2*sigma*sigma));

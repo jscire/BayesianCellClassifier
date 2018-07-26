@@ -137,20 +137,20 @@ public class  LineageTreeProb extends Distribution {
     private Map<InputPair, MeasureType> createMapOfMeasureInputs(){
         Map<InputPair, MeasureType> result = new HashMap<>();
 
-        InputPair areaGrowthRateInput = new InputPair(meanLogNormalAreaGrowthRateInput, sdLogNormalAreaGrowthRateInput);
-        InputPair perimeterGrowthRateInput = new InputPair(meanLogNormalPerimeterGrowthRateInput, sdLogNormalPerimeterGrowthRateInput);
-        InputPair eccentricityInput = new InputPair(meanNormalEccentricityInput, sdNormalEccentricityInput);
-        InputPair instantSpeedInput = new InputPair(meanLogNormalInstantSpeedInput, sdLogNormalInstantSpeedInput);
-        InputPair CD41ProductionRateInput = new InputPair(meanLogNormalCD41ProductionRateInput, sdLogNormalCD41ProductionRateInput);
-        InputPair FcgRIIIProductionRateInput = new InputPair(meanLogNormalFcgRIIIProductionRateInput, sdLogNormalFcgRIIIProductionRateInput);
-        InputPair ROSProductionRateInput = new InputPair(meanLogNormalROSProductionRateInput, sdLogNormalROSProductionRateInput);
-        InputPair TMRMProductionRateInput = new InputPair(meanLogNormalTMRMProductionRateInput, sdLogNormalTMRMProductionRateInput);
-        InputPair TMRMMaxRateInput = new InputPair(meanLogNormalTMRMMaxRateInput, sdLogNormalTMRMMaxRateInput);
-        InputPair Sca1ProductionRateInput = new InputPair(meanLogNormalSca1ProductionRateInput, sdLogNormalSca1ProductionRateInput);
-        InputPair Ig2afcProductionRateInput = new InputPair(meanLogNormalIg2afcProductionRateInput, sdLogNormalIg2afcProductionRateInput);
-        InputPair CD71APCProductionRateInput = new InputPair(meanLogNormalCD71APCProductionRateInput, sdLogNormalCD71APCProductionRateInput);
-        InputPair CD71PEProductionRateInput = new InputPair(meanLogNormalCD71PEProductionRateInput, sdLogNormalCD71PEProductionRateInput);
-        InputPair cMycGFPMaxRateInput = new InputPair(meanLogNormalcMycGFPMaxRateInput, sdLogNormalcMycGFPMaxRateInput);
+        InputPair areaGrowthRateInput = new InputPair(meanLogNormalAreaGrowthRateInput, sdLogNormalAreaGrowthRateInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair perimeterGrowthRateInput = new InputPair(meanLogNormalPerimeterGrowthRateInput, sdLogNormalPerimeterGrowthRateInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair eccentricityInput = new InputPair(meanNormalEccentricityInput, sdNormalEccentricityInput, InputPair.DistributionType.NORMAL);
+        InputPair instantSpeedInput = new InputPair(meanLogNormalInstantSpeedInput, sdLogNormalInstantSpeedInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair CD41ProductionRateInput = new InputPair(meanLogNormalCD41ProductionRateInput, sdLogNormalCD41ProductionRateInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair FcgRIIIProductionRateInput = new InputPair(meanLogNormalFcgRIIIProductionRateInput, sdLogNormalFcgRIIIProductionRateInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair ROSProductionRateInput = new InputPair(meanLogNormalROSProductionRateInput, sdLogNormalROSProductionRateInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair TMRMProductionRateInput = new InputPair(meanLogNormalTMRMProductionRateInput, sdLogNormalTMRMProductionRateInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair TMRMMaxRateInput = new InputPair(meanLogNormalTMRMMaxRateInput, sdLogNormalTMRMMaxRateInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair Sca1ProductionRateInput = new InputPair(meanLogNormalSca1ProductionRateInput, sdLogNormalSca1ProductionRateInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair Ig2afcProductionRateInput = new InputPair(meanLogNormalIg2afcProductionRateInput, sdLogNormalIg2afcProductionRateInput, InputPair.DistributionType.LOGNORMAL);
+        InputPair CD71APCProductionRateInput = new InputPair(meanLogNormalCD71APCProductionRateInput, sdLogNormalCD71APCProductionRateInput,InputPair.DistributionType.LOGNORMAL);
+        InputPair CD71PEProductionRateInput = new InputPair(meanLogNormalCD71PEProductionRateInput, sdLogNormalCD71PEProductionRateInput,InputPair.DistributionType.LOGNORMAL);
+        InputPair cMycGFPMaxRateInput = new InputPair(meanLogNormalcMycGFPMaxRateInput, sdLogNormalcMycGFPMaxRateInput,InputPair.DistributionType.LOGNORMAL);
         
 
         result.put(areaGrowthRateInput, MeasureType.Area);
@@ -506,7 +506,13 @@ public class  LineageTreeProb extends Distribution {
                 double x = node.getSummaryValue(mapMeasureTypeToInput.get(input));
                 if(Double.isNaN(x)) continue; // skip this measure if there is no summary value
 
-                branchProb *= Utils.getNormalDensity(x, input.getMean().get().getArrayValue(typeEndBranch), input.getStandardDev().get().getArrayValue(typeEndBranch));
+                if(input.getDistributionType() == InputPair.DistributionType.NORMAL)
+                    branchProb *= Utils.getNormalDensity(x, input.getMean().get().getArrayValue(typeEndBranch), input.getStandardDev().get().getArrayValue(typeEndBranch));
+                else if (input.getDistributionType() == InputPair.DistributionType.LOGNORMAL)
+                    branchProb *= Utils.getLogNormalDensity(x, input.getMean().get().getArrayValue(typeEndBranch), input.getStandardDev().get().getArrayValue(typeEndBranch));
+                else
+                    throw new IllegalArgumentException("Distribution type is not implemented yet.");
+
             }
         }
         return branchProb;
