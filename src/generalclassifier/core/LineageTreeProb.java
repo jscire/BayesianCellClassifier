@@ -4,6 +4,7 @@ import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.State;
 import beast.core.parameter.BooleanParameter;
+import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 
@@ -41,9 +42,9 @@ public class  LineageTreeProb extends Distribution {
     public Input<List<RealParameter>> transitionUponDivisionProbsInput = new Input<>("transitionUponDivisionProbs",
             "List of flattened 2-dimensional arrays containing the probabilites of transition between states upon division." +
                     "If mkj in array i represents the probability that a cell of type i divides into cells of type k and j (k<= j)," +
-                    "the element of index n*k + j - k(k+1)/2 gives the index of element mkj in the input vector." +
-                    "If j<k, invert k and j. We assume here that the daughter cells are not ordered and so that the arrays are symmetric before being truncated." +
-                    "This renumbering is equivalent to flattening the array by rows." +
+                    "the element mkj has index n*k + j - k(k+1)/2 in the input vector." +
+                    "If j<k, invert k and j. We assume here that the daughter cells are not ordered and so that the arrays are symmetric before being truncated (the triangle below the diagonal is removed)." +
+                    "This renumbering is equivalent to flattening this truncated array by rows." +
                     "Note that all vectors in this list must have elements which sum up to 1.",
             new ArrayList<RealParameter>(), Input.Validate.REQUIRED);
 
@@ -52,14 +53,21 @@ public class  LineageTreeProb extends Distribution {
             "Probability of losing any given cell",
             Input.Validate.REQUIRED);
 
+    //TODO remove if below works
     public Input<BooleanParameter> rootIsHSCInput = new Input<>("rootIsHSC",
-            "True if root is an HSC cell, false otherwise.",
-            Input.Validate.REQUIRED);
+            "True if root is an HSC cell, false otherwise.");
+
+    public Input<IntegerParameter> rootTypeInput = new Input<>("rootType", "Each number corresponds to the type of the root cell.");
 
     public Input<Integer> rootIsHSCidxInput = new Input<>("rootIsHSCidx",
             "If provided, this is an index into the rootIsHSC boolean " +
                     "parameter specifying which element corresponds to the root " +
                     "HSC status.");
+
+    public Input<Integer> rootTypeIdxInput = new Input<>("rootTypeIdx",
+            "If provided, this is an index into the rootType inetger " +
+                    "parameter specifying which element corresponds to the root " +
+                    "type.");
 
     public Input<BooleanParameter> matrixOfAllowedTransitionsInput = new Input<> ("allowedTransitions",
             "Flattened matrix of allowed transitions between cell types. " +
@@ -193,8 +201,8 @@ public class  LineageTreeProb extends Distribution {
         numberOfTypes = fateProbabilitiesInput.get().size();
 
         //TODO remove when tested with more than 2 types.
-        if(numberOfTypes != 2)
-            throw new IllegalStateException("Number of types is not two. Such a configuration is not tested yet.");
+//        if(numberOfTypes != 2)
+//            throw new IllegalStateException("Number of types is not two. Such a configuration is not tested yet.");
 
         if(shapeWeibullInput.get().size() != numberOfTypes || scaleWeibullInput.get().size() != numberOfTypes)
             throw new IllegalStateException("Inputs fateProbabilities, shapeWeibull and scaleWeibull should have the same number of elements: the number of cell types.");
@@ -232,13 +240,25 @@ public class  LineageTreeProb extends Distribution {
     public double calculateLogP() {
         logP = 0.0;
 
-        if (rootIsHSCidxInput.get() != null)
-            rootIsHSC = rootIsHSCInput.get().getValue(rootIsHSCidxInput.get());
-        else
-            rootIsHSC = rootIsHSCInput.get().getValue();
+        int rootNodeType = 0;
 
-        //TODO rework on this when adding more types
-        int rootNodeType = rootIsHSC? 0 : 1;
+        //TODO remove rootIsHSCidx when multitype is properly implemented
+        if (rootIsHSCInput.get() != null) {
+            if (rootIsHSCidxInput.get() != null)
+                rootIsHSC = rootIsHSCInput.get().getValue(rootIsHSCidxInput.get());
+            else
+                rootIsHSC = rootIsHSCInput.get().getValue();
+
+            rootNodeType = rootIsHSC? 0 : 1;
+        }
+
+
+        if (rootTypeInput.get() != null) {
+            if (rootTypeIdxInput.get() != null)
+                rootNodeType = rootTypeInput.get().getValue(rootTypeIdxInput.get());
+            else
+                rootNodeType = rootTypeInput.get().getValue();
+        }
 
         //for now prior is that frequency is equal for all types TODO allow for more flexibility
         try {
@@ -366,7 +386,7 @@ public class  LineageTreeProb extends Distribution {
 
                 int cellFate = node.getFate() == Cell.Fate.D ? 0 : 1; // get the index of the cellFate of the cell (0 for dividers, 1 for apoptosers)
 
-                if(node == tree.getRoot()) { //TODO check that this check works as intended
+                if(node.isRoot()) {
                     // if cell is root cell, take its observed lifetime as the minimal bound of its real lifetime
                     branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getArrayValue(cellFate)
                             * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate), shapeWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate)));
@@ -432,6 +452,7 @@ public class  LineageTreeProb extends Distribution {
 
                 }
                 else if (node.getFate() == Cell.Fate.N) { //TODO potentially remove this fate (and have only unobserved instead)
+                    //TODO remove this fate
 
                     DensityProbTransitionBeforeEndAndDivisionDeathAfter f = new DensityProbTransitionBeforeEndAndDivisionDeathAfter(
                             node.getEdgeLength(),
@@ -665,45 +686,49 @@ public class  LineageTreeProb extends Distribution {
         List<RealParameter> fateProbabilities = new ArrayList<>();
         fateProbabilities.add(new RealParameter("1.0 0. 0."));
         fateProbabilities.add(new RealParameter("1.0 0. 0."));
+        fateProbabilities.add(new RealParameter("1.0 0. 0."));
 
         List<RealParameter> scaleWeibull = new ArrayList<>();
+        scaleWeibull.add(new RealParameter("10 10"));
         scaleWeibull.add(new RealParameter("10 10"));
         scaleWeibull.add(new RealParameter("10 10"));
 
         List<RealParameter> shapeWeibull = new ArrayList<>();
         shapeWeibull.add(new RealParameter("1 1"));
         shapeWeibull.add(new RealParameter("1 1"));
+        shapeWeibull.add(new RealParameter("1 1"));
 
         List<RealParameter> transitionUponDivisionProbs = new ArrayList<>();
-        transitionUponDivisionProbs.add(new RealParameter("0.3 0.3 0.4"));
-        transitionUponDivisionProbs.add(new RealParameter("0 0 1.0"));
+        transitionUponDivisionProbs.add(new RealParameter("0.3 0.1 0.1 0.15 0.15 0.2"));
+        transitionUponDivisionProbs.add(new RealParameter("0 0 0 1.0 0 0 "));
+        transitionUponDivisionProbs.add(new RealParameter("0 0 0 0 0 1.0 "));
 
-        RealParameter meanNormalAreaGrowthRateInput = new RealParameter("20.0 20.0");
-        RealParameter sdNormalAreaGrowthRateInput = new RealParameter("20.0 20.0");
+        RealParameter meanNormalAreaGrowthRateInput = new RealParameter("20.0 20.0 20.0");
+        RealParameter sdNormalAreaGrowthRateInput = new RealParameter("20.0 20.0 20.0");
 
-        RealParameter meanNormalEccentricityInput = new RealParameter("0.5 .5");
-        RealParameter sdNormalEccentricityInput = new RealParameter("0.3 0.3");
+        RealParameter meanNormalEccentricityInput = new RealParameter("0.5 .5 .5");
+        RealParameter sdNormalEccentricityInput = new RealParameter("0.3 0.3 .3");
 
-        RealParameter meanNormalInstantSpeedInput = new RealParameter("10. 10.");
-        RealParameter sdNormalInstantSpeedInput = new RealParameter("10.0 10.0");
+        RealParameter meanNormalInstantSpeedInput = new RealParameter("10. 10. 10.");
+        RealParameter sdNormalInstantSpeedInput = new RealParameter("10.0 10.0 10.");
 
-        RealParameter meanNormalTMRMProductionRateInput = new RealParameter("5.0 5.0");
-        RealParameter sdNormalTMRMProductionRateInput = new RealParameter("2.0 2.0");
+        RealParameter meanNormalTMRMProductionRateInput = new RealParameter("5.0 5.0 5.0");
+        RealParameter sdNormalTMRMProductionRateInput = new RealParameter("2.0 2.0 2.0");
 
-        RealParameter meanNormalTMRMMaxRateInput = new RealParameter("20.0 20.0");
-        RealParameter sdNormalTMRMMaxRateInput = new RealParameter("40.0 40.0");
+        RealParameter meanNormalTMRMMaxRateInput = new RealParameter("20.0 20.0 20.0");
+        RealParameter sdNormalTMRMMaxRateInput = new RealParameter("40.0 40.0 40.0");
 
-        RealParameter meanNormalROSProductionRateInput = new RealParameter("1.0 1.0");
-        RealParameter sdNormalROSProductionRateInput = new RealParameter("2.0 2.0");
+        RealParameter meanNormalROSProductionRateInput = new RealParameter("1.0 1.0 1.0");
+        RealParameter sdNormalROSProductionRateInput = new RealParameter("2.0 2.0 2.0");
 
-        RealParameter meanNormalCD71APCProductionRateInput = new RealParameter("5.0 5.0");
-        RealParameter sdNormalCD71APCProductionRateInput = new RealParameter("2.0 2.0");
+        RealParameter meanNormalCD71APCProductionRateInput = new RealParameter("5.0 5.0 5.0");
+        RealParameter sdNormalCD71APCProductionRateInput = new RealParameter("2.0 2.0 2.0");
 
-        RealParameter meanNormalCD71PEProductionRateInput = new RealParameter("5.0 5.0");
-        RealParameter sdNormalCD71PEProductionRateInput = new RealParameter("10.0 10.0");
+        RealParameter meanNormalCD71PEProductionRateInput = new RealParameter("5.0 5.0 5.0");
+        RealParameter sdNormalCD71PEProductionRateInput = new RealParameter("10.0 10.0 10.0");
 
-        RealParameter meanNormalcMycGFPMaxRateInput = new RealParameter("1.0 1.0");
-        RealParameter sdNormalcMycGFPMaxRateInput = new RealParameter("10.0 10.0");
+        RealParameter meanNormalcMycGFPMaxRateInput = new RealParameter("1.0 1.0 1.0");
+        RealParameter sdNormalcMycGFPMaxRateInput = new RealParameter("10.0 10.0 10.0");
 
 //        RealParameter meanNormalPerimeterGrowthRateInput = new RealParameter("0. 1.");
 //        RealParameter sdNormalPerimeterGrowthRateInput = new RealParameter("5.0 10.0");
@@ -713,7 +738,9 @@ public class  LineageTreeProb extends Distribution {
         probTree.setInputValue("scaleWeibull",scaleWeibull);
         probTree.setInputValue("shapeWeibull",shapeWeibull);
         probTree.setInputValue("lossProb", new RealParameter("0."));
-        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
+
+//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
+        probTree.setInputValue("rootType", new IntegerParameter("2"));
 
         probTree.setInputValue("meanAreaGrowthRate", meanNormalAreaGrowthRateInput);
         probTree.setInputValue("sdAreaGrowthRate", sdNormalAreaGrowthRateInput);
