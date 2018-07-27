@@ -87,6 +87,7 @@ public class ExperimentalMeasure {
                     res = Double.NaN;
                     break;
                 }
+                res = Double.NEGATIVE_INFINITY;
                 for (int i = 1; i <= lastIndex; i++) {
                     instantRate = (dataPoints.get(i) - dataPoints.get(i-1))/(timePoints.get(i) - timePoints.get(i-1));
                     if(instantRate > res)

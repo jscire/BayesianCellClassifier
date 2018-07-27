@@ -11,7 +11,7 @@ import beast.evolution.tree.Node;
 import generalclassifier.lineagetree.Cell;
 import generalclassifier.lineagetree.LineageTree;
 import generalclassifier.lineagetree.MeasureType;
-import generalclassifier.utils.InputPair;
+import generalclassifier.utils.InputGroup;
 import generalclassifier.utils.Utils;
 
 import org.apache.commons.math3.analysis.UnivariateFunction;
@@ -131,26 +131,77 @@ public class  LineageTreeProb extends Distribution {
     public Input<RealParameter> sdLogNormalcMycGFPMaxRateInput = new Input<>("sdcMycGFPMaxRate",
             "");
 
+    public Input<RealParameter> zeroFractionAreaGrowthRateInput = new Input<>("zeroFractionAreaGrowthRate", "");
 
-    Map<InputPair, MeasureType> mapMeasureTypeToInput = createMapOfMeasureInputs();
+    public Input<RealParameter> zeroFractionPerimeterGrowthRateInput = new Input<>("zeroFractionPerimeterGrowthRate", "");
 
-    private Map<InputPair, MeasureType> createMapOfMeasureInputs(){
-        Map<InputPair, MeasureType> result = new HashMap<>();
+    public Input<RealParameter> zeroFractionInstantSpeedInput = new Input<>("zeroFractionInstantSpeed", "");
 
-        InputPair areaGrowthRateInput = new InputPair(meanLogNormalAreaGrowthRateInput, sdLogNormalAreaGrowthRateInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair perimeterGrowthRateInput = new InputPair(meanLogNormalPerimeterGrowthRateInput, sdLogNormalPerimeterGrowthRateInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair eccentricityInput = new InputPair(meanNormalEccentricityInput, sdNormalEccentricityInput, InputPair.DistributionType.NORMAL);
-        InputPair instantSpeedInput = new InputPair(meanLogNormalInstantSpeedInput, sdLogNormalInstantSpeedInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair CD41ProductionRateInput = new InputPair(meanLogNormalCD41ProductionRateInput, sdLogNormalCD41ProductionRateInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair FcgRIIIProductionRateInput = new InputPair(meanLogNormalFcgRIIIProductionRateInput, sdLogNormalFcgRIIIProductionRateInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair ROSProductionRateInput = new InputPair(meanLogNormalROSProductionRateInput, sdLogNormalROSProductionRateInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair TMRMProductionRateInput = new InputPair(meanLogNormalTMRMProductionRateInput, sdLogNormalTMRMProductionRateInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair TMRMMaxRateInput = new InputPair(meanLogNormalTMRMMaxRateInput, sdLogNormalTMRMMaxRateInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair Sca1ProductionRateInput = new InputPair(meanLogNormalSca1ProductionRateInput, sdLogNormalSca1ProductionRateInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair Ig2afcProductionRateInput = new InputPair(meanLogNormalIg2afcProductionRateInput, sdLogNormalIg2afcProductionRateInput, InputPair.DistributionType.LOGNORMAL);
-        InputPair CD71APCProductionRateInput = new InputPair(meanLogNormalCD71APCProductionRateInput, sdLogNormalCD71APCProductionRateInput,InputPair.DistributionType.LOGNORMAL);
-        InputPair CD71PEProductionRateInput = new InputPair(meanLogNormalCD71PEProductionRateInput, sdLogNormalCD71PEProductionRateInput,InputPair.DistributionType.LOGNORMAL);
-        InputPair cMycGFPMaxRateInput = new InputPair(meanLogNormalcMycGFPMaxRateInput, sdLogNormalcMycGFPMaxRateInput,InputPair.DistributionType.LOGNORMAL);
+    public Input<RealParameter> zeroFractionCD41ProductionRateInput = new Input<>("zeroFractionCD41ProductionRate", "");
+
+    public Input<RealParameter> zeroFractionFcgRIIIProductionRateInput = new Input<>("zeroFractionFcgRIIIProductionRate", "");
+
+    public Input<RealParameter> zeroFractionTMRMProductionRateInput = new Input<>("zeroFractionTMRMProductionRate", "");
+
+    public Input<RealParameter> zeroFractionTMRMMaxRateInput = new Input<>("zeroFractionTMRMMaxRate", "");
+
+    public Input<RealParameter> zeroFractionROSProductionRateInput = new Input<>("zeroFractionROSProductionRate", "");
+
+    public Input<RealParameter> zeroFractionSca1ProductionRateInput = new Input<>("zeroFractionSca1ProductionRate", "");
+
+    public Input<RealParameter> zeroFractionIg2afcProductionRateInput = new Input<>("zeroFractionIg2afcProductionRate", "");
+
+    public Input<RealParameter> zeroFractionCD71APCProductionRateInput = new Input<>("zeroFractionCD71APCProductionRate", "");
+
+    public Input<RealParameter> zeroFractionCD71PEProductionRateInput = new Input<>("zeroFractionCD71PEProductionRate", "");
+
+    public Input<RealParameter> zeroFractioncMycGFPMaxRateInput = new Input<>("zeroFractioncMycGFPMaxRate", "");
+
+    Map<InputGroup, MeasureType> mapMeasureTypeToInput = createMapOfMeasureInputs();
+
+    private Map<InputGroup, MeasureType> createMapOfMeasureInputs(){
+        Map<InputGroup, MeasureType> result = new HashMap<>();
+
+        InputGroup areaGrowthRateInput = new InputGroup(meanLogNormalAreaGrowthRateInput, sdLogNormalAreaGrowthRateInput, zeroFractionAreaGrowthRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup perimeterGrowthRateInput = new InputGroup(meanLogNormalPerimeterGrowthRateInput, sdLogNormalPerimeterGrowthRateInput, zeroFractionPerimeterGrowthRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup eccentricityInput = new InputGroup(meanNormalEccentricityInput, sdNormalEccentricityInput, InputGroup.DistributionType.NORMAL);
+
+        InputGroup instantSpeedInput = new InputGroup(meanLogNormalInstantSpeedInput, sdLogNormalInstantSpeedInput, zeroFractionInstantSpeedInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup CD41ProductionRateInput = new InputGroup(meanLogNormalCD41ProductionRateInput, sdLogNormalCD41ProductionRateInput, zeroFractionCD41ProductionRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup FcgRIIIProductionRateInput = new InputGroup(meanLogNormalFcgRIIIProductionRateInput, sdLogNormalFcgRIIIProductionRateInput, zeroFractionFcgRIIIProductionRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup ROSProductionRateInput = new InputGroup(meanLogNormalROSProductionRateInput, sdLogNormalROSProductionRateInput, zeroFractionROSProductionRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup TMRMProductionRateInput = new InputGroup(meanLogNormalTMRMProductionRateInput, sdLogNormalTMRMProductionRateInput, zeroFractionTMRMProductionRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup TMRMMaxRateInput = new InputGroup(meanLogNormalTMRMMaxRateInput, sdLogNormalTMRMMaxRateInput, zeroFractionTMRMMaxRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup Sca1ProductionRateInput = new InputGroup(meanLogNormalSca1ProductionRateInput, sdLogNormalSca1ProductionRateInput, zeroFractionSca1ProductionRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup Ig2afcProductionRateInput = new InputGroup(meanLogNormalIg2afcProductionRateInput, sdLogNormalIg2afcProductionRateInput, zeroFractionIg2afcProductionRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup CD71APCProductionRateInput = new InputGroup(meanLogNormalCD71APCProductionRateInput, sdLogNormalCD71APCProductionRateInput, zeroFractionCD71APCProductionRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup CD71PEProductionRateInput = new InputGroup(meanLogNormalCD71PEProductionRateInput, sdLogNormalCD71PEProductionRateInput, zeroFractionCD71PEProductionRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup cMycGFPMaxRateInput = new InputGroup(meanLogNormalcMycGFPMaxRateInput, sdLogNormalcMycGFPMaxRateInput, zeroFractioncMycGFPMaxRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
         
 
         result.put(areaGrowthRateInput, MeasureType.Area);
@@ -498,7 +549,7 @@ public class  LineageTreeProb extends Distribution {
             return 0;
         }
 
-        for (InputPair input : mapMeasureTypeToInput.keySet()) {
+        for (InputGroup input : mapMeasureTypeToInput.keySet()) {
             MeasureType measureType = mapMeasureTypeToInput.get(input);
 
             // if input is provided by user and the cell actually contains info about the measure
@@ -506,13 +557,23 @@ public class  LineageTreeProb extends Distribution {
                 double x = node.getSummaryValue(mapMeasureTypeToInput.get(input));
                 if(Double.isNaN(x)) continue; // skip this measure if there is no summary value
 
-                if(input.getDistributionType() == InputPair.DistributionType.NORMAL)
+                if(input.getDistributionType() == InputGroup.DistributionType.NORMAL)
                     branchProb *= Utils.getNormalDensity(x, input.getMean().get().getArrayValue(typeEndBranch), input.getStandardDev().get().getArrayValue(typeEndBranch));
-                else if (input.getDistributionType() == InputPair.DistributionType.LOGNORMAL)
-                    branchProb *= Utils.getLogNormalDensity(x, input.getMean().get().getArrayValue(typeEndBranch), input.getStandardDev().get().getArrayValue(typeEndBranch));
+                else if (input.getDistributionType() == InputGroup.DistributionType.LOGNORMAL) {
+                    if (input.getZeroFraction() != null) {
+                        if (input.getZeroFraction().get() == null)
+                            throw new IllegalStateException("The probability of having a zero value for this measure is missing, It should be given using a zeroFraction input.");
+
+                        if (x == 0) // observed value is zero
+                            branchProb *= input.getZeroFraction().get().getArrayValue(typeEndBranch);
+                        else
+                            branchProb *= (1-input.getZeroFraction().get().getArrayValue(typeEndBranch)) * Utils.getLogNormalDensity(x, input.getMean().get().getArrayValue(typeEndBranch), input.getStandardDev().get().getArrayValue(typeEndBranch));
+                    }
+                    else
+                        branchProb *= Utils.getLogNormalDensity(x, input.getMean().get().getArrayValue(typeEndBranch), input.getStandardDev().get().getArrayValue(typeEndBranch));
+                }
                 else
                     throw new IllegalArgumentException("Distribution type is not implemented yet.");
-
             }
         }
         return branchProb;
@@ -709,32 +770,42 @@ public class  LineageTreeProb extends Distribution {
         transitionUponDivisionProbs.add(new RealParameter("0 0 0 1.0 0 0 "));
         transitionUponDivisionProbs.add(new RealParameter("0 0 0 0 0 1.0 "));
 
-        RealParameter meanNormalAreaGrowthRateInput = new RealParameter("20.0 20.0 20.0");
-        RealParameter sdNormalAreaGrowthRateInput = new RealParameter("20.0 20.0 20.0");
+
+        RealParameter meanLogNormalAreaGrowthRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter sdLogNormalAreaGrowthRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter zeroFractionAreaGrowthRateInput = new RealParameter("0.1 0.1 0.1");
 
         RealParameter meanNormalEccentricityInput = new RealParameter("0.5 .5 .5");
         RealParameter sdNormalEccentricityInput = new RealParameter("0.3 0.3 .3");
 
-        RealParameter meanNormalInstantSpeedInput = new RealParameter("10. 10. 10.");
-        RealParameter sdNormalInstantSpeedInput = new RealParameter("10.0 10.0 10.");
+        RealParameter meanLogNormalInstantSpeedInput = new RealParameter("1. 1. 1.");
+        RealParameter sdLogNormalInstantSpeedInput = new RealParameter("1.0 1.0 1.");
+        RealParameter zeroFractionInstantSpeedInput = new RealParameter("0.1 0.1 0.1");
 
-        RealParameter meanNormalTMRMProductionRateInput = new RealParameter("5.0 5.0 5.0");
-        RealParameter sdNormalTMRMProductionRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter meanLogNormalTMRMProductionRateInput = new RealParameter("3.0 3.0 3.0");
+        RealParameter sdLogNormalTMRMProductionRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter zeroFractionTMRMProductionRateInput = new RealParameter("0.1 0.1 0.1");
 
-        RealParameter meanNormalTMRMMaxRateInput = new RealParameter("20.0 20.0 20.0");
-        RealParameter sdNormalTMRMMaxRateInput = new RealParameter("40.0 40.0 40.0");
+        RealParameter meanLogNormalTMRMMaxRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter sdLogNormalTMRMMaxRateInput = new RealParameter("1.0 1.0 1.0");
+        RealParameter zeroFractionTMRMMaxRateInput = new RealParameter("0.1 0.1 0.1");
 
-        RealParameter meanNormalROSProductionRateInput = new RealParameter("1.0 1.0 1.0");
-        RealParameter sdNormalROSProductionRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter meanLogNormalROSProductionRateInput = new RealParameter("1.0 1.0 1.0");
+        RealParameter sdLogNormalROSProductionRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter zeroFractionROSProductionRateInput = new RealParameter("0.1 0.1 0.1");
 
-        RealParameter meanNormalCD71APCProductionRateInput = new RealParameter("5.0 5.0 5.0");
-        RealParameter sdNormalCD71APCProductionRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter meanLogNormalCD71APCProductionRateInput = new RealParameter("5.0 5.0 5.0");
+        RealParameter sdLogNormalCD71APCProductionRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter zeroFractionCD71APCProductionRateInput = new RealParameter("0.1 0.1 0.1");
 
-        RealParameter meanNormalCD71PEProductionRateInput = new RealParameter("5.0 5.0 5.0");
-        RealParameter sdNormalCD71PEProductionRateInput = new RealParameter("10.0 10.0 10.0");
+        RealParameter meanLogNormalCD71PEProductionRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter sdLogNormalCD71PEProductionRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter zeroFractionCD71PEProductionRateInput = new RealParameter("0.1 0.1 0.1");
 
-        RealParameter meanNormalcMycGFPMaxRateInput = new RealParameter("1.0 1.0 1.0");
-        RealParameter sdNormalcMycGFPMaxRateInput = new RealParameter("10.0 10.0 10.0");
+        RealParameter meanLogNormalcMycGFPMaxRateInput = new RealParameter("1.0 1.0 1.0");
+        RealParameter sdLogNormalcMycGFPMaxRateInput = new RealParameter("2.0 2.0 2.0");
+        RealParameter zeroFractioncMycGFPMaxRateInput = new RealParameter("0.1 0.1 0.1");
+
 
 //        RealParameter meanNormalPerimeterGrowthRateInput = new RealParameter("0. 1.");
 //        RealParameter sdNormalPerimeterGrowthRateInput = new RealParameter("5.0 10.0");
@@ -748,34 +819,40 @@ public class  LineageTreeProb extends Distribution {
 //        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
         probTree.setInputValue("rootType", new IntegerParameter("2"));
 
-        probTree.setInputValue("meanAreaGrowthRate", meanNormalAreaGrowthRateInput);
-        probTree.setInputValue("sdAreaGrowthRate", sdNormalAreaGrowthRateInput);
+        probTree.setInputValue("meanAreaGrowthRate", meanLogNormalAreaGrowthRateInput);
+        probTree.setInputValue("sdAreaGrowthRate", sdLogNormalAreaGrowthRateInput);
+        probTree.setInputValue("zeroFractionAreaGrowthRate", zeroFractionAreaGrowthRateInput);
 
         probTree.setInputValue("meanEccentricity", meanNormalEccentricityInput);
         probTree.setInputValue("sdEccentricity", sdNormalEccentricityInput);
 
-        probTree.setInputValue("meanInstantSpeed", meanNormalInstantSpeedInput);
-        probTree.setInputValue("sdInstantSpeed", sdNormalInstantSpeedInput);
+        probTree.setInputValue("meanInstantSpeed", meanLogNormalInstantSpeedInput);
+        probTree.setInputValue("sdInstantSpeed", sdLogNormalInstantSpeedInput);
+        probTree.setInputValue("zeroFractionInstantSpeed", zeroFractionInstantSpeedInput);
 
-        probTree.setInputValue("meanTMRMProductionRate", meanNormalTMRMProductionRateInput);
-        probTree.setInputValue("sdTMRMProductionRate", sdNormalTMRMProductionRateInput);
+        probTree.setInputValue("meanTMRMProductionRate", meanLogNormalTMRMProductionRateInput);
+        probTree.setInputValue("sdTMRMProductionRate", sdLogNormalTMRMProductionRateInput);
+        probTree.setInputValue("zeroFractionTMRMProductionRate", zeroFractionROSProductionRateInput);
 
+        probTree.setInputValue("meanTMRMMaxRate", meanLogNormalTMRMMaxRateInput);
+        probTree.setInputValue("sdTMRMMaxRate", sdLogNormalTMRMMaxRateInput);
+        probTree.setInputValue("zeroFractionTMRMMaxRate", zeroFractionTMRMMaxRateInput);
 
-        probTree.setInputValue("meanTMRMMaxRate", meanNormalTMRMMaxRateInput);
-        probTree.setInputValue("sdTMRMMaxRate", sdNormalTMRMMaxRateInput);
+        probTree.setInputValue("meanROSProductionRate", meanLogNormalROSProductionRateInput);
+        probTree.setInputValue("sdROSProductionRate", sdLogNormalROSProductionRateInput);
+        probTree.setInputValue("zeroFractionROSProductionRate", zeroFractionROSProductionRateInput);
 
+        probTree.setInputValue("meanCD71APCProductionRate", meanLogNormalCD71APCProductionRateInput);
+        probTree.setInputValue("sdCD71APCProductionRate", sdLogNormalCD71APCProductionRateInput);
+        probTree.setInputValue("zeroFractionCD71APCProductionRate", zeroFractionCD71APCProductionRateInput);
 
-        probTree.setInputValue("meanROSProductionRate", meanNormalROSProductionRateInput);
-        probTree.setInputValue("sdROSProductionRate", sdNormalROSProductionRateInput);
+        probTree.setInputValue("meanCD71PEProductionRate", meanLogNormalCD71PEProductionRateInput);
+        probTree.setInputValue("sdCD71PEProductionRate", sdLogNormalCD71PEProductionRateInput);
+        probTree.setInputValue("zeroFractionCD71PEProductionRate", zeroFractionCD71PEProductionRateInput);
 
-        probTree.setInputValue("meanCD71APCProductionRate", meanNormalCD71APCProductionRateInput);
-        probTree.setInputValue("sdCD71APCProductionRate", sdNormalCD71APCProductionRateInput);
-
-        probTree.setInputValue("meanCD71PEProductionRate", meanNormalCD71PEProductionRateInput);
-        probTree.setInputValue("sdCD71PEProductionRate", sdNormalCD71PEProductionRateInput);
-
-        probTree.setInputValue("meancMycGFPMaxRate", meanNormalcMycGFPMaxRateInput);
-        probTree.setInputValue("sdcMycGFPMaxRate", sdNormalcMycGFPMaxRateInput);
+        probTree.setInputValue("meancMycGFPMaxRate", meanLogNormalcMycGFPMaxRateInput);
+        probTree.setInputValue("sdcMycGFPMaxRate", sdLogNormalcMycGFPMaxRateInput);
+        probTree.setInputValue("zeroFractioncMycGFPMaxRate", zeroFractioncMycGFPMaxRateInput);
 
 //        probTree.setInputValue("",);
 //        probTree.setInputValue("",);

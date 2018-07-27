@@ -106,7 +106,10 @@ public class Utils {
     }
 
     public static double getLogNormalDensity(double x, double mu, double sigma) {
-        return 1.0/ (x * sigma * Math.sqrt(2*Math.PI)) * Math.exp(-(Math.log(x) - mu)*(Math.log(x)-mu)/(2*sigma*sigma));
+        if(x == 0)
+            return 0;
+        else
+            return 1.0/ (x * sigma * Math.sqrt(2*Math.PI)) * Math.exp(-(Math.log(x) - mu)*(Math.log(x)-mu)/(2*sigma*sigma));
     }
 
 
@@ -118,14 +121,14 @@ public class Utils {
         return - 1.0/2 * Math.log(2*Math.PI*sigma*sigma) - (x - mu)*(x-mu)/(2*sigma*sigma);
     }
 
-    public static double getNormalLogDensityForTypeAndInput(double x, int nodeType, InputPair input) {
+    public static double getNormalLogDensityForTypeAndInput(double x, int nodeType, InputGroup input) {
         double mu = input.getMean().get().getArrayValue(nodeType);
         double sigma = input.getStandardDev().get().getArrayValue(nodeType);
 
         return getNormalLogDensity(x, mu, sigma);
     }
 
-    public static double getTruncatedNormalDensity(double x, int nodeType, InputPair input, MeasureType measureType) {
+    public static double getTruncatedNormalDensity(double x, int nodeType, InputGroup input, MeasureType measureType) {
 
         NormalDistribution dist = new NormalDistributionImpl(input.getMean().get().getArrayValue(nodeType),
                                                             input.getStandardDev().get().getArrayValue(nodeType));
