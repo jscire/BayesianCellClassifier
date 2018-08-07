@@ -3,6 +3,7 @@ package generalclassifier.utils;
 import generalclassifier.lineagetree.MeasureType;
 import org.apache.commons.math.distribution.NormalDistribution;
 import org.apache.commons.math.distribution.NormalDistributionImpl;
+import org.apache.commons.math.special.Gamma;
 
 public class Utils {
 
@@ -110,6 +111,13 @@ public class Utils {
             return 0;
         else
             return 1.0/ (x * sigma * Math.sqrt(2*Math.PI)) * Math.exp(-(Math.log(x) - mu)*(Math.log(x)-mu)/(2*sigma*sigma));
+    }
+
+    public static double getGammaDensity(double x, double alpha, double beta) {
+        if (x < 0 || alpha <= 0 || beta <= 0)
+            return 0;
+        else
+            return Math.pow(x * beta, alpha - 1) * beta * Math.exp(-x * beta) / Math.exp(Gamma.logGamma(alpha));
     }
 
 

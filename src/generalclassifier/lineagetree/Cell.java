@@ -247,28 +247,31 @@ public class Cell extends Node {
             }
         }
 
+
         // assuming no duplicates here (only one measure each for xPos and yPos)
         if (inputForSpeedCalculation == 2) {
-            this.setInstantSpeedAndSummarize(xPos, yPos);
+            for(ExperimentalMeasure measure: measures) {
+                if(measure.measureType == MeasureType.InstantSpeed) {
+                    this.setInstantSpeedAndSummarize(xPos, yPos, measure);
+                    break;
+                }
+            }
         }
     }
 
     /**
      * Note: If only one timePoint, no speed is calculated.
      */
-    void setInstantSpeedAndSummarize(ExperimentalMeasure xPos, ExperimentalMeasure yPos) {
+    void setInstantSpeedAndSummarize(ExperimentalMeasure xPos, ExperimentalMeasure yPos, ExperimentalMeasure instantSpeed) {
         if((timePoints.size() != xPos.dataPoints.size()) || (yPos.dataPoints.size() != timePoints.size()))
-            throw new IllegalArgumentException("All three inputs should be of the same size.");
-
-
-        ExperimentalMeasure instantSpeed = new ExperimentalMeasure(MeasureType.InstantSpeed, ExperimentalMeasure.CalculationMethod.averageInstantSpeed);
+            throw new IllegalArgumentException("All inputs should be of the same size.");
 
         double dist;
         double time;
 
         double sumOfSpeeds = 0;
 
-        if(timePoints.size() < 1)  {
+        if(timePoints.size() < 2)  {
             instantSpeed.dataPoints.add(Double.NaN);
             return;
         }
@@ -284,8 +287,6 @@ public class Cell extends Node {
         }
 
         instantSpeed.summaryValue = sumOfSpeeds/(timePoints.size() -1);
-
-        this.measures.add(instantSpeed);
     }
 
 

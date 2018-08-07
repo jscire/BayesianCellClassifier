@@ -33,6 +33,7 @@ public class LineageTree extends Tree {
         Map<Integer, Cell> cells  = new HashMap<>();
         try {
             LineageTreeParser parser = new LineageTreeParser(experimentalMeasuresFileInput.get());
+
             cells = parser.parseRawCells();
         } catch (IOException e) {
             e.printStackTrace();

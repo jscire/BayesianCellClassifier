@@ -74,6 +74,9 @@ public enum MeasureType {
      * @return
      */
     boolean isMeasureInCSV(CSVParser parser){
+        if(this == InstantSpeed)
+            return (XPosition.isMeasureInCSV(parser) && YPosition.isMeasureInCSV(parser));
+
         for (String name : this.namesInInputFile) {
             if(parser.getHeaderMap().containsKey(name))
                 return true;
