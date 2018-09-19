@@ -110,9 +110,13 @@ public class  LineageTreeProb extends Distribution {
             "");
     public Input<RealParameter> sdLogNormalTMRMMaxRateInput = new Input<>("sdTMRMMaxRate",
             "");
-    public Input<RealParameter> meanLogNormalSca1ProductionRateInput = new Input<>("meanSca1ProductionRate",
+    public Input<RealParameter> meanLogNormalSca1MeanRateInput = new Input<>("meanSca1MeanRate",
             "");
-    public Input<RealParameter> sdLogNormalSca1ProductionRateInput = new Input<>("sdSca1ProductionRate",
+    public Input<RealParameter> sdLogNormalSca1MeanRateInput = new Input<>("sdSca1MeanRate",
+            "");
+    public Input<RealParameter> meanLogNormalSca1MeanValueInput = new Input<>("meanSca1MeanValue",
+            "");
+    public Input<RealParameter> sdLogNormalSca1MeanValueInput = new Input<>("sdSca1MeanValue",
             "");
     public Input<RealParameter> meanLogNormalIg2afcProductionRateInput = new Input<>("meanIg2afcProductionRate",
             "");
@@ -149,7 +153,9 @@ public class  LineageTreeProb extends Distribution {
 
     public Input<RealParameter> zeroFractionROSProductionRateInput = new Input<>("zeroFractionROSProductionRate", "");
 
-    public Input<RealParameter> zeroFractionSca1ProductionRateInput = new Input<>("zeroFractionSca1ProductionRate", "");
+    public Input<RealParameter> zeroFractionSca1MeanRateInput = new Input<>("zeroFractionSca1MeanRate", "");
+
+    public Input<RealParameter> zeroFractionSca1MeanValueInput = new Input<>("zeroFractionSca1MeanValue", "");
 
     public Input<RealParameter> zeroFractionIg2afcProductionRateInput = new Input<>("zeroFractionIg2afcProductionRate", "");
 
@@ -194,9 +200,13 @@ public class  LineageTreeProb extends Distribution {
             "");
     public Input<RealParameter> rateGammaTMRMMaxRateInput = new Input<>("rateTMRMMaxRate",
             "");
-    public Input<RealParameter> shapeGammaSca1ProductionRateInput = new Input<>("shapeSca1ProductionRate",
+    public Input<RealParameter> shapeGammaSca1MeanRateInput = new Input<>("shapeSca1MeanRate",
             "");
-    public Input<RealParameter> rateGammaSca1ProductionRateInput = new Input<>("rateSca1ProductionRate",
+    public Input<RealParameter> rateGammaSca1MeanRateInput = new Input<>("rateSca1MeanRate",
+            "");
+    public Input<RealParameter> shapeGammaSca1MeanValueInput = new Input<>("shapeSca1MeanValue",
+            "");
+    public Input<RealParameter> rateGammaSca1MeanValueInput = new Input<>("rateSca1MeanValue",
             "");
     public Input<RealParameter> shapeGammaIg2afcProductionRateInput = new Input<>("shapeIg2afcProductionRate",
             "");
@@ -247,7 +257,10 @@ public class  LineageTreeProb extends Distribution {
         InputGroup TMRMMaxRateLogNormInput = new InputGroup(meanLogNormalTMRMMaxRateInput, sdLogNormalTMRMMaxRateInput, zeroFractionTMRMMaxRateInput,
                 InputGroup.DistributionType.LOGNORMAL);
 
-        InputGroup Sca1ProductionRateLogNormInput = new InputGroup(meanLogNormalSca1ProductionRateInput, sdLogNormalSca1ProductionRateInput, zeroFractionSca1ProductionRateInput,
+        InputGroup Sca1MeanRateLogNormInput = new InputGroup(meanLogNormalSca1MeanRateInput, sdLogNormalSca1MeanRateInput, zeroFractionSca1MeanRateInput,
+                InputGroup.DistributionType.LOGNORMAL);
+
+        InputGroup Sca1MeanValueLogNormInput = new InputGroup(meanLogNormalSca1MeanValueInput, sdLogNormalSca1MeanValueInput, zeroFractionSca1MeanValueInput,
                 InputGroup.DistributionType.LOGNORMAL);
 
         InputGroup Ig2afcProductionRateLogNormInput = new InputGroup(meanLogNormalIg2afcProductionRateInput, sdLogNormalIg2afcProductionRateInput, zeroFractionIg2afcProductionRateInput,
@@ -286,7 +299,10 @@ public class  LineageTreeProb extends Distribution {
         InputGroup TMRMMaxRateGammaInput = new InputGroup(shapeGammaTMRMMaxRateInput, rateGammaTMRMMaxRateInput, zeroFractionTMRMMaxRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup Sca1ProductionRateGammaInput = new InputGroup(shapeGammaSca1ProductionRateInput, rateGammaSca1ProductionRateInput, zeroFractionSca1ProductionRateInput,
+        InputGroup Sca1MeanRateGammaInput = new InputGroup(shapeGammaSca1MeanRateInput, rateGammaSca1MeanRateInput, zeroFractionSca1MeanRateInput,
+                InputGroup.DistributionType.GAMMA);
+
+        InputGroup Sca1MeanValueGammaInput = new InputGroup(shapeGammaSca1MeanValueInput, rateGammaSca1MeanValueInput, zeroFractionSca1MeanValueInput,
                 InputGroup.DistributionType.GAMMA);
 
         InputGroup Ig2afcProductionRateGammaInput = new InputGroup(shapeGammaIg2afcProductionRateInput, rateGammaIg2afcProductionRateInput, zeroFractionIg2afcProductionRateInput,
@@ -311,7 +327,8 @@ public class  LineageTreeProb extends Distribution {
         result.put(ROSProductionRateLogNormInput, MeasureType.ROS);
         result.put(TMRMProductionRateLogNormInput, MeasureType.TMRMmean);
         result.put(TMRMMaxRateLogNormInput, MeasureType.TMRMmax);
-        result.put(Sca1ProductionRateLogNormInput, MeasureType.Sca1);
+        result.put(Sca1MeanRateLogNormInput, MeasureType.Sca1meanRate);
+        result.put(Sca1MeanValueLogNormInput, MeasureType.Sca1meanValue);
         result.put(Ig2afcProductionRateLogNormInput, MeasureType.Ig2afc);
         result.put(CD71APCProductionRateLogNormInput, MeasureType.CD71APC);
         result.put(CD71PEProductionRateLogNormInput, MeasureType.CD71PE);
@@ -325,7 +342,8 @@ public class  LineageTreeProb extends Distribution {
         result.put(ROSProductionRateGammaInput, MeasureType.ROS);
         result.put(TMRMProductionRateGammaInput, MeasureType.TMRMmean);
         result.put(TMRMMaxRateGammaInput, MeasureType.TMRMmax);
-        result.put(Sca1ProductionRateGammaInput, MeasureType.Sca1);
+        result.put(Sca1MeanRateGammaInput, MeasureType.Sca1meanRate);
+        result.put(Sca1MeanValueGammaInput, MeasureType.Sca1meanValue);
         result.put(Ig2afcProductionRateGammaInput, MeasureType.Ig2afc);
         result.put(CD71APCProductionRateGammaInput, MeasureType.CD71APC);
         result.put(CD71PEProductionRateGammaInput, MeasureType.CD71PE);
@@ -664,10 +682,6 @@ public class  LineageTreeProb extends Distribution {
 
         for (InputGroup input : mapMeasureTypeToInput.keySet()) {
             MeasureType measureType = mapMeasureTypeToInput.get(input);
-
-            //TODO remove, for debugging
-            if(measureType == MeasureType.InstantSpeed && input.getDistributionType() == InputGroup.DistributionType.GAMMA)
-                System.out.println("This is the instant speed");
 
             // if input is provided by user and the cell actually contains info about the measure
             if(input.getParm1().get() != null && node.hasMeasure(measureType)) {

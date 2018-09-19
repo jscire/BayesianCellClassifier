@@ -16,7 +16,8 @@ public class ExperimentalMeasure {
         result.put(MeasureType.Area, CalculationMethod.averageRate);
         result.put(MeasureType.Perimeter, CalculationMethod.averageRate);
         result.put(MeasureType.Ig2afc, CalculationMethod.averageRate);
-        result.put(MeasureType.Sca1, CalculationMethod.averageRate);
+        result.put(MeasureType.Sca1meanValue, CalculationMethod.averageValue);
+        result.put(MeasureType.Sca1meanRate, CalculationMethod.averageRate);
         result.put(MeasureType.CD41, CalculationMethod.averageRate);
         result.put(MeasureType.FcgRIII, CalculationMethod.averageRate);
         result.put(MeasureType.ROS, CalculationMethod.averageRate);
