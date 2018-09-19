@@ -113,11 +113,18 @@ public class Utils {
             return 1.0/ (x * sigma * Math.sqrt(2*Math.PI)) * Math.exp(-(Math.log(x) - mu)*(Math.log(x)-mu)/(2*sigma*sigma));
     }
 
-    public static double getGammaDensity(double x, double alpha, double beta) {
+    public static double getGammaDensityShapeRateParam(double x, double alpha, double beta) {
         if (x < 0 || alpha <= 0 || beta <= 0)
             return 0;
         else
             return Math.pow(x * beta, alpha - 1) * beta * Math.exp(-x * beta) / Math.exp(Gamma.logGamma(alpha));
+    }
+
+    public static double getGammaDensityShapeMeanParam(double x, double k, double mu) {
+        if (x < 0 || k <= 0 || mu <= 0)
+            return 0;
+        else
+            return Math.pow(x * mu/k, k - 1) * mu/k * Math.exp(-x * mu/k) / Math.exp(Gamma.logGamma(k));
     }
 
 

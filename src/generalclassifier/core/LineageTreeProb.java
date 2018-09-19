@@ -170,59 +170,59 @@ public class  LineageTreeProb extends Distribution {
 
     public Input<RealParameter> shapeGammaAreaGrowthRateInput = new Input<>("shapeAreaGrowthRate",
             "");
-    public Input<RealParameter> rateGammaAreaGrowthRateInput = new Input<>("rateAreaGrowthRate",
+    public Input<RealParameter> meanGammaAreaGrowthRateInput = new Input<>("rateAreaGrowthRate",
             "");
     public Input<RealParameter> shapeGammaPerimeterGrowthRateInput = new Input<>("shapePerimeterGrowthRate",
             "");
-    public Input<RealParameter> rateGammaPerimeterGrowthRateInput = new Input<>("ratePerimeterGrowthRate",
+    public Input<RealParameter> meanGammaPerimeterGrowthRateInput = new Input<>("ratePerimeterGrowthRate",
             "");
     public Input<RealParameter> shapeGammaInstantSpeedInput = new Input<>("shapeInstantSpeed",
             "");
-    public Input<RealParameter> rateGammaInstantSpeedInput = new Input<>("rateInstantSpeed",
+    public Input<RealParameter> meanGammaInstantSpeedInput = new Input<>("rateInstantSpeed",
             "");
     public Input<RealParameter> shapeGammaCD41ProductionRateInput = new Input<>("shapeCD41ProductionRate",
             "");
-    public Input<RealParameter> rateGammaCD41ProductionRateInput = new Input<>("rateCD41ProductionRate",
+    public Input<RealParameter> meanGammaCD41ProductionRateInput = new Input<>("rateCD41ProductionRate",
             "");
     public Input<RealParameter> shapeGammaFcgRIIIProductionRateInput = new Input<>("shapeFcgRIIIProductionRate",
             "");
-    public Input<RealParameter> rateGammaFcgRIIIProductionRateInput = new Input<>("rateFcgRIIIProductionRate",
+    public Input<RealParameter> meanGammaFcgRIIIProductionRateInput = new Input<>("rateFcgRIIIProductionRate",
             "");
     public Input<RealParameter> shapeGammaROSProductionRateInput = new Input<>("shapeROSProductionRate",
             "");
-    public Input<RealParameter> rateGammaROSProductionRateInput = new Input<>("rateROSProductionRate",
+    public Input<RealParameter> meanGammaROSProductionRateInput = new Input<>("rateROSProductionRate",
             "");
     public Input<RealParameter> shapeGammaTMRMProductionRateInput = new Input<>("shapeTMRMProductionRate",
             "");
-    public Input<RealParameter> rateGammaTMRMProductionRateInput = new Input<>("rateTMRMProductionRate",
+    public Input<RealParameter> meanGammaTMRMProductionRateInput = new Input<>("rateTMRMProductionRate",
             "");
     public Input<RealParameter> shapeGammaTMRMMaxRateInput = new Input<>("shapeTMRMMaxRate",
             "");
-    public Input<RealParameter> rateGammaTMRMMaxRateInput = new Input<>("rateTMRMMaxRate",
+    public Input<RealParameter> meanGammaTMRMMaxRateInput = new Input<>("rateTMRMMaxRate",
             "");
     public Input<RealParameter> shapeGammaSca1MeanRateInput = new Input<>("shapeSca1MeanRate",
             "");
-    public Input<RealParameter> rateGammaSca1MeanRateInput = new Input<>("rateSca1MeanRate",
+    public Input<RealParameter> meanGammaSca1MeanRateInput = new Input<>("rateSca1MeanRate",
             "");
     public Input<RealParameter> shapeGammaSca1MeanValueInput = new Input<>("shapeSca1MeanValue",
             "");
-    public Input<RealParameter> rateGammaSca1MeanValueInput = new Input<>("rateSca1MeanValue",
+    public Input<RealParameter> meanGammaSca1MeanValueInput = new Input<>("rateSca1MeanValue",
             "");
     public Input<RealParameter> shapeGammaIg2afcProductionRateInput = new Input<>("shapeIg2afcProductionRate",
             "");
-    public Input<RealParameter> rateGammaIg2afcProductionRateInput = new Input<>("rateIg2afcProductionRate",
+    public Input<RealParameter> meanGammaIg2afcProductionRateInput = new Input<>("rateIg2afcProductionRate",
             "");
     public Input<RealParameter> shapeGammaCD71APCProductionRateInput = new Input<>("shapeCD71APCProductionRate",
             "");
-    public Input<RealParameter> rateGammaCD71APCProductionRateInput = new Input<>("rateCD71APCProductionRate",
+    public Input<RealParameter> meanGammaCD71APCProductionRateInput = new Input<>("rateCD71APCProductionRate",
             "");
     public Input<RealParameter> shapeGammaCD71PEProductionRateInput = new Input<>("shapeCD71PEProductionRate",
             "");
-    public Input<RealParameter> rateGammaCD71PEProductionRateInput = new Input<>("rateCD71PEProductionRate",
+    public Input<RealParameter> meanGammaCD71PEProductionRateInput = new Input<>("rateCD71PEProductionRate",
             "");
     public Input<RealParameter> shapeGammacMycGFPMaxRateInput = new Input<>("shapecMycGFPMaxRate",
             "");
-    public Input<RealParameter> rateGammacMycGFPMaxRateInput = new Input<>("ratecMycGFPMaxRate",
+    public Input<RealParameter> meanGammacMycGFPMaxRateInput = new Input<>("ratecMycGFPMaxRate",
             "");
 
     Map<InputGroup, MeasureType> mapMeasureTypeToInput = createMapOfMeasureInputs();
@@ -275,46 +275,46 @@ public class  LineageTreeProb extends Distribution {
         InputGroup cMycGFPMaxRateLogNormInput = new InputGroup(meanLogNormalcMycGFPMaxRateInput, sdLogNormalcMycGFPMaxRateInput, zeroFractioncMycGFPMaxRateInput,
                 InputGroup.DistributionType.LOGNORMAL);
 
-        InputGroup areaGrowthRateGammaInput = new InputGroup(shapeGammaAreaGrowthRateInput, rateGammaAreaGrowthRateInput, zeroFractionAreaGrowthRateInput,
+        InputGroup areaGrowthRateGammaInput = new InputGroup(shapeGammaAreaGrowthRateInput, meanGammaAreaGrowthRateInput, zeroFractionAreaGrowthRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup perimeterGrowthRateGammaInput = new InputGroup(shapeGammaPerimeterGrowthRateInput, rateGammaPerimeterGrowthRateInput, zeroFractionPerimeterGrowthRateInput,
+        InputGroup perimeterGrowthRateGammaInput = new InputGroup(shapeGammaPerimeterGrowthRateInput, meanGammaPerimeterGrowthRateInput, zeroFractionPerimeterGrowthRateInput,
                 InputGroup.DistributionType.GAMMA);
         
-        InputGroup instantSpeedGammaInput = new InputGroup(shapeGammaInstantSpeedInput, rateGammaInstantSpeedInput, zeroFractionInstantSpeedInput,
+        InputGroup instantSpeedGammaInput = new InputGroup(shapeGammaInstantSpeedInput, meanGammaInstantSpeedInput, zeroFractionInstantSpeedInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup CD41ProductionRateGammaInput = new InputGroup(shapeGammaCD41ProductionRateInput, rateGammaCD41ProductionRateInput, zeroFractionCD41ProductionRateInput,
+        InputGroup CD41ProductionRateGammaInput = new InputGroup(shapeGammaCD41ProductionRateInput, meanGammaCD41ProductionRateInput, zeroFractionCD41ProductionRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup FcgRIIIProductionRateGammaInput = new InputGroup(shapeGammaFcgRIIIProductionRateInput, rateGammaFcgRIIIProductionRateInput, zeroFractionFcgRIIIProductionRateInput,
+        InputGroup FcgRIIIProductionRateGammaInput = new InputGroup(shapeGammaFcgRIIIProductionRateInput, meanGammaFcgRIIIProductionRateInput, zeroFractionFcgRIIIProductionRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup ROSProductionRateGammaInput = new InputGroup(shapeGammaROSProductionRateInput, rateGammaROSProductionRateInput, zeroFractionROSProductionRateInput,
+        InputGroup ROSProductionRateGammaInput = new InputGroup(shapeGammaROSProductionRateInput, meanGammaROSProductionRateInput, zeroFractionROSProductionRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup TMRMProductionRateGammaInput = new InputGroup(shapeGammaTMRMProductionRateInput, rateGammaTMRMProductionRateInput, zeroFractionTMRMProductionRateInput,
+        InputGroup TMRMProductionRateGammaInput = new InputGroup(shapeGammaTMRMProductionRateInput, meanGammaTMRMProductionRateInput, zeroFractionTMRMProductionRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup TMRMMaxRateGammaInput = new InputGroup(shapeGammaTMRMMaxRateInput, rateGammaTMRMMaxRateInput, zeroFractionTMRMMaxRateInput,
+        InputGroup TMRMMaxRateGammaInput = new InputGroup(shapeGammaTMRMMaxRateInput, meanGammaTMRMMaxRateInput, zeroFractionTMRMMaxRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup Sca1MeanRateGammaInput = new InputGroup(shapeGammaSca1MeanRateInput, rateGammaSca1MeanRateInput, zeroFractionSca1MeanRateInput,
+        InputGroup Sca1MeanRateGammaInput = new InputGroup(shapeGammaSca1MeanRateInput, meanGammaSca1MeanRateInput, zeroFractionSca1MeanRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup Sca1MeanValueGammaInput = new InputGroup(shapeGammaSca1MeanValueInput, rateGammaSca1MeanValueInput, zeroFractionSca1MeanValueInput,
+        InputGroup Sca1MeanValueGammaInput = new InputGroup(shapeGammaSca1MeanValueInput, meanGammaSca1MeanValueInput, zeroFractionSca1MeanValueInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup Ig2afcProductionRateGammaInput = new InputGroup(shapeGammaIg2afcProductionRateInput, rateGammaIg2afcProductionRateInput, zeroFractionIg2afcProductionRateInput,
+        InputGroup Ig2afcProductionRateGammaInput = new InputGroup(shapeGammaIg2afcProductionRateInput, meanGammaIg2afcProductionRateInput, zeroFractionIg2afcProductionRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup CD71APCProductionRateGammaInput = new InputGroup(shapeGammaCD71APCProductionRateInput, rateGammaCD71APCProductionRateInput, zeroFractionCD71APCProductionRateInput,
+        InputGroup CD71APCProductionRateGammaInput = new InputGroup(shapeGammaCD71APCProductionRateInput, meanGammaCD71APCProductionRateInput, zeroFractionCD71APCProductionRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup CD71PEProductionRateGammaInput = new InputGroup(shapeGammaCD71PEProductionRateInput, rateGammaCD71PEProductionRateInput, zeroFractionCD71PEProductionRateInput,
+        InputGroup CD71PEProductionRateGammaInput = new InputGroup(shapeGammaCD71PEProductionRateInput, meanGammaCD71PEProductionRateInput, zeroFractionCD71PEProductionRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup cMycGFPMaxRateGammaInput = new InputGroup(shapeGammacMycGFPMaxRateInput, rateGammacMycGFPMaxRateInput, zeroFractioncMycGFPMaxRateInput,
+        InputGroup cMycGFPMaxRateGammaInput = new InputGroup(shapeGammacMycGFPMaxRateInput, meanGammacMycGFPMaxRateInput, zeroFractioncMycGFPMaxRateInput,
                 InputGroup.DistributionType.GAMMA);
         
 

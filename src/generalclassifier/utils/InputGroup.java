@@ -38,7 +38,8 @@ public class InputGroup {
     public Input<RealParameter> getMean(){
         if (this.distributionType == DistributionType.NORMAL || this.distributionType == DistributionType.LOGNORMAL)
             return this.parm1;
-        else
+        else if (this.distributionType == DistributionType.GAMMA)
+            return this.parm2;
             throw new IllegalArgumentException("This distribution is not parametrized with a mean.");
     }
 
@@ -49,12 +50,6 @@ public class InputGroup {
             throw new IllegalArgumentException("This distribution is not parametrized with a shape.");
     }
 
-    public Input<RealParameter> getRate(){
-        if (this.distributionType == DistributionType.GAMMA)
-            return this.parm2;
-        else
-            throw new IllegalArgumentException("This distribution is not parametrized with a rate.");
-    }
 
     public Input<RealParameter> getStandardDev(){
         if (this.distributionType == DistributionType.NORMAL || this.distributionType == DistributionType.LOGNORMAL)
@@ -86,7 +81,7 @@ public class InputGroup {
                     result *= Utils.getLogNormalDensity(measuredValue, this.getMean().get().getArrayValue(cellType), this.getStandardDev().get().getArrayValue(cellType));
                     break;
                 case GAMMA:
-                    result *= Utils.getGammaDensity(measuredValue, this.getShape().get().getArrayValue(cellType), this.getRate().get().getArrayValue(cellType));
+                    result *= Utils.getGammaDensityShapeMeanParam(measuredValue, this.getShape().get().getArrayValue(cellType), this.getMean().get().getArrayValue(cellType));
                     break;
                 default:
                     throw new IllegalStateException("Unknown distribution type.");
