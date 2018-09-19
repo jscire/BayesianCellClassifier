@@ -53,6 +53,7 @@ public class  LineageTreeProb extends Distribution {
             "Probability of losing any given cell",
             Input.Validate.REQUIRED);
 
+
     //TODO remove if below works
     public Input<BooleanParameter> rootIsHSCInput = new Input<>("rootIsHSC",
             "True if root is an HSC cell, false otherwise.");

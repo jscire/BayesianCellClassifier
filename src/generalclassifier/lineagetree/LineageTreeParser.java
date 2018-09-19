@@ -15,10 +15,16 @@ public class LineageTreeParser {
 
     String inputFileName;
     String[] fluoChannelsCorrespondance;
+    int maxNumberOfCells = Integer.MAX_VALUE;
     FrameRate frameRate = FrameRate.Hour;
 
     public LineageTreeParser(String inputFile) {
         this.inputFileName = inputFile;
+    }
+
+    public LineageTreeParser(String inputFile, int maxNumOfCells) {
+        this.inputFileName = inputFile;
+        this.maxNumberOfCells = maxNumOfCells;
     }
 
     public LineageTreeParser(String inputFile, String frameRate) {
@@ -48,6 +54,9 @@ public class LineageTreeParser {
 
             // get number of the cell in current line
             int cellNumber = getCellNumberInRecord(csvRecord);
+
+            if(cellNumber < 1 || cellNumber > maxNumberOfCells)
+                continue;
 
             if(!cells.containsKey(cellNumber)) {
                 // update maxCellNumber if needed

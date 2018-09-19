@@ -16,6 +16,10 @@ public class LineageTree extends Tree {
     public Input<String> experimentalMeasuresFileInput = new Input<>("measuresCSVFile",
             "CSV file containing all the measures performed on this tree.");
 
+    public Input<Integer> maxNumberOfCellsInput = new Input<>("maxNumOfCells", "Maximum number of cells whose measures are taken into account for the analysis. " +
+            "Remember that cells are numbered from 1 at the root, and daughters are 2n, 2n+1. We assume here no apoptosis.");
+
+
     public Input<String> frameRateInput = new Input<>("frameRate",
             "Specify only if time is not explicitly measured in input csv file." +
                     "Accepted values:  'day', 'hour', 'minute', 'second'");
@@ -32,7 +36,12 @@ public class LineageTree extends Tree {
 
         Map<Integer, Cell> cells  = new HashMap<>();
         try {
-            LineageTreeParser parser = new LineageTreeParser(experimentalMeasuresFileInput.get());
+            LineageTreeParser parser;
+
+            if(maxNumberOfCellsInput.get() != null)
+                parser = new LineageTreeParser(experimentalMeasuresFileInput.get(), maxNumberOfCellsInput.get());
+            else
+                parser = new LineageTreeParser(experimentalMeasuresFileInput.get());
 
             cells = parser.parseRawCells();
         } catch (IOException e) {
