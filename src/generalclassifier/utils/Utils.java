@@ -124,7 +124,7 @@ public class Utils {
         if (x < 0 || k <= 0 || mu <= 0)
             return 0;
         else
-            return Math.pow(x * mu/k, k - 1) * mu/k * Math.exp(-x * mu/k) / Math.exp(Gamma.logGamma(k));
+            return Math.pow(x * k/mu, k - 1) * k/mu * Math.exp(-x * k/mu) / Math.exp(Gamma.logGamma(k));
     }
 
 

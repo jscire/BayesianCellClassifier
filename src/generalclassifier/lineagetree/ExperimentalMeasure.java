@@ -90,6 +90,8 @@ public class ExperimentalMeasure {
                 }
                 res = Double.NEGATIVE_INFINITY;
                 for (int i = 1; i <= lastIndex; i++) {
+                    if(timePoints.get(i) - timePoints.get(i-1) == 0)
+                        continue;
                     instantRate = (dataPoints.get(i) - dataPoints.get(i-1))/(timePoints.get(i) - timePoints.get(i-1));
                     if(instantRate > res)
                         res = instantRate;

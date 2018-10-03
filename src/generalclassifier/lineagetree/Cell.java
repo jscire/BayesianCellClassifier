@@ -276,7 +276,14 @@ public class Cell extends Node {
             return;
         }
 
+        int numberOfTimePoints = timePoints.size();
+
         for (int i = 1; i < timePoints.size(); i++) {
+
+            if (timePoints.get(i) - timePoints.get(i-1) == 0) {
+                numberOfTimePoints -= 1;
+                continue; // skip timepoint if two timepoints with the same time associated
+            }
 
             dist = Math.sqrt(Math.pow(xPos.dataPoints.get(i) - xPos.dataPoints.get(i-1),2)
                     + Math.pow(yPos.dataPoints.get(i) - yPos.dataPoints.get(i-1),2));
@@ -286,7 +293,12 @@ public class Cell extends Node {
             instantSpeed.dataPoints.add(dist/time);
         }
 
-        instantSpeed.summaryValue = sumOfSpeeds/(timePoints.size() -1);
+        if (numberOfTimePoints < 2) {
+            instantSpeed.dataPoints.add(Double.NaN);
+            return;
+        }
+
+        instantSpeed.summaryValue = sumOfSpeeds/(numberOfTimePoints -1);
     }
 
 

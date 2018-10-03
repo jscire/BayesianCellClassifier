@@ -82,6 +82,10 @@ public class InputGroup {
                     break;
                 case GAMMA:
                     result *= Utils.getGammaDensityShapeMeanParam(measuredValue, this.getShape().get().getArrayValue(cellType), this.getMean().get().getArrayValue(cellType));
+                    //TODO remove, to debug
+//                    result *= Utils.getGammaDensityShapeRateParam(measuredValue, this.getShape().get().getArrayValue(cellType), this.getShape().get().getArrayValue(cellType)/this.getMean().get().getArrayValue(cellType));
+//                    if(result > 10E30)
+//                        System.out.printf("Approaching big values");
                     break;
                 default:
                     throw new IllegalStateException("Unknown distribution type.");

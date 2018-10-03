@@ -11,7 +11,7 @@ public enum MeasureType {
     Perimeter(new String[]{"Perimeter", "PerimeterMorphologyCh00"}, 0 , Double.POSITIVE_INFINITY, false),
     XPosition(new String[]{"CentroidX","XMorphologyCh00"}),
     YPosition(new String[]{"CentroidY","YMorphologyCh00"}),
-    InstantSpeed(new String[]{"Speed"}, 0, Double.POSITIVE_INFINITY, false),
+    InstantSpeed(new String[]{"Speed"}, 0, Double.POSITIVE_INFINITY),
 
     // fluorescent markers
     Ig2afc(new String[]{"Ig2afc", "Ig2afc_signal"}, 0, Double.POSITIVE_INFINITY),

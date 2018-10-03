@@ -75,65 +75,65 @@ public class  LineageTreeProb extends Distribution {
                     "If mij is the boolean that characterizes transitions from type i to j, the element of index i*(n-1)+j if i>j, or i*(n-1) + j-1 otherwise, gives the index of element mij. n is the number of types.");
 
     // TODO possibly rework on the way inputs are written in. This is a first draft
-    public Input<RealParameter> meanLogNormalAreaGrowthRateInput = new Input<>("meanAreaGrowthRate",
+    public Input<RealParameter> meanLogNormalAreaGrowthRateInput = new Input<>("meanAreaGrowthRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalAreaGrowthRateInput = new Input<>("sdAreaGrowthRate",
+    public Input<RealParameter> sdLogNormalAreaGrowthRateInput = new Input<>("sdAreaGrowthRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalPerimeterGrowthRateInput = new Input<>("meanPerimeterGrowthRate",
+    public Input<RealParameter> meanLogNormalPerimeterGrowthRateInput = new Input<>("meanPerimeterGrowthRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalPerimeterGrowthRateInput = new Input<>("sdPerimeterGrowthRate",
+    public Input<RealParameter> sdLogNormalPerimeterGrowthRateInput = new Input<>("sdPerimeterGrowthRateLogNormal",
             "");
     public Input<RealParameter> meanNormalEccentricityInput = new Input<>("meanEccentricity",
             "");
     public Input<RealParameter> sdNormalEccentricityInput = new Input<>("sdEccentricity",
             "");
-    public Input<RealParameter> meanLogNormalInstantSpeedInput = new Input<>("meanInstantSpeed",
+    public Input<RealParameter> meanLogNormalInstantSpeedInput = new Input<>("meanInstantSpeedLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalInstantSpeedInput = new Input<>("sdInstantSpeed",
+    public Input<RealParameter> sdLogNormalInstantSpeedInput = new Input<>("sdInstantSpeedLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalCD41ProductionRateInput = new Input<>("meanCD41ProductionRate",
+    public Input<RealParameter> meanLogNormalCD41ProductionRateInput = new Input<>("meanCD41ProductionRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalCD41ProductionRateInput = new Input<>("sdCD41ProductionRate",
+    public Input<RealParameter> sdLogNormalCD41ProductionRateInput = new Input<>("sdCD41ProductionRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalFcgRIIIProductionRateInput = new Input<>("meanFcgRIIIProductionRate",
+    public Input<RealParameter> meanLogNormalFcgRIIIProductionRateInput = new Input<>("meanFcgRIIIProductionRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalFcgRIIIProductionRateInput = new Input<>("sdFcgRIIIProductionRate",
+    public Input<RealParameter> sdLogNormalFcgRIIIProductionRateInput = new Input<>("sdFcgRIIIProductionRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalROSProductionRateInput = new Input<>("meanROSProductionRate",
+    public Input<RealParameter> meanLogNormalROSProductionRateInput = new Input<>("meanROSProductionRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalROSProductionRateInput = new Input<>("sdROSProductionRate",
+    public Input<RealParameter> sdLogNormalROSProductionRateInput = new Input<>("sdROSProductionRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalTMRMProductionRateInput = new Input<>("meanTMRMProductionRate",
+    public Input<RealParameter> meanLogNormalTMRMProductionRateInput = new Input<>("meanTMRMProductionRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalTMRMProductionRateInput = new Input<>("sdTMRMProductionRate",
+    public Input<RealParameter> sdLogNormalTMRMProductionRateInput = new Input<>("sdTMRMProductionRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalTMRMMaxRateInput = new Input<>("meanTMRMMaxRate",
+    public Input<RealParameter> meanLogNormalTMRMMaxRateInput = new Input<>("meanTMRMMaxRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalTMRMMaxRateInput = new Input<>("sdTMRMMaxRate",
+    public Input<RealParameter> sdLogNormalTMRMMaxRateInput = new Input<>("sdTMRMMaxRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalSca1MeanRateInput = new Input<>("meanSca1MeanRate",
+    public Input<RealParameter> meanLogNormalSca1MeanRateInput = new Input<>("meanSca1MeanRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalSca1MeanRateInput = new Input<>("sdSca1MeanRate",
+    public Input<RealParameter> sdLogNormalSca1MeanRateInput = new Input<>("sdSca1MeanRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalSca1MeanValueInput = new Input<>("meanSca1MeanValue",
+    public Input<RealParameter> meanLogNormalSca1MeanValueInput = new Input<>("meanSca1MeanValueLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalSca1MeanValueInput = new Input<>("sdSca1MeanValue",
+    public Input<RealParameter> sdLogNormalSca1MeanValueInput = new Input<>("sdSca1MeanValueLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalIg2afcProductionRateInput = new Input<>("meanIg2afcProductionRate",
+    public Input<RealParameter> meanLogNormalIg2afcProductionRateInput = new Input<>("meanIg2afcProductionRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalIg2afcProductionRateInput = new Input<>("sdIg2afcProductionRate",
+    public Input<RealParameter> sdLogNormalIg2afcProductionRateInput = new Input<>("sdIg2afcProductionRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalCD71APCProductionRateInput = new Input<>("meanCD71APCProductionRate",
+    public Input<RealParameter> meanLogNormalCD71APCProductionRateInput = new Input<>("meanCD71APCProductionRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalCD71APCProductionRateInput = new Input<>("sdCD71APCProductionRate",
+    public Input<RealParameter> sdLogNormalCD71APCProductionRateInput = new Input<>("sdCD71APCProductionRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalCD71PEProductionRateInput = new Input<>("meanCD71PEProductionRate",
+    public Input<RealParameter> meanLogNormalCD71PEProductionRateInput = new Input<>("meanCD71PEProductionRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalCD71PEProductionRateInput = new Input<>("sdCD71PEProductionRate",
+    public Input<RealParameter> sdLogNormalCD71PEProductionRateInput = new Input<>("sdCD71PEProductionRateLogNormal",
             "");
-    public Input<RealParameter> meanLogNormalcMycGFPMaxRateInput = new Input<>("meancMycGFPMaxRate",
+    public Input<RealParameter> meanLogNormalcMycGFPMaxRateInput = new Input<>("meancMycGFPMaxRateLogNormal",
             "");
-    public Input<RealParameter> sdLogNormalcMycGFPMaxRateInput = new Input<>("sdcMycGFPMaxRate",
+    public Input<RealParameter> sdLogNormalcMycGFPMaxRateInput = new Input<>("sdcMycGFPMaxRateLogNormal",
             "");
 
 
@@ -154,7 +154,7 @@ public class  LineageTreeProb extends Distribution {
 
     public Input<RealParameter> zeroFractionROSProductionRateInput = new Input<>("zeroFractionROSProductionRate", "");
 
-    public Input<RealParameter> zeroFractionSca1MeanRateInput = new Input<>("zeroFractionSca1MeanRate", "");
+    public Input<RealParameter> zeroFractionSca1MeanRateInput = new Input<>("zeroFractionSca1ProductionRate", "");
 
     public Input<RealParameter> zeroFractionSca1MeanValueInput = new Input<>("zeroFractionSca1MeanValue", "");
 
@@ -171,59 +171,59 @@ public class  LineageTreeProb extends Distribution {
 
     public Input<RealParameter> shapeGammaAreaGrowthRateInput = new Input<>("shapeAreaGrowthRate",
             "");
-    public Input<RealParameter> meanGammaAreaGrowthRateInput = new Input<>("rateAreaGrowthRate",
+    public Input<RealParameter> meanGammaAreaGrowthRateInput = new Input<>("meanAreaGrowthRate",
             "");
     public Input<RealParameter> shapeGammaPerimeterGrowthRateInput = new Input<>("shapePerimeterGrowthRate",
             "");
-    public Input<RealParameter> meanGammaPerimeterGrowthRateInput = new Input<>("ratePerimeterGrowthRate",
+    public Input<RealParameter> meanGammaPerimeterGrowthRateInput = new Input<>("meanPerimeterGrowthRate",
             "");
     public Input<RealParameter> shapeGammaInstantSpeedInput = new Input<>("shapeInstantSpeed",
             "");
-    public Input<RealParameter> meanGammaInstantSpeedInput = new Input<>("rateInstantSpeed",
+    public Input<RealParameter> meanGammaInstantSpeedInput = new Input<>("meanInstantSpeed",
             "");
     public Input<RealParameter> shapeGammaCD41ProductionRateInput = new Input<>("shapeCD41ProductionRate",
             "");
-    public Input<RealParameter> meanGammaCD41ProductionRateInput = new Input<>("rateCD41ProductionRate",
+    public Input<RealParameter> meanGammaCD41ProductionRateInput = new Input<>("meanCD41ProductionRate",
             "");
     public Input<RealParameter> shapeGammaFcgRIIIProductionRateInput = new Input<>("shapeFcgRIIIProductionRate",
             "");
-    public Input<RealParameter> meanGammaFcgRIIIProductionRateInput = new Input<>("rateFcgRIIIProductionRate",
+    public Input<RealParameter> meanGammaFcgRIIIProductionRateInput = new Input<>("meanFcgRIIIProductionRate",
             "");
     public Input<RealParameter> shapeGammaROSProductionRateInput = new Input<>("shapeROSProductionRate",
             "");
-    public Input<RealParameter> meanGammaROSProductionRateInput = new Input<>("rateROSProductionRate",
+    public Input<RealParameter> meanGammaROSProductionRateInput = new Input<>("meanROSProductionRate",
             "");
     public Input<RealParameter> shapeGammaTMRMProductionRateInput = new Input<>("shapeTMRMProductionRate",
             "");
-    public Input<RealParameter> meanGammaTMRMProductionRateInput = new Input<>("rateTMRMProductionRate",
+    public Input<RealParameter> meanGammaTMRMProductionRateInput = new Input<>("meanTMRMProductionRate",
             "");
     public Input<RealParameter> shapeGammaTMRMMaxRateInput = new Input<>("shapeTMRMMaxRate",
             "");
-    public Input<RealParameter> meanGammaTMRMMaxRateInput = new Input<>("rateTMRMMaxRate",
+    public Input<RealParameter> meanGammaTMRMMaxRateInput = new Input<>("meanTMRMMaxRate",
             "");
-    public Input<RealParameter> shapeGammaSca1MeanRateInput = new Input<>("shapeSca1MeanRate",
+    public Input<RealParameter> shapeGammaSca1ProductionRateInput = new Input<>("shapeSca1ProductionRate",
             "");
-    public Input<RealParameter> meanGammaSca1MeanRateInput = new Input<>("rateSca1MeanRate",
+    public Input<RealParameter> meanGammaSca1ProductionRateInput = new Input<>("meanSca1ProductionRate",
             "");
     public Input<RealParameter> shapeGammaSca1MeanValueInput = new Input<>("shapeSca1MeanValue",
             "");
-    public Input<RealParameter> meanGammaSca1MeanValueInput = new Input<>("rateSca1MeanValue",
+    public Input<RealParameter> meanGammaSca1MeanValueInput = new Input<>("meanSca1MeanValue",
             "");
     public Input<RealParameter> shapeGammaIg2afcProductionRateInput = new Input<>("shapeIg2afcProductionRate",
             "");
-    public Input<RealParameter> meanGammaIg2afcProductionRateInput = new Input<>("rateIg2afcProductionRate",
+    public Input<RealParameter> meanGammaIg2afcProductionRateInput = new Input<>("meanIg2afcProductionRate",
             "");
     public Input<RealParameter> shapeGammaCD71APCProductionRateInput = new Input<>("shapeCD71APCProductionRate",
             "");
-    public Input<RealParameter> meanGammaCD71APCProductionRateInput = new Input<>("rateCD71APCProductionRate",
+    public Input<RealParameter> meanGammaCD71APCProductionRateInput = new Input<>("meanCD71APCProductionRate",
             "");
     public Input<RealParameter> shapeGammaCD71PEProductionRateInput = new Input<>("shapeCD71PEProductionRate",
             "");
-    public Input<RealParameter> meanGammaCD71PEProductionRateInput = new Input<>("rateCD71PEProductionRate",
+    public Input<RealParameter> meanGammaCD71PEProductionRateInput = new Input<>("meanCD71PEProductionRate",
             "");
     public Input<RealParameter> shapeGammacMycGFPMaxRateInput = new Input<>("shapecMycGFPMaxRate",
             "");
-    public Input<RealParameter> meanGammacMycGFPMaxRateInput = new Input<>("ratecMycGFPMaxRate",
+    public Input<RealParameter> meanGammacMycGFPMaxRateInput = new Input<>("meancMycGFPMaxRate",
             "");
 
     Map<InputGroup, MeasureType> mapMeasureTypeToInput = createMapOfMeasureInputs();
@@ -300,7 +300,7 @@ public class  LineageTreeProb extends Distribution {
         InputGroup TMRMMaxRateGammaInput = new InputGroup(shapeGammaTMRMMaxRateInput, meanGammaTMRMMaxRateInput, zeroFractionTMRMMaxRateInput,
                 InputGroup.DistributionType.GAMMA);
 
-        InputGroup Sca1MeanRateGammaInput = new InputGroup(shapeGammaSca1MeanRateInput, meanGammaSca1MeanRateInput, zeroFractionSca1MeanRateInput,
+        InputGroup Sca1MeanRateGammaInput = new InputGroup(shapeGammaSca1ProductionRateInput, meanGammaSca1ProductionRateInput, zeroFractionSca1MeanRateInput,
                 InputGroup.DistributionType.GAMMA);
 
         InputGroup Sca1MeanValueGammaInput = new InputGroup(shapeGammaSca1MeanValueInput, meanGammaSca1MeanValueInput, zeroFractionSca1MeanValueInput,
@@ -691,6 +691,10 @@ public class  LineageTreeProb extends Distribution {
                 if(Double.isNaN(x)) continue; // skip this measure if there is no summary value
 
                 branchProb *= input.getDensity(typeEndBranch, x);
+
+                //TODO remove, for debugging
+//                if(branchProb == 0)
+//                    System.out.println("Oh no, prob is zero");
             }
         }
         return branchProb;

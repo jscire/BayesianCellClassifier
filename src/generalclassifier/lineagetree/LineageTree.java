@@ -54,9 +54,6 @@ public class LineageTree extends Tree {
         setRoot(rootCell);
         initArrays();
 
-        //TODO remove
-       // this.measureTypes = rootCell.getMeasureTypes();
-
         // apply an offset to the nodeheights so that they conform to the standard format
         double maxHeight = 0;
         for(Node node : getNodesAsArray()) {
