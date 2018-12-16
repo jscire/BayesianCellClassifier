@@ -17,8 +17,8 @@ public class Cell extends Node {
 
     Fate fate;
     int trackNumber;
+    int childrenNum;
     double edgeLength;
-
    // List<double[]> timePoints = new ArrayList<> ();
 
     List<MeasureType> measureTypes = new ArrayList<>();
@@ -29,14 +29,18 @@ public class Cell extends Node {
 
     public Cell(int trackNumber) {
         this.trackNumber = trackNumber;
+        this.childrenNum = 0;
+        this.setFate(Fate.U);
     }
 
     public Cell(int trackNumber, List<MeasureType> measureTypes) {
         this.trackNumber = trackNumber;
+        this.childrenNum = 0;
         this.measureTypes = measureTypes;
         for (MeasureType measureType : measureTypes) {
             this.measures.add(new ExperimentalMeasure(measureType));
         }
+        this.setFate(Fate.U);
     }
 
     public double getEdgeLength(){
@@ -57,6 +61,35 @@ public class Cell extends Node {
     //TODO not enough to allow for more fates than just dividers (need to read actually it from the csv file)
     public void setFate(Fate f) {
         this.fate = f;
+    }
+
+
+    /**
+     * Keep track of the children of a cell, to set its fate to Divider when 2 distinct children are found.
+     * @param childTrackNumber
+     */
+    public void addChild(int childTrackNumber) {
+
+        if(this.getFate() == Fate.D) // if cell is already a divider, ignore the child, it was recorded before.
+            return;
+
+        if(childrenNum == 0) // if cell has no child recorded, record this child
+            this.childrenNum = childTrackNumber;
+        else if(childrenNum == childTrackNumber) // if cell has already recorded this child, ignore it
+            return;
+        else { // cell has recorded the other child before, so now it has two children. So it is a divider.
+            childrenNum += childTrackNumber;
+            this.setFate(Fate.D);
+        }
+    }
+
+    public static int findParent(int cellTrackNumber) {
+        if(cellTrackNumber < 2)
+            return 0; // no parent
+        if(cellTrackNumber % 2 == 0)
+            return cellTrackNumber/2;
+        else
+            return (cellTrackNumber -1)/2;
     }
 
     public boolean hasMeasure(MeasureType measureType) {
@@ -116,10 +149,6 @@ public class Cell extends Node {
 
         // summarize each measure following the appropriate calculation method
         rootCell.summarizeMeasures();
-
-        //TODO rework on how the fate is attributed to the cell
-        // only dividers are allowed for now
-        rootCell.setFate(Fate.D);
 
         if(cells.containsKey(2*rootKey)) {
             Cell child1 = buildTreeAndGetRoot(cells, 2*rootKey);

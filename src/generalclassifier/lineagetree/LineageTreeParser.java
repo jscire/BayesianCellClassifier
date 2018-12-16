@@ -16,15 +16,12 @@ public class LineageTreeParser {
     String inputFileName;
     String[] fluoChannelsCorrespondance;
     int maxNumberOfCells = Integer.MAX_VALUE;
+    int maxTimePoint = Integer.MAX_VALUE;
+    boolean isMaxTimeRelative = true;
     FrameRate frameRate = FrameRate.Hour;
 
     public LineageTreeParser(String inputFile) {
         this.inputFileName = inputFile;
-    }
-
-    public LineageTreeParser(String inputFile, int maxNumOfCells) {
-        this.inputFileName = inputFile;
-        this.maxNumberOfCells = maxNumOfCells;
     }
 
     public LineageTreeParser(String inputFile, String frameRate) {
@@ -32,14 +29,22 @@ public class LineageTreeParser {
         this.inputFileName = inputFile;
     }
 
+    public void setMaxNumberOfCells(int maxNumberOfCells) {
+        this.maxNumberOfCells = maxNumberOfCells;
+    }
+
+    public void setMaxTimePoint(int maxTimePoint) {
+        this.maxTimePoint = maxTimePoint;
+    }
+
+    public void setIsMaxTimeRelative(boolean isRelative) {this.isMaxTimeRelative = isRelative;}
+
     //TODO deal with NA values
     public Map<Integer, Cell> parseRawCells() throws IOException {
         File csvData = new File(inputFileName);
         CSVParser parser = CSVParser.parse(new FileReader(csvData), CSVFormat.EXCEL.withHeader());
 
-        int maxCellNumber = 0;
         Map<Integer, Cell> cells = new HashMap<>();
-
 
         ArrayList<MeasureType> measuresInCSV = new ArrayList<>();
         // add all measure that are actually in the CSV file to the list of measuresInCSV
@@ -48,6 +53,8 @@ public class LineageTreeParser {
                 measuresInCSV.add(measureType);
         }
 
+        boolean isFirstMeasure = true;
+
         // iterate over the lines of the csv files until an empty line is reached
         for (CSVRecord csvRecord : parser) {
             if(isEmptyRecord(csvRecord)) break;
@@ -55,12 +62,28 @@ public class LineageTreeParser {
             // get number of the cell in current line
             int cellNumber = getCellNumberInRecord(csvRecord);
 
-            if(cellNumber < 1 || cellNumber > maxNumberOfCells)
+            // get time of the datapoint in current line
+            int time = getTimePointInRecord(csvRecord);
+
+            if(isFirstMeasure) { // if it's the first measure and maxtimepoint was input relatively to the first time point, then change the maxtimepoint accordingly.
+                if(isMaxTimeRelative) setMaxTimePoint(time + maxTimePoint);
+                isFirstMeasure = false;
+            }
+
+            if (time > maxTimePoint) //skip this data point if time is later than the maxTimePoint limit
+                continue;
+
+            if(cellNumber < 1)
+                continue;
+
+            int parentNumber = Cell.findParent(cellNumber);
+            if (parentNumber > 0)
+                cells.get(parentNumber).addChild(cellNumber); // record the observed child of the parent, to know if this parent is a divider or not.
+
+            if (cellNumber > maxNumberOfCells) // if cell is in a generation not taken into account, skip the data points
                 continue;
 
             if(!cells.containsKey(cellNumber)) {
-                // update maxCellNumber if needed
-                if(maxCellNumber < cellNumber) maxCellNumber = cellNumber;
                 // add a cell with the new track number
                 cells.put(cellNumber, new Cell(cellNumber, measuresInCSV));
             }
@@ -71,7 +94,6 @@ public class LineageTreeParser {
         return cells;
     }
 
-
     boolean isEmptyRecord(CSVRecord record) {
         return record.get("TrackNumber").isEmpty();
     }
@@ -80,6 +102,9 @@ public class LineageTreeParser {
         return Integer.parseInt(record.get("TrackNumber"));
     }
 
+    int getTimePointInRecord(CSVRecord record) {
+        return Integer.parseInt(record.get("TimePoint"));
+    }
 
     boolean isCellNumberInRecord(CSVRecord record, int cellNumber) {
         if(Integer.parseInt(record.get("TrackNumber")) == cellNumber) {

@@ -72,6 +72,16 @@ public class ExperimentalMeasure {
         return this.calculationMethod;
     }
 
+    public static CalculationMethod getCalculationMethodOfMeasureType(MeasureType measureType) {
+        return mapMeasureToMethod.get(measureType);
+    }
+
+    public static boolean isSummaryAverage(CalculationMethod method) {
+        if(method == CalculationMethod.averageRate || method == CalculationMethod.averageInstantSpeed || method == CalculationMethod.averageValue)
+            return true;
+        else return false;
+    }
+
 
     void summarize(List<Double> timePoints) {
         double res = 0;
@@ -133,8 +143,6 @@ public class ExperimentalMeasure {
 
         summaryValue = res;
     }
-
-
 
 
     /**

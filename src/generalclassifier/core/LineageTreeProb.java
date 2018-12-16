@@ -9,6 +9,7 @@ import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 
 import generalclassifier.lineagetree.Cell;
+import generalclassifier.lineagetree.ExperimentalMeasure;
 import generalclassifier.lineagetree.LineageTree;
 import generalclassifier.lineagetree.MeasureType;
 import generalclassifier.utils.InputGroup;
@@ -52,7 +53,6 @@ public class  LineageTreeProb extends Distribution {
     public Input<RealParameter> lossProbInput = new Input<>("lossProb",
             "Probability of losing any given cell",
             Input.Validate.REQUIRED);
-
 
     //TODO remove if below works
     public Input<BooleanParameter> rootIsHSCInput = new Input<>("rootIsHSC",
@@ -584,8 +584,10 @@ public class  LineageTreeProb extends Distribution {
             else if (node.getFate() == Cell.Fate.U) {
 
                 branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getValue(0) // cell divides after end of branch
-                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)))
-                        + fateProbabilitiesInput.get().get(typeEndBranch).getValue(1) // cell dies after end of branch
+                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)));
+
+                if(fateProbabilitiesInput.get().get(typeEndBranch).getValue(1) > 0) // possibility cell dies after end of branch
+                    branchProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(1)
                         * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
 
                 if (transitionDuringLifetimeIsAllowed && fateProbabilitiesInput.get().get(typeEndBranch).getDimension() > 3) // check if this state can transition
@@ -690,11 +692,12 @@ public class  LineageTreeProb extends Distribution {
 
                 if(Double.isNaN(x)) continue; // skip this measure if there is no summary value
 
-                branchProb *= input.getDensity(typeEndBranch, x);
+                boolean summaryIsAverage = ExperimentalMeasure.isSummaryAverage(ExperimentalMeasure.getCalculationMethodOfMeasureType(measureType));
 
-                //TODO remove, for debugging
-//                if(branchProb == 0)
-//                    System.out.println("Oh no, prob is zero");
+                if(node.getFate() == Cell.Fate.U && !summaryIsAverage)
+                    branchProb *= input.getComplementaryCumulativeDistribution(typeEndBranch, x);
+                else
+                    branchProb *= input.getProbabilityDensity(typeEndBranch, x);
             }
         }
         return branchProb;

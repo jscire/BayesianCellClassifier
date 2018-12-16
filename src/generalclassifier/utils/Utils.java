@@ -1,9 +1,8 @@
 package generalclassifier.utils;
 
 import generalclassifier.lineagetree.MeasureType;
-import org.apache.commons.math.distribution.NormalDistribution;
-import org.apache.commons.math.distribution.NormalDistributionImpl;
-import org.apache.commons.math.special.Gamma;
+import org.apache.commons.math3.special.Gamma;
+import org.apache.commons.math3.special.Erf;
 
 public class Utils {
 
@@ -107,29 +106,47 @@ public class Utils {
     }
 
     public static double getLogNormalDensity(double x, double mu, double sigma) {
-        if(x == 0)
+        if(x <= 0)
             return 0;
         else
             return 1.0/ (x * sigma * Math.sqrt(2*Math.PI)) * Math.exp(-(Math.log(x) - mu)*(Math.log(x)-mu)/(2*sigma*sigma));
+    }
+
+    public static double getLogNormalCumulativeDistribution(double x, double mu, double sigma) {
+        if(x <= 0)
+            return 0;
+        else
+            return 0.5 * Erf.erfc((- Math.log(x) - mu)/(sigma * Math.sqrt(2))); // erfc is the complementary error function
     }
 
     public static double getGammaDensityShapeRateParam(double x, double alpha, double beta) {
         if (x < 0 || alpha <= 0 || beta <= 0)
             return 0;
         else
-            return Math.pow(x * beta, alpha - 1) * beta * Math.exp(-x * beta) / Math.exp(Gamma.logGamma(alpha));
+            return Math.pow(x * beta, alpha - 1) * beta * Math.exp(-x * beta) / Gamma.gamma(alpha);
     }
 
     public static double getGammaDensityShapeMeanParam(double x, double k, double mu) {
         if (x < 0 || k <= 0 || mu <= 0)
             return 0;
         else
-            return Math.pow(x * k/mu, k - 1) * k/mu * Math.exp(-x * k/mu) / Math.exp(Gamma.logGamma(k));
+            return Math.pow(x * k/mu, k - 1) * k/mu * Math.exp(-x * k/mu) / Gamma.gamma(k);
+    }
+
+    public static double getGammaCumulativeDistributionShapeMeanParam(double x, double k, double mu) {
+        if (x <= 0 || k <= 0 || mu <= 0)
+            return 0;
+        else
+            return Gamma.regularizedGammaP(k,k * x/mu);
     }
 
 
     public static double getNormalDensity(double x, double mu, double sigma) {
         return 1.0/Math.sqrt(2*Math.PI*sigma*sigma)*Math.exp(-(x - mu)*(x-mu)/(2*sigma*sigma));
+    }
+
+    public static double getNormalCumulativeDistribution(double x, double mu, double sigma) {
+        return 0.5*(1 + Erf.erf((x - mu)/(sigma * Math.sqrt(2)))) ; // erf is the error function
     }
 
     public static double getNormalLogDensity(double x, double mu, double sigma) {
@@ -142,46 +159,4 @@ public class Utils {
 
         return getNormalLogDensity(x, mu, sigma);
     }
-
-    public static double getTruncatedNormalDensity(double x, int nodeType, InputGroup input, MeasureType measureType) {
-
-        NormalDistribution dist = new NormalDistributionImpl(input.getMean().get().getArrayValue(nodeType),
-                                                            input.getStandardDev().get().getArrayValue(nodeType));
-
-        double upperBound = measureType.getHardUpperBound();
-        double lowerBound = measureType.getHardLowerBound();
-
-        if(lowerBound == Double.NEGATIVE_INFINITY && upperBound == Double.POSITIVE_INFINITY) return dist.density(x);
-
-        double scaleFactor = 1.0;
-
-        try{
-            if(upperBound == Double.POSITIVE_INFINITY) {
-                scaleFactor = 1.0 / (1.0 - dist.cumulativeProbability(lowerBound));
-            }
-            else if(lowerBound == Double.NEGATIVE_INFINITY) {
-                scaleFactor = 1.0 / dist.cumulativeProbability(upperBound);
-            }
-            else {
-                scaleFactor = 1.0/(dist.cumulativeProbability(upperBound) - dist.cumulativeProbability(lowerBound));
-            }
-        }
-        catch(Exception e) {
-            System.out.println("Cumulative probability of normal distribution crashed." +
-                    "\nLower bound" + lowerBound +
-                    "\nUpper bound" + upperBound +
-                    "\nx: " + x +
-                    "\nmean: " + dist.getMean() +
-                    "\nsd: " + dist.getStandardDeviation());
-        }
-
-        return scaleFactor * dist.density(x);
-    }
-
-
-
-
-
-
-
 }

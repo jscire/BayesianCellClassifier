@@ -67,7 +67,7 @@ public class InputGroup {
     }
 
 
-    public double getDensity(int cellType, double measuredValue){
+    public double getProbabilityDensity(int cellType, double measuredValue){
 
         double result = 1;
         if (measuredValue == 0 && hasZeroFraction && this.zeroFraction.get() != null)
@@ -82,10 +82,6 @@ public class InputGroup {
                     break;
                 case GAMMA:
                     result *= Utils.getGammaDensityShapeMeanParam(measuredValue, this.getShape().get().getArrayValue(cellType), this.getMean().get().getArrayValue(cellType));
-                    //TODO remove, to debug
-//                    result *= Utils.getGammaDensityShapeRateParam(measuredValue, this.getShape().get().getArrayValue(cellType), this.getShape().get().getArrayValue(cellType)/this.getMean().get().getArrayValue(cellType));
-//                    if(result > 10E30)
-//                        System.out.printf("Approaching big values");
                     break;
                 default:
                     throw new IllegalStateException("Unknown distribution type.");
@@ -96,6 +92,33 @@ public class InputGroup {
         }
         return result;
     }
+
+    public double getComplementaryCumulativeDistribution(int cellType, double measuredValue){
+
+        double result = 0;
+        if (measuredValue == 0 && hasZeroFraction && this.zeroFraction.get() != null) // if value is zero and hasZeroFraction, complementary cumulative distribution function has value 1.
+            return 1;
+        else {
+            switch (distributionType) {
+                case NORMAL:
+                    result = 1 - Utils.getNormalCumulativeDistribution(measuredValue, this.getMean().get().getArrayValue(cellType), this.getStandardDev().get().getArrayValue(cellType));
+                    break;
+                case LOGNORMAL:
+                    result = 1 - Utils.getLogNormalCumulativeDistribution(measuredValue, this.getMean().get().getArrayValue(cellType), this.getStandardDev().get().getArrayValue(cellType));
+                    break;
+                case GAMMA:
+                    result = 1 - Utils.getGammaCumulativeDistributionShapeMeanParam(measuredValue, this.getShape().get().getArrayValue(cellType), this.getMean().get().getArrayValue(cellType));
+                    break;
+                default:
+                    throw new IllegalStateException("Unknown distribution type.");
+            }
+
+            if(hasZeroFraction && this.zeroFraction.get() != null && measuredValue != 0)
+                result *= (1-this.zeroFraction.get().getArrayValue(cellType));
+        }
+        return result;
+    }
+
 }
 
 

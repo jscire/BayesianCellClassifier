@@ -19,6 +19,11 @@ public class LineageTree extends Tree {
     public Input<Integer> maxNumberOfCellsInput = new Input<>("maxNumOfCells", "Maximum number of cells whose measures are taken into account for the analysis. " +
             "Remember that cells are numbered from 1 at the root, and daughters are 2n, 2n+1. We assume here no apoptosis.");
 
+    public Input<Integer> maxTimePointInput = new Input<>("maxTimePoint", "Maximum number of cells whose measures are taken into account for the analysis. " +
+            "Remember that cells are numbered from 1 at the root, and daughters are 2n, 2n+1. We assume here no apoptosis.");
+
+    public Input<Boolean> isMaxTimeRelativeInput = new Input<>("isMaxTimeRelative", "If true, the final max time point is defined 'input max time' + 'time of first measure'." +
+            " If false, the final max time point is the 'input max time'. Default value: true.");
 
     public Input<String> frameRateInput = new Input<>("frameRate",
             "Specify only if time is not explicitly measured in input csv file." +
@@ -36,12 +41,16 @@ public class LineageTree extends Tree {
 
         Map<Integer, Cell> cells  = new HashMap<>();
         try {
-            LineageTreeParser parser;
+            LineageTreeParser parser = new LineageTreeParser(experimentalMeasuresFileInput.get());
 
             if(maxNumberOfCellsInput.get() != null)
-                parser = new LineageTreeParser(experimentalMeasuresFileInput.get(), maxNumberOfCellsInput.get());
-            else
-                parser = new LineageTreeParser(experimentalMeasuresFileInput.get());
+                parser.setMaxNumberOfCells(maxNumberOfCellsInput.get());
+
+            if(maxTimePointInput.get() != null)
+                parser.setMaxTimePoint(maxTimePointInput.get());
+
+            if(isMaxTimeRelativeInput.get() != null)
+                parser.setIsMaxTimeRelative(isMaxTimeRelativeInput.get());
 
             cells = parser.parseRawCells();
         } catch (IOException e) {
