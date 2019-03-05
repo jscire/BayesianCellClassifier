@@ -14,6 +14,10 @@ import java.util.List;
 
 public class LikelihoodTests extends TestCase{
 
+    //TODO rework on all the tests are we don't take newick inputs anymore
+
+
+
     //TODO the reference values are modified compared to the SCclassify tests. Check if it makes sense.
     // The prob is multiplied by .5 at the root to reflect the expected purity of the pop and by .5 at each (non lost) leaf to reflect the naked expectancy we have on each cell being a certain type (not sure about that part)
     // I left the + k log(0.5) so that it's easily changeable later.
@@ -38,12 +42,16 @@ public class LikelihoodTests extends TestCase{
         shapeWeibull.add(new RealParameter("1 1"));
         shapeWeibull.add(new RealParameter("1 1"));
 
+        List<RealParameter> probsTransitionUponDivision = new ArrayList<>();
+        probsTransitionUponDivision.add(new RealParameter("0.5 0.3 0.2"));
+        probsTransitionUponDivision.add(new RealParameter("0 0 1.0"));
+
+        probTree.setInputValue("probsOfTransitionUponDivision", probsTransitionUponDivision);
         probTree.setInputValue("fateProbabilities", fateProbabilities);
         probTree.setInputValue("scaleWeibull",scaleWeibull);
         probTree.setInputValue("shapeWeibull",shapeWeibull);
         probTree.setInputValue("lossProb", new RealParameter("0.1"));
         probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-        probTree.setInputValue("transitionProbs", new RealParameter("0.2 0.3 0.5"));
 
         double logP;
 
@@ -176,12 +184,16 @@ public class LikelihoodTests extends TestCase{
         shapeWeibull.add(new RealParameter("1 1.5 1.3"));
         shapeWeibull.add(new RealParameter("1 1.2"));
 
+        List<RealParameter> probsTransitionUponDivision = new ArrayList<>();
+        probsTransitionUponDivision.add(new RealParameter("0.5 0.3 0.2"));
+        probsTransitionUponDivision.add(new RealParameter("0 0 1.0"));
+
+        probTree.setInputValue("probsOfTransitionUponDivision", probsTransitionUponDivision);
         probTree.setInputValue("fateProbabilities", fateProbabilities);
         probTree.setInputValue("scaleWeibull",scaleWeibull);
         probTree.setInputValue("shapeWeibull",shapeWeibull);
         probTree.setInputValue("lossProb", new RealParameter("0.1"));
         probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-        probTree.setInputValue("transitionProbs", new RealParameter("0.2 0.3 0.5"));
         probTree.setInputValue("allowedTransitions", new BooleanParameter("1 0"));
 
         double logP;

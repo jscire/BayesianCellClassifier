@@ -1,5 +1,9 @@
 package generalclassifier.utils;
 
+import generalclassifier.lineagetree.MeasureType;
+import org.apache.commons.math3.special.Gamma;
+import org.apache.commons.math3.special.Erf;
+
 public class Utils {
 
     /**
@@ -101,9 +105,58 @@ public class Utils {
                 : Math.log(1 - Math.exp(-Math.exp(k * Math.log(x/lambda))));
     }
 
+    public static double getLogNormalDensity(double x, double mu, double sigma) {
+        if(x <= 0)
+            return 0;
+        else
+            return 1.0/ (x * sigma * Math.sqrt(2*Math.PI)) * Math.exp(-(Math.log(x) - mu)*(Math.log(x)-mu)/(2*sigma*sigma));
+    }
+
+    public static double getLogNormalCumulativeDistribution(double x, double mu, double sigma) {
+        if(x <= 0)
+            return 0;
+        else
+            return 0.5 * Erf.erfc((- Math.log(x) - mu)/(sigma * Math.sqrt(2))); // erfc is the complementary error function
+    }
+
+    public static double getGammaDensityShapeRateParam(double x, double alpha, double beta) {
+        if (x < 0 || alpha <= 0 || beta <= 0)
+            return 0;
+        else
+            return Math.pow(x * beta, alpha - 1) * beta * Math.exp(-x * beta) / Gamma.gamma(alpha);
+    }
+
+    public static double getGammaDensityShapeMeanParam(double x, double k, double mu) {
+        if (x < 0 || k <= 0 || mu <= 0)
+            return 0;
+        else
+            return Math.pow(x * k/mu, k - 1) * k/mu * Math.exp(-x * k/mu) / Gamma.gamma(k);
+    }
+
+    public static double getGammaCumulativeDistributionShapeMeanParam(double x, double k, double mu) {
+        if (x <= 0 || k <= 0 || mu <= 0)
+            return 0;
+        else
+            return Gamma.regularizedGammaP(k,k * x/mu);
+    }
 
 
+    public static double getNormalDensity(double x, double mu, double sigma) {
+        return 1.0/Math.sqrt(2*Math.PI*sigma*sigma)*Math.exp(-(x - mu)*(x-mu)/(2*sigma*sigma));
+    }
 
+    public static double getNormalCumulativeDistribution(double x, double mu, double sigma) {
+        return 0.5*(1 + Erf.erf((x - mu)/(sigma * Math.sqrt(2)))) ; // erf is the error function
+    }
 
+    public static double getNormalLogDensity(double x, double mu, double sigma) {
+        return - 1.0/2 * Math.log(2*Math.PI*sigma*sigma) - (x - mu)*(x-mu)/(2*sigma*sigma);
+    }
 
+    public static double getNormalLogDensityForTypeAndInput(double x, int nodeType, InputGroup input) {
+        double mu = input.getMean().get().getArrayValue(nodeType);
+        double sigma = input.getStandardDev().get().getArrayValue(nodeType);
+
+        return getNormalLogDensity(x, mu, sigma);
+    }
 }

@@ -5,89 +5,79 @@ import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
 
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 public class LineageTree extends Tree {
 
-    public Input<String> newickInput = new Input<>("newick",
-            "Newick string describing lineage tree.",
-            Input.Validate.REQUIRED);
+    public Input<String> experimentalMeasuresFileInput = new Input<>("measuresCSVFile",
+            "CSV file containing all the measures performed on this tree.");
+
+    public Input<Integer> maxNumberOfCellsInput = new Input<>("maxNumOfCells", "Maximum number of cells whose measures are taken into account for the analysis. " +
+            "Remember that cells are numbered from 1 at the root, and daughters are 2n, 2n+1. We assume here no apoptosis.");
 
 
-    public enum Fate {
-        // D: divides, A: apoptoses, L: lost cell, N: does nothing (not sure we'll keep that), U: unobserved fate
-        D, A, L, N, U
-    }
+    public Input<Integer> maxTimePointInput = new Input<>("maxTimePoint", "Maximum number of cells whose measures are taken into account for the analysis. " +
+            "Remember that cells are numbered from 1 at the root, and daughters are 2n, 2n+1. We assume here no apoptosis.");
 
-    private Fate[] nodeFates;
 
-    private double edgeLengths[];
+    public Input<Boolean> isMaxTimeRelativeInput = new Input<>("isMaxTimeRelative", "If true, the final max time point is defined 'input max time' + 'time of first measure'." +
+            " If false, the final max time point is the 'input max time'. Default value: true.");
 
-    public boolean allowTransitionOnEdge = false;
+    public Input<String> frameRateInput = new Input<>("frameRate",
+            "Specify only if time is not explicitly measured in input csv file." +
+                    "Accepted values:  'day', 'hour', 'minute', 'second'");
 
-    //TODO change that before going for bigger trees
-    static final int maxTreeSize = 7; // maximal number of nodes a LineageTree can have
+    static final int rootCellNumberInInput = 1;
+
+    //TODO remove
+   // List<MeasureType> measureTypes = new ArrayList<>();
 
     @Override
     public void initAndValidate() {
 
-        String newickString = newickInput.get();
+        if(experimentalMeasuresFileInput.get() == null) throw new IllegalArgumentException("No input file to initialize the tree.");
 
-        assignFromWithoutID(new TreeParser(newickString, false, false, true, 0));
+        Map<Integer, Cell> cells  = new HashMap<>();
+        try {
+            LineageTreeParser parser = new LineageTreeParser(experimentalMeasuresFileInput.get());
 
-        //TODO remove if below works
-//        nodeFates = new Fate[getNodeCount()]; // original version
-//        edgeLengths = new double[getNodeCount()];
+            if(maxNumberOfCellsInput.get() != null)
+                parser.setMaxNumberOfCells(maxNumberOfCellsInput.get());
 
-        nodeFates = new Fate[maxTreeSize];
-        edgeLengths = new double[maxTreeSize];
+            if(maxTimePointInput.get() != null)
+                parser.setMaxTimePoint(maxTimePointInput.get());
 
-        for (Node node : getNodesAsArray()) {
+            if(isMaxTimeRelativeInput.get() != null)
+                parser.setIsMaxTimeRelative(isMaxTimeRelativeInput.get());
 
-            // TODO check that ok to always do this renumbering (helpful when looking at transitions on branches)
-            int newNodeNumber = Integer.parseInt(node.getID().substring(0, 1)) -1; // the "-1" is there to account for the fact that cell indices start at 1 in the datasets
-            node.setNr(newNodeNumber);
-
-            String fateStr = node.getID().substring(1);
-            Fate fate;
-            switch(fateStr) {
-                case "D":
-                    fate = Fate.D;
-                    break;
-                case "A":
-                    fate = Fate.A;
-                    break;
-                case "L":
-                    fate = Fate.L;
-                    break;
-                case "N":
-                    fate = Fate.N;
-                    break;
-                case "U":
-                    throw new IllegalStateException("Unobserved fate 'U' is not fully implemented yet.");
-                    //fate = Fate.U;
-                    //break;
-                default:
-                    throw new IllegalArgumentException("Unknown cell fate '" + fateStr + "'");
-            }
-
-            nodeFates[node.getNr()] = fate;
-
-            if (!node.isRoot())
-                edgeLengths[node.getNr()] = node.getParent().getHeight()-node.getHeight();
+            cells = parser.parseRawCells();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
 
-        String rootEdgeLengthStr = newickString.substring(1+newickString.lastIndexOf(":"));
-        if (rootEdgeLengthStr.endsWith(";"))
-            rootEdgeLengthStr = rootEdgeLengthStr.substring(0, rootEdgeLengthStr.length()-1);
+        Cell rootCell = Cell.buildTreeAndGetRoot(cells, rootCellNumberInInput);
+        rootCell.labelNodesInTree();
 
-        edgeLengths[getRoot().getNr()] = Double.parseDouble(rootEdgeLengthStr);
-    }
+        setRoot(rootCell);
+        initArrays();
 
-    public Fate getNodeFate(int nodeNr) {
-        return nodeFates[nodeNr];
-    }
+        // apply an offset to the nodeheights so that they conform to the standard format
+        double maxHeight = 0;
+        for(Node node : getNodesAsArray()) {
+            if(node.getHeight() > maxHeight) maxHeight = node.getHeight();
+        }
 
-    public double getEdgeLength(int nodeNr) {
-        return edgeLengths[nodeNr];
+        for(Node node : getNodesAsArray()) {
+            node.setHeight(maxHeight - node.getHeight());
+        }
+
+        super.initAndValidate();
+
+        //TODO add fates
     }
 
     // naive way of getting a node by its label number
@@ -96,6 +86,12 @@ public class LineageTree extends Tree {
             if (node.getNr() == nodeLabel) return node;
         }
         return null;
+    }
+
+    //TODO implement proper toString method to at least print the cell tracknumbers in the metadata.
+    @Override
+    public String toString() {
+        return super.toString();
     }
 
     //TODO that's a dirty attempt to go around the fact that nodes in Tree should be numbered the standard way for BEAST, not the way they are in the input data
@@ -107,5 +103,17 @@ public class LineageTree extends Tree {
     protected void store() {}
     @Override
     public void restore() {}
+
+    public static void main(String[] parms) {
+
+//        String fileName = "../Data/Examples/toyFile.csv";
+        String fileName = "../Data/Examples/testFile_shortLife.csv";
+        LineageTree tree =  new LineageTree();
+        tree.setInputValue("measuresCSVFile", fileName);
+
+        tree.initAndValidate();
+
+        System.out.println(tree.toString());
+    }
 
 }
