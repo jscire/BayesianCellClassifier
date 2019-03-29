@@ -21,6 +21,7 @@ public class ExperimentalMeasure {
         result.put(MeasureType.CD41, CalculationMethod.averageRate);
         result.put(MeasureType.FcgRIII, CalculationMethod.averageRate);
         result.put(MeasureType.ROS, CalculationMethod.averageRate);
+        result.put(MeasureType.Lysobrite, CalculationMethod.averageRate);
 
         result.put(MeasureType.TMRMmean, CalculationMethod.averageRate);
         result.put(MeasureType.TMRMmax, CalculationMethod.maxRate);

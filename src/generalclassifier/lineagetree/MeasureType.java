@@ -15,8 +15,9 @@ public enum MeasureType {
 
     // fluorescent markers
     Ig2afc(new String[]{"Ig2afc", "Ig2afc_signal"}, 0, Double.POSITIVE_INFINITY),
-    Sca1meanValue(new String[]{"Sca1", "Sca1_signal"}, 0, Double.POSITIVE_INFINITY),
-    Sca1meanRate(new String[]{"Sca1", "Sca1_signal"}, 0, Double.POSITIVE_INFINITY),
+    Sca1meanValue(new String[]{"Sca1", "Sca1_signal", "Sca1GFP"}, 0, Double.POSITIVE_INFINITY),
+    Sca1meanRate(new String[]{"Sca1", "Sca1_signal", "Sca1GFP"}, 0, Double.POSITIVE_INFINITY),
+    Lysobrite(new String[]{"Lysobrite"}, 0, Double.POSITIVE_INFINITY),
     CD41(new String[]{"CD41", "CD41_signal"}, 0, Double.POSITIVE_INFINITY),
     FcgRIII(new String[]{"FcgRIII", "FcgRIII_signal"}, 0, Double.POSITIVE_INFINITY),
     cMycGFP(new String[]{"cMycGFP", "cMycGFP_signal"}, 0, Double.POSITIVE_INFINITY),

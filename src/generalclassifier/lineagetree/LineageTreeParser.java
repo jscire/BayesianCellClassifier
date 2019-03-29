@@ -66,7 +66,7 @@ public class LineageTreeParser {
             int time = getTimePointInRecord(csvRecord);
 
             if(isFirstMeasure) { // if it's the first measure and maxtimepoint was input relatively to the first time point, then change the maxtimepoint accordingly.
-                if(isMaxTimeRelative) setMaxTimePoint(time + maxTimePoint);
+                if(isMaxTimeRelative) setMaxTimePoint(Math.max(time + maxTimePoint,maxTimePoint)); // use the max to make sure maxTimePoint does not become negative if already at Integer.MAX_VALUE
                 isFirstMeasure = false;
             }
 
@@ -77,11 +77,13 @@ public class LineageTreeParser {
                 continue;
 
             int parentNumber = Cell.findParent(cellNumber);
-            if (parentNumber > 0)
-                cells.get(parentNumber).addChild(cellNumber); // record the observed child of the parent, to know if this parent is a divider or not.
 
             if (cellNumber > maxNumberOfCells) // if cell is in a generation not taken into account, skip the data points
                 continue;
+
+            if (parentNumber > 0 && cells.containsKey(parentNumber))
+                cells.get(parentNumber).addChild(cellNumber); // record the observed child of the parent, to know if this parent is a divider or not.
+
 
             if(!cells.containsKey(cellNumber)) {
                 // add a cell with the new track number
