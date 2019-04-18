@@ -355,10 +355,7 @@ public class  LineageTreeProb extends Distribution {
     }
 
     LineageTree tree;
-
-    boolean rootIsHSC;
-    //TODO allow for specifying the types of leaves or even other cells of the tree.
-
+    
     boolean transitionUponDivisionIsAllowed;
     boolean transitionDuringLifetimeIsAllowed;
     boolean sumOverDaughterCellTypes;
@@ -757,9 +754,6 @@ public class  LineageTreeProb extends Distribution {
         else return "";
     }
 
-    public boolean isHSCtree() {
-        return rootIsHSC;
-    }
 
     public String getCorrespondanceLabelsToNodeArray() {
 
