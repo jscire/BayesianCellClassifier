@@ -273,7 +273,7 @@ public class  LineageTreeProb extends Distribution {
 
         InputGroup perimeterGrowthRateGammaInput = new InputGroup(shapeGammaPerimeterGrowthRateInput, meanGammaPerimeterGrowthRateInput, zeroFractionPerimeterGrowthRateInput,
                 InputGroup.DistributionType.GAMMA);
-        
+
         InputGroup instantSpeedGammaInput = new InputGroup(shapeGammaInstantSpeedInput, meanGammaInstantSpeedInput, zeroFractionInstantSpeedInput,
                 InputGroup.DistributionType.GAMMA);
 
@@ -314,7 +314,7 @@ public class  LineageTreeProb extends Distribution {
                 InputGroup.DistributionType.GAMMA);
 
         InputGroup mot50BetaInput = new InputGroup(alphaBetaMot50Input, betaBetaMot50Input, InputGroup.DistributionType.BETA);
-        
+
 
         result.put(areaGrowthRateLogNormInput, MeasureType.Area);
         result.put(perimeterGrowthRateLogNormInput, MeasureType.Perimeter);
@@ -355,7 +355,7 @@ public class  LineageTreeProb extends Distribution {
     }
 
     LineageTree tree;
-    
+
     boolean transitionUponDivisionIsAllowed;
     boolean transitionDuringLifetimeIsAllowed;
     boolean sumOverDaughterCellTypes;
@@ -473,7 +473,13 @@ public class  LineageTreeProb extends Distribution {
 
         // for each type, compute the conditional probability at the end of the edge, using the pruning algorithm
         double[] probsEndBranch = new double[numberOfTypes];
+
+
         for (int i = 0; i < numberOfTypes; i++) {
+            // if no transition during lifetime and type of cell is fixed: do only calculations for type at start of branch
+            if(!transitionDuringLifetimeIsAllowed && nodeType > -1 && nodeType != i)
+                continue;
+
             for (int j = 0; j < numberOfTypes; j++) {
                 probsEndBranch[i] += 2 * getProbabilityAtDivisionNode(i, j, j) * pruningProbaFirstChild[j] * pruningProbaSecondChild[j];
                 for (int k = (j + 1); k < numberOfTypes; k++) {
@@ -598,7 +604,7 @@ public class  LineageTreeProb extends Distribution {
 
                 if(fateProbabilitiesInput.get().get(typeEndBranch).getValue(1) > 0) // possibility cell dies after end of branch
                     branchProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(1)
-                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
+                            * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
 
                 if (transitionDuringLifetimeIsAllowed && fateProbabilitiesInput.get().get(typeEndBranch).getDimension() > 3) // check if this state can transition
                     //TODO if more than 1 fate that the cell can transition to, take it into account, either by summing the different probas or by having one big proba for all
@@ -1003,7 +1009,7 @@ public class  LineageTreeProb extends Distribution {
 //
 //        probTree.setInputValue("meanFcgRIIIProductionRate", meanNormalFcgRIIIProductionRateInput);
 //        probTree.setInputValue("sdFcgRIIIProductionRate", sdNormalFcgRIIIProductionRateInput);
-        
+
         probTree.initAndValidate();
         double logP;
         logP = probTree.calculateLogP();
