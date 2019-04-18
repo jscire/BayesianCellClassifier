@@ -159,4 +159,12 @@ public class Utils {
 
         return getNormalLogDensity(x, mu, sigma);
     }
+
+    public static double getBetaDensity(double x, double alpha, double beta) {
+        if(x <0 || x>1 || alpha <= 0 || beta <= 0)
+            return 0;
+        else
+            return Math.pow(x, alpha-1)*Math.pow(1-x, beta-1)*Gamma.gamma(alpha + beta)/(Gamma.gamma(alpha) * Gamma.gamma(beta));
+    }
+
 }

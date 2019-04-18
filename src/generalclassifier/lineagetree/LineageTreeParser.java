@@ -40,6 +40,7 @@ public class LineageTreeParser {
     public void setIsMaxTimeRelative(boolean isRelative) {this.isMaxTimeRelative = isRelative;}
 
     //TODO deal with NA values
+    //TODO implement check that tracknumber of root is 1, also force that children are always 2n, 2n+1
     public Map<Integer, Cell> parseRawCells() throws IOException {
         File csvData = new File(inputFileName);
         CSVParser parser = CSVParser.parse(new FileReader(csvData), CSVFormat.EXCEL.withHeader());
@@ -78,12 +79,11 @@ public class LineageTreeParser {
 
             int parentNumber = Cell.findParent(cellNumber);
 
-            if (cellNumber > maxNumberOfCells) // if cell is in a generation not taken into account, skip the data points
-                continue;
-
             if (parentNumber > 0 && cells.containsKey(parentNumber))
                 cells.get(parentNumber).addChild(cellNumber); // record the observed child of the parent, to know if this parent is a divider or not.
 
+            if (cellNumber > maxNumberOfCells) // if cell is in a generation not taken into account, skip the data points
+                continue;
 
             if(!cells.containsKey(cellNumber)) {
                 // add a cell with the new track number
@@ -113,29 +113,6 @@ public class LineageTreeParser {
             return true;
         }
         return false;
-    }
-
-    // not used
-    // TODO remove if useless
-    public Cell parseCell(int CellNumber) throws IOException {
-        File csvData = new File(inputFileName);
-        CSVParser parser = CSVParser.parse(new FileReader(csvData), CSVFormat.EXCEL);
-
-        Cell cell = new Cell(CellNumber);
-
-        for (CSVRecord csvRecord : parser) {
-
-            if(isCellNumberInRecord(csvRecord, cell.trackNumber))
-                // if current line (record) contains this cellNumber, add a timePoint to the stored observations
-                cell.addDataPoint(csvRecord);
-
-            else if(isCellNumberInRecord(csvRecord, 2 * cell.trackNumber)
-                    || isCellNumberInRecord(csvRecord, 2 * cell.trackNumber + 1))
-                // if one of the daughters of the cell is in the record, stop searching lower, the mother cell does not exist anymore
-                break;
-        }
-
-        return cell;
     }
 
     public void setFluoChannelsCorrespondance(String[] fluoChannelsCorrespondance) {

@@ -38,6 +38,7 @@ public class ExperimentalMeasure {
         result.put(MeasureType.YPosition, CalculationMethod.undefined);
 
         result.put(MeasureType.InstantSpeed, CalculationMethod.averageInstantSpeed);
+        result.put(MeasureType.mot50, CalculationMethod.mot50);
 
         return Collections.unmodifiableMap(result);
     }
@@ -130,6 +131,7 @@ public class ExperimentalMeasure {
                 break;
 
             case averageInstantSpeed:
+            case mot50:
             case undefined:
             default:
                 throw new IllegalArgumentException("Cannot summarize this measure. Method is: " + this.calculationMethod);
@@ -183,7 +185,8 @@ public class ExperimentalMeasure {
         averageRate,
         differenceStartToEnd,
         averageValue,
-        averageInstantSpeed
+        averageInstantSpeed,
+        mot50
     }
 }
 

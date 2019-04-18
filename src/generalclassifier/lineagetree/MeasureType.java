@@ -12,12 +12,13 @@ public enum MeasureType {
     XPosition(new String[]{"CentroidX","XMorphologyCh00"}),
     YPosition(new String[]{"CentroidY","YMorphologyCh00"}),
     InstantSpeed(new String[]{"Speed"}, 0, Double.POSITIVE_INFINITY),
+    mot50(new String[]{"mot50"}, 0, 1, false),
 
     // fluorescent markers
     Ig2afc(new String[]{"Ig2afc", "Ig2afc_signal"}, 0, Double.POSITIVE_INFINITY),
-    Sca1meanValue(new String[]{"Sca1", "Sca1_signal", "Sca1GFP"}, 0, Double.POSITIVE_INFINITY),
-    Sca1meanRate(new String[]{"Sca1", "Sca1_signal", "Sca1GFP"}, 0, Double.POSITIVE_INFINITY),
-    Lysobrite(new String[]{"Lysobrite"}, 0, Double.POSITIVE_INFINITY),
+    Sca1meanValue(new String[]{"Sca1", "Sca1_signal", "Sca1GFP", "Sca1Al488"}, 0, Double.POSITIVE_INFINITY),
+    Sca1meanRate(new String[]{"Sca1", "Sca1_signal", "Sca1GFP", "Sca1Al488"}, 0, Double.POSITIVE_INFINITY),
+    Lysobrite(new String[]{"Lysobrite", "LysobriteNIR"}, 0, Double.POSITIVE_INFINITY),
     CD41(new String[]{"CD41", "CD41_signal"}, 0, Double.POSITIVE_INFINITY),
     FcgRIII(new String[]{"FcgRIII", "FcgRIII_signal"}, 0, Double.POSITIVE_INFINITY),
     cMycGFP(new String[]{"cMycGFP", "cMycGFP_signal"}, 0, Double.POSITIVE_INFINITY),
@@ -76,7 +77,7 @@ public enum MeasureType {
      * @return
      */
     boolean isMeasureInCSV(CSVParser parser){
-        if(this == InstantSpeed)
+        if(this == InstantSpeed || this == mot50)
             return (XPosition.isMeasureInCSV(parser) && YPosition.isMeasureInCSV(parser));
 
         for (String name : this.namesInInputFile) {

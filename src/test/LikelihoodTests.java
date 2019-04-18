@@ -14,10 +14,8 @@ import java.util.List;
 
 public class LikelihoodTests extends TestCase{
 
+    //TODO obsolete tests remake unit tests
     //TODO rework on all the tests are we don't take newick inputs anymore
-
-
-
     //TODO the reference values are modified compared to the SCclassify tests. Check if it makes sense.
     // The prob is multiplied by .5 at the root to reflect the expected purity of the pop and by .5 at each (non lost) leaf to reflect the naked expectancy we have on each cell being a certain type (not sure about that part)
     // I left the + k log(0.5) so that it's easily changeable later.

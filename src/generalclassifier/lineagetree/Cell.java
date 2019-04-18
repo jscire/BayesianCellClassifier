@@ -2,6 +2,8 @@ package generalclassifier.lineagetree;
 
 import beast.evolution.tree.Node;
 import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.math3.analysis.interpolation.*;
+import org.apache.commons.math3.analysis.polynomials.PolynomialSplineFunction;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,15 +13,15 @@ import java.util.Map;
 public class Cell extends Node {
 
     public enum Fate {
-        // D: divides, A: apoptoses, L: lost cell, N: does nothing (not sure we'll keep that), U: unobserved
-        D, A, L, N, U
+        // D: divides, A: apoptoses, L: lost cell, U: unobserved
+        D, A, L, U
     }
 
     Fate fate;
-    int trackNumber;
+    private final int trackNumber;
     int childrenNum;
     double edgeLength;
-   // List<double[]> timePoints = new ArrayList<> ();
+    // List<double[]> timePoints = new ArrayList<> ();
 
     List<MeasureType> measureTypes = new ArrayList<>();
 
@@ -63,6 +65,14 @@ public class Cell extends Node {
         this.fate = f;
     }
 
+
+    public int getTrackNumber(){
+        return this.trackNumber;
+    }
+
+    public boolean isRootCell(){
+        return this.trackNumber == 1;
+    }
 
     /**
      * Keep track of the children of a cell, to set its fate to Divider when 2 distinct children are found.
@@ -262,7 +272,8 @@ public class Cell extends Node {
 
         for (ExperimentalMeasure measure : measures) {
             if(measure.calculationMethod != ExperimentalMeasure.CalculationMethod.undefined &&
-                    measure.calculationMethod != ExperimentalMeasure.CalculationMethod.averageInstantSpeed) {
+                    measure.calculationMethod != ExperimentalMeasure.CalculationMethod.averageInstantSpeed &&
+                    measure.calculationMethod != ExperimentalMeasure.CalculationMethod.mot50) {
                 measure.summarize(timePoints);
             }
             // perform checks to see if we'll have to
@@ -282,10 +293,63 @@ public class Cell extends Node {
             for(ExperimentalMeasure measure: measures) {
                 if(measure.measureType == MeasureType.InstantSpeed) {
                     this.setInstantSpeedAndSummarize(xPos, yPos, measure);
-                    break;
+                }
+                if(measure.measureType == MeasureType.mot50) {
+                    this.setMot50(xPos, yPos, measure);
                 }
             }
         }
+    }
+
+    /**
+     * Note: If only one timePoint, no mot-50 is calculated.
+     */
+    void setMot50(ExperimentalMeasure xPos, ExperimentalMeasure yPos, ExperimentalMeasure mot50) {
+        if((timePoints.size() != xPos.dataPoints.size()) || (yPos.dataPoints.size() != timePoints.size()))
+            throw new IllegalArgumentException("All inputs should be of the same size.");
+
+
+        if(timePoints.size() < 3)  { // at least 3 points are required to perform the interpolation and to compute the mot50 value.
+            mot50.dataPoints.add(Double.NaN);
+            return;
+        }
+
+        int numberOfTimePoints = timePoints.size();
+
+        if ( timePoints.get(0) == timePoints.get(numberOfTimePoints -1)) {
+            mot50.dataPoints.add(Double.NaN);
+            return;
+        }
+
+
+        double[] cumulativeDistanceTravelled = new double[numberOfTimePoints];
+
+        cumulativeDistanceTravelled[0] = 0;
+
+        for (int i = 1; i < numberOfTimePoints; i++) {
+
+            double distanceInStep = Math.sqrt(Math.pow(xPos.dataPoints.get(i) - xPos.dataPoints.get(i - 1), 2)
+                    + Math.pow(yPos.dataPoints.get(i) - yPos.dataPoints.get(i - 1), 2));
+
+            distanceInStep = Math.max(distanceInStep, 1E-6); // do not allow for a null distance travelled, to not cause an issue with the interpolation.
+
+            cumulativeDistanceTravelled[i] = cumulativeDistanceTravelled[i - 1] + distanceInStep;
+        }
+
+        double totalDistance = cumulativeDistanceTravelled[numberOfTimePoints -1];
+
+        for (int i = 0; i < cumulativeDistanceTravelled.length; i++) cumulativeDistanceTravelled[i] = cumulativeDistanceTravelled[i]/totalDistance;
+
+        double[] rescaledTime = new double[numberOfTimePoints];
+        for (int i = 0; i < numberOfTimePoints; i++) rescaledTime[i] = (timePoints.get(i) - timePoints.get(0)) / (timePoints.get(numberOfTimePoints -1) - timePoints.get(0));
+
+//        PolynomialSplineFunction interpolationFunction = (new SplineInterpolator()).interpolate(cumulativeDistanceTravelled, rescaledTime);
+        PolynomialSplineFunction interpolationFunction = (new LinearInterpolator()).interpolate(cumulativeDistanceTravelled, rescaledTime);
+
+        double resultSummary = interpolationFunction.value(0.5);
+        resultSummary = Math.min(Math.max(resultSummary, 0), 1);
+
+        mot50.summaryValue = resultSummary;
     }
 
     /**
@@ -307,6 +371,12 @@ public class Cell extends Node {
 
         int numberOfTimePoints = timePoints.size();
 
+
+        if (numberOfTimePoints < 2) {
+            instantSpeed.dataPoints.add(Double.NaN);
+            return;
+        }
+
         for (int i = 1; i < timePoints.size(); i++) {
 
             if (timePoints.get(i) - timePoints.get(i-1) == 0) {
@@ -320,11 +390,6 @@ public class Cell extends Node {
 
             sumOfSpeeds += dist/time;
             instantSpeed.dataPoints.add(dist/time);
-        }
-
-        if (numberOfTimePoints < 2) {
-            instantSpeed.dataPoints.add(Double.NaN);
-            return;
         }
 
         instantSpeed.summaryValue = sumOfSpeeds/(numberOfTimePoints -1);

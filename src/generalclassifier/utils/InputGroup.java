@@ -8,7 +8,8 @@ public class InputGroup {
     public enum DistributionType {
         NORMAL,
         LOGNORMAL,
-        GAMMA
+        GAMMA,
+        BETA
     }
 
     Input<RealParameter> parm1;
@@ -33,6 +34,10 @@ public class InputGroup {
 
     public Input<RealParameter> getParm1(){
         return this.parm1;
+    }
+
+    public Input<RealParameter> getParm2(){
+        return this.parm2;
     }
 
     public Input<RealParameter> getMean(){
@@ -66,7 +71,6 @@ public class InputGroup {
         return distributionType;
     }
 
-
     public double getProbabilityDensity(int cellType, double measuredValue){
 
         double result = 1;
@@ -82,6 +86,9 @@ public class InputGroup {
                     break;
                 case GAMMA:
                     result *= Utils.getGammaDensityShapeMeanParam(measuredValue, this.getShape().get().getArrayValue(cellType), this.getMean().get().getArrayValue(cellType));
+                    break;
+                case BETA:
+                    result *= Utils.getBetaDensity(measuredValue, this.getParm1().get().getArrayValue(cellType), this.getParm2().get().getArrayValue(cellType));
                     break;
                 default:
                     throw new IllegalStateException("Unknown distribution type.");
