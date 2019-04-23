@@ -32,9 +32,12 @@ public class  LineageTreeProb extends Distribution {
             "List of vectors containing probabilities for each cell type of the cell being a divider, apoptoser, non-divider or type-transitioner (if defined).",
             new ArrayList<RealParameter>(), Input.Validate.REQUIRED);
 
+    public Input<List<RealParameter>> medianWeibullInput = new Input<>("medianWeibull",
+            "List of vectors containing Weibull median parameters for each type for division, apoptosis and type-transition (if defined) times.", new ArrayList<RealParameter>());
+
+
     public Input<List<RealParameter>> scaleWeibullInput = new Input<>("scaleWeibull",
-            "List of vectors containing Weibull scale parameters for each type for division, apoptosis and type-transition (if defined) times.",
-            new ArrayList<RealParameter>(), Input.Validate.REQUIRED);
+            "List of vectors containing Weibull scale parameters for each type for division, apoptosis and type-transition (if defined) times.", new ArrayList<RealParameter>());
 
     public Input<List<RealParameter>> shapeWeibullInput = new Input<>("shapeWeibull",
             "List of vectors containing Weibull shape parameters for each type for division, apoptosis and type-transition (if defined) times.",
@@ -356,6 +359,7 @@ public class  LineageTreeProb extends Distribution {
 
     LineageTree tree;
 
+    boolean parametrizeWeibullWithMedian;
     boolean transitionUponDivisionIsAllowed;
     boolean transitionDuringLifetimeIsAllowed;
     boolean sumOverDaughterCellTypes;
@@ -384,8 +388,21 @@ public class  LineageTreeProb extends Distribution {
 //        if(numberOfTypes != 2)
 //            throw new IllegalStateException("Number of types is not two. Such a configuration is not tested yet.");
 
-        if(shapeWeibullInput.get().size() != numberOfTypes || scaleWeibullInput.get().size() != numberOfTypes)
+        if(!(scaleWeibullInput.get().size() == 0 ^ medianWeibullInput.get().size() == 0))
+            throw new IllegalStateException("Either scaleWeibull or medianWeibull is to be specified.");
+
+        parametrizeWeibullWithMedian = medianWeibullInput.get() != null;
+
+        if(shapeWeibullInput.get().size() != numberOfTypes) {
             throw new IllegalStateException("Inputs fateProbabilities, shapeWeibull and scaleWeibull should have the same number of elements: the number of cell types.");
+        } else if(!parametrizeWeibullWithMedian && scaleWeibullInput.get().size() != numberOfTypes) {
+            throw new IllegalStateException("Inputs fateProbabilities, shapeWeibull and scaleWeibull should have the same number of elements: the number of cell types.");
+        } else if(parametrizeWeibullWithMedian && medianWeibullInput.get().size() != numberOfTypes) {
+            throw new IllegalStateException("Inputs fateProbabilities, shapeWeibull and scaleWeibull (or medianWeibull) should have the same number of elements: the number of cell types.");
+        }
+
+
+
 
         if(matrixOfAllowedTransitionsInput.get() != null) {
             transitionDuringLifetimeIsAllowed = true;
@@ -586,13 +603,13 @@ public class  LineageTreeProb extends Distribution {
                 if(node.isRoot()) {
                     // if cell is root cell, take its observed lifetime as the minimal bound of its real lifetime
                     branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getArrayValue(cellFate)
-                            * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate), shapeWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate)));
+                            * Math.exp(-Math.pow(node.getEdgeLength() / getScaleWeibull(typeEndBranch, cellFate), shapeWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate)));
                 }
                 else {
                     // observed lifetime is the real lifetime of the cell
                     branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getArrayValue(cellFate)
                             * Utils.getWeibullDensity(node.getEdgeLength(),
-                            scaleWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate),
+                            getScaleWeibull(typeEndBranch, cellFate),
                             shapeWeibullInput.get().get(typeEndBranch).getArrayValue(cellFate));
                 }
             }
@@ -600,16 +617,16 @@ public class  LineageTreeProb extends Distribution {
                 // two possibilities: cell either divides or dies after end of observation window.
 
                 branchProb = fateProbabilitiesInput.get().get(typeEndBranch).getValue(0) // cell divides after end of branch
-                        * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)));
+                        * Math.exp(-Math.pow(node.getEdgeLength() /  getScaleWeibull(typeEndBranch, 0), shapeWeibullInput.get().get(typeEndBranch).getValue(0)));
 
                 if(fateProbabilitiesInput.get().get(typeEndBranch).getValue(1) > 0) // possibility cell dies after end of branch
                     branchProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(1)
-                            * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
+                            * Math.exp(-Math.pow(node.getEdgeLength() /  getScaleWeibull(typeEndBranch, 1), shapeWeibullInput.get().get(typeEndBranch).getValue(1)));
 
                 if (transitionDuringLifetimeIsAllowed && fateProbabilitiesInput.get().get(typeEndBranch).getDimension() > 3) // check if this state can transition
                     //TODO if more than 1 fate that the cell can transition to, take it into account, either by summing the different probas or by having one big proba for all
                     branchProb += fateProbabilitiesInput.get().get(typeEndBranch).getValue(3) // cell transitions after end of branch
-                            * Math.exp(-Math.pow(node.getEdgeLength() / scaleWeibullInput.get().get(typeEndBranch).getValue(2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
+                            * Math.exp(-Math.pow(node.getEdgeLength() /  getScaleWeibull(typeEndBranch, 2), shapeWeibullInput.get().get(typeEndBranch).getValue(2)));
 
             }
             else {
@@ -638,9 +655,9 @@ public class  LineageTreeProb extends Distribution {
                     DensityProbOfStateTransition f = new DensityProbOfStateTransition(
                             node.getEdgeLength(),
                             shapeWeibullInput.get().get(typeStartBranch).getValue(2),
-                            scaleWeibullInput.get().get(typeStartBranch).getValue(2),
+                            getScaleWeibull(typeStartBranch, 2),
                             shapeWeibullInput.get().get(typeEndBranch).getValue(cellEndFate),
-                            scaleWeibullInput.get().get(typeEndBranch).getValue(cellEndFate));
+                            getScaleWeibull(typeStartBranch, cellEndFate));
 
                     try {
                         double integrationRes = numericalIntegrator.integrate(maxEval, f, 0, 1);
@@ -727,11 +744,27 @@ public class  LineageTreeProb extends Distribution {
      * @return
      */
     private int getFixedCellType(Cell cell){
-        if(!sumOverDaughterCellTypes)
-            return cellTypeInput.get().getValue(treeIdxInput.get() * cell.getTrackNumber());
-        else if(cell.getTrackNumber() == 1) // cell is root cell
-            return cellTypeInput.get().getValue(treeIdxInput.get());
-        else return -1;
+        try {
+            if(!sumOverDaughterCellTypes)
+                return cellTypeInput.get().getValue(treeIdxInput.get() * cell.getTrackNumber());
+            else if(cell.getTrackNumber() == 1) // cell is root cell
+                return cellTypeInput.get().getValue(treeIdxInput.get());
+            else return -1;
+        }
+        catch (Exception e) {
+            throw new IllegalStateException("Attempting to get the type of a cell but failed.");
+        }
+
+    }
+
+    double getScaleWeibull(int type, int fate) {
+        double scale;
+        if(parametrizeWeibullWithMedian)
+            scale = medianWeibullInput.get().get(type).getArrayValue(fate) / Math.pow(Math.log(2), 1.0/shapeWeibullInput.get().get(type).getArrayValue(fate));
+        else
+            scale = scaleWeibullInput.get().get(type).getArrayValue(fate);
+
+        return scale;
     }
 
     @Override
