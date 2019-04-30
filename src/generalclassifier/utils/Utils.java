@@ -1,7 +1,7 @@
 package generalclassifier.utils;
 
-import generalclassifier.lineagetree.MeasureType;
 import org.apache.commons.math3.special.Gamma;
+import org.apache.commons.math3.special.Beta;
 import org.apache.commons.math3.special.Erf;
 
 public class Utils {
@@ -40,6 +40,44 @@ public class Utils {
                 ? 0.0
                 : k/lambda * Math.pow(x/lambda, k-1) * Math.exp(-Math.pow(x/lambda, k));
     }
+
+    /**
+     * Compute density at x under a Weibull distribution with median m
+     * and shape parameter k.
+     *
+     * @param x parameter with distribution
+     * @param m median parameter
+     * @param k shape parameter
+     * @return density at x
+     */
+    public static double getWeibullDensityMedianShapeParam(double x, double m, double k) {
+
+        if(x < 0.0 || m <= 0 || k <= 0)
+            return 0.0;
+        else{
+            double lambda = m/Math.pow(Math.log(2), 1/k);
+            return k/lambda * Math.pow(x/lambda, k-1) * Math.exp(-Math.pow(x/lambda, k));
+        }
+    }
+
+    public static double getWeibullCumulativeDistribution(double x, double lambda, double k) {
+
+        return x<0.0
+                ? 0.0
+                : 1 - Math.exp(-Math.pow(x/lambda, k));
+    }
+
+    public static double getWeibullCumulativeDistributionMedianShapeParam(double x, double m, double k) {
+
+        if(x < 0.0 || m <= 0 || k <= 0)
+            return 0.0;
+        else{
+            double lambda = m/Math.pow(Math.log(2), 1/k);
+            return 1 - Math.exp(-Math.pow(x/lambda, k));
+        }
+    }
+
+
 
     /**
      * Compute log density at x under a Weibull distribution with scale lambda
@@ -133,7 +171,21 @@ public class Utils {
             return Math.pow(x * k/mu, k - 1) * k/mu * Math.exp(-x * k/mu) / Gamma.gamma(k);
     }
 
+    public static double getGammaDensityMeanShapeParam(double x, double mu, double k) {
+        if (x < 0 || k <= 0 || mu <= 0)
+            return 0;
+        else
+            return Math.pow(x * k/mu, k - 1) * k/mu * Math.exp(-x * k/mu) / Gamma.gamma(k);
+    }
+
     public static double getGammaCumulativeDistributionShapeMeanParam(double x, double k, double mu) {
+        if (x <= 0 || k <= 0 || mu <= 0)
+            return 0;
+        else
+            return Gamma.regularizedGammaP(k,k * x/mu);
+    }
+
+    public static double getGammaCumulativeDistributionMeanShapeParam(double x, double mu, double k) {
         if (x <= 0 || k <= 0 || mu <= 0)
             return 0;
         else
@@ -165,6 +217,13 @@ public class Utils {
             return 0;
         else
             return Math.pow(x, alpha-1)*Math.pow(1-x, beta-1)*Gamma.gamma(alpha + beta)/(Gamma.gamma(alpha) * Gamma.gamma(beta));
+    }
+
+    public static double getBetaCumulativeDistribution(double x, double alpha, double beta) {
+        if(x <0 || x>1 || alpha <= 0 || beta <= 0)
+            return 0;
+        else
+            return Beta.regularizedBeta(x, alpha, beta);
     }
 
 }

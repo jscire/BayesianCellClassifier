@@ -102,7 +102,7 @@ public class InputGroup {
 
     public double getComplementaryCumulativeDistribution(int cellType, double measuredValue){
 
-        double result = 0;
+        double result;
         if (measuredValue == 0 && hasZeroFraction && this.zeroFraction.get() != null) // if value is zero and hasZeroFraction, complementary cumulative distribution function has value 1.
             return 1;
         else {

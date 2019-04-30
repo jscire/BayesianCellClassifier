@@ -4,80 +4,70 @@ import beast.core.Input;
 import beast.evolution.tree.Node;
 import beast.evolution.tree.Tree;
 import beast.util.TreeParser;
+import generalclassifier.parametrization.ExperimentalMeasurements;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LineageTree extends Tree {
 
-    public Input<String> experimentalMeasuresFileInput = new Input<>("measuresCSVFile",
-            "CSV file containing all the measures performed on this tree.");
+    public Input<List<ExperimentalMeasurements>> measuresOnCellsInput = new Input<>("measurement",
+            "List of experimental measurements made on cells in the tree.");
 
-    public Input<Integer> maxNumberOfCellsInput = new Input<>("maxNumOfCells", "Maximum number of cells whose measures are taken into account for the analysis. " +
-            "Remember that cells are numbered from 1 at the root, and daughters are 2n, 2n+1. We assume here no apoptosis.");
+    public Input<String> cellsInTreeInput = new Input<>("cellsInTree",
+            "Comma separated list of labels of cells in tree. " +
+            "Cells must be numbered following the convention: root cell is '1'," +
+                    " the daughters of a cell 'n' are '2n' and '2n+1'. ", Input.Validate.REQUIRED);
 
+    //TODO ask about convention for numbering generations
+    public Input<Integer> lastGenerationOfInterestInput = new Input<>("lastGenerationOfInterest",
+            "Root cell is considered to be at generation 1." +
+                    "If not specified, all cells in 'cellsInTree' will be used in the analysis." +
+                    "The point of having more cells in cellsInTree than what the lastGenerationOfInterest imposes" +
+                    " is to provide information what cells do at the end of their lifetime: do they divide or not?.",
+            Input.Validate.REQUIRED);
 
-    public Input<Integer> maxTimePointInput = new Input<>("maxTimePoint", "Maximum number of cells whose measures are taken into account for the analysis. " +
-            "Remember that cells are numbered from 1 at the root, and daughters are 2n, 2n+1. We assume here no apoptosis.");
+    SortedSet<Integer> labelsOfAllCellsInTree;
 
+    HashSet<String> uniqueMeasurementTags;
 
-    public Input<Boolean> isMaxTimeRelativeInput = new Input<>("isMaxTimeRelative", "If true, the final max time point is defined 'input max time' + 'time of first measure'." +
-            " If false, the final max time point is the 'input max time'. Default value: true.");
-
-    public Input<String> frameRateInput = new Input<>("frameRate",
-            "Specify only if time is not explicitly measured in input csv file." +
-                    "Accepted values:  'day', 'hour', 'minute', 'second'");
-
-    static final int rootCellNumberInInput = 1;
-
-    //TODO remove
-   // List<MeasureType> measureTypes = new ArrayList<>();
+    int numberOfCellsInTree;
 
     @Override
     public void initAndValidate() {
 
-        if(experimentalMeasuresFileInput.get() == null) throw new IllegalArgumentException("No input file to initialize the tree.");
 
-        Map<Integer, Cell> cells  = new HashMap<>();
-        try {
-            LineageTreeParser parser = new LineageTreeParser(experimentalMeasuresFileInput.get());
+        String tag;
 
-            if(maxNumberOfCellsInput.get() != null)
-                parser.setMaxNumberOfCells(maxNumberOfCellsInput.get());
+        //check for duplication in measurement tags
+        for(ExperimentalMeasurements measure : measuresOnCellsInput.get()) {
 
-            if(maxTimePointInput.get() != null)
-                parser.setMaxTimePoint(maxTimePointInput.get());
+            tag = measure.getMeasurementTag();
 
-            if(isMaxTimeRelativeInput.get() != null)
-                parser.setIsMaxTimeRelative(isMaxTimeRelativeInput.get());
-
-            cells = parser.parseRawCells();
-        } catch (IOException e) {
-            e.printStackTrace();
+            if(uniqueMeasurementTags.contains(tag))
+                throw new IllegalArgumentException("Duplicated tag: " + tag + " in list of measurements.");
+            else
+                uniqueMeasurementTags.add(tag);
         }
 
-        Cell rootCell = Cell.buildTreeAndGetRoot(cells, rootCellNumberInInput);
+        //TODO add check fir correct formatting og the cellsInTree string
+        String[] labelsOfCellsInTreeAsStrings = cellsInTreeInput.get().replaceAll("\\s","").split(",");
+
+        labelsOfAllCellsInTree = new TreeSet<Integer>();
+
+        for(String s : labelsOfCellsInTreeAsStrings) {
+            labelsOfAllCellsInTree.add(Integer.parseInt(s));
+        }
+
+        Map<Integer, Cell> cellsOfInterest =  buildAllCellsOfInterest();
+
+        Cell rootCell = buildTreeAndGetRoot(1, cellsOfInterest);
         rootCell.labelNodesInTree();
 
         setRoot(rootCell);
         initArrays();
 
-        // apply an offset to the nodeheights so that they conform to the standard format
-        double maxHeight = 0;
-        for(Node node : getNodesAsArray()) {
-            if(node.getHeight() > maxHeight) maxHeight = node.getHeight();
-        }
-
-        for(Node node : getNodesAsArray()) {
-            node.setHeight(maxHeight - node.getHeight());
-        }
-
         super.initAndValidate();
-
-        //TODO add fates
     }
 
     // naive way of getting a node by its label number
@@ -88,23 +78,63 @@ public class LineageTree extends Tree {
         return null;
     }
 
+    public Map<Integer, Cell> buildAllCellsOfInterest() {
+
+        int maxCellNumber = (int) Math.pow(2, lastGenerationOfInterestInput.get()) -1;
+
+        Map<Integer, Cell> cells  = new HashMap<>();
+
+        for(Integer cellLabel : labelsOfAllCellsInTree) {
+            if (cellLabel > maxCellNumber || cells.containsKey(cellLabel))
+                continue;
+
+            Cell newCell = new Cell(cellLabel);
+            newCell.addExperimentalMeasures(measuresOnCellsInput.get());
+
+            cells.put(cellLabel, newCell);
+        }
+
+        return cells;
+    }
+
+    public Cell buildTreeAndGetRoot(int rootKey, Map<Integer, Cell> cellsOfInterest) {
+        if(!cellsOfInterest.containsKey(rootKey))
+            throw new IllegalArgumentException("There is no cell with label " + rootKey + " in the set of cells of interest.");
+
+        Cell rootCell = cellsOfInterest.get(rootKey);
+
+        if(labelsOfAllCellsInTree.contains(2*rootKey) || labelsOfAllCellsInTree.contains(2*rootKey + 1))
+            rootCell.setAsDivider();
+
+        if(cellsOfInterest.containsKey(2*rootKey)) {
+            Cell child1 = buildTreeAndGetRoot(2*rootKey, cellsOfInterest);
+            child1.setParent(rootCell);
+            rootCell.addChild(child1);
+        }
+        if(cellsOfInterest.containsKey(2*rootKey + 1)) {
+            Cell child2 = buildTreeAndGetRoot(2*rootKey + 1, cellsOfInterest);
+            child2.setParent(rootCell);
+            rootCell.addChild(child2);
+        }
+
+        return rootCell;
+    }
+
     //TODO implement proper toString method to at least print the cell tracknumbers in the metadata.
     @Override
     public String toString() {
         return super.toString();
     }
 
-    //TODO that's a dirty attempt to go around the fact that nodes in Tree should be numbered the standard way for BEAST, not the way they are in the input data
-    //TODO does it even make sense to do things that way?
-    /**
-     * StateNode implementation *
-     */
+
+    //LineageTrees are not treated as StateNodes, so we override the store/restore with empty methods.
     @Override
     protected void store() {}
     @Override
     public void restore() {}
 
     public static void main(String[] parms) {
+        //TODO update example to adapt to new code.
 
 //        String fileName = "../Data/Examples/toyFile.csv";
         String fileName = "../Data/Examples/testFile_shortLife.csv";

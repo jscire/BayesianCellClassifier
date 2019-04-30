@@ -2,8 +2,6 @@ package test;
 
 import beast.core.parameter.BooleanParameter;
 import beast.core.parameter.RealParameter;
-import com.sun.org.apache.regexp.internal.RE;
-import generalclassifier.core.LineageTreeProb;
 import generalclassifier.lineagetree.LineageTree;
 import junit.framework.TestCase;
 import org.junit.Test;
