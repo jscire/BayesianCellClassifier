@@ -6,6 +6,7 @@ import beast.core.parameter.RealParameter;
 import generalclassifier.lineagetree.Cell;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 
@@ -48,6 +49,7 @@ public class Parametrization extends CalculationNode {
     public void initAndValidate() {
 
         String tag;
+        uniqueMeasurementTags = new HashSet<>();
 
         numberOfCellTypes = -1;
 
@@ -73,20 +75,19 @@ public class Parametrization extends CalculationNode {
                     "correspond to the number of cell types");
 
         for (RealParameter param : transitionUponDivisionProbsInput.get()) {
-            if(param.getDimension() != (numberOfCellTypes - 1) * numberOfCellTypes / 2.0)
+            if(param.getDimension() != (numberOfCellTypes + 1) * numberOfCellTypes / 2.0)
                 throw new IllegalArgumentException("Wrong number of elements in an element of transitionUponDivisionProbs." +
-                        "There should be ((numberOfCellTypes - 1) * numberOfCellTypes / 2) elements");
+                        "There should be ((numberOfCellTypes + 1) * numberOfCellTypes / 2) elements");
         }
 
 
-        if(fateProbabilitiesInput.get() == null) {
-            List<RealParameter> fateProbabilities = new ArrayList<RealParameter>();
+        if(fateProbabilitiesInput.get().size() == 0) {
             for (int i = 0; i < numberOfCellTypes; i++) {
-                fateProbabilities.add(new RealParameter("1.0 0.0"));
+                this.setInputValue("fateProbabilities", new RealParameter("1.0 0.0"));
             }
-            fateProbabilitiesInput.set(fateProbabilities);
         }
         else {
+            //TODO add check that all fateProbabilities elements sum up to 1 with an error margin.
             for(RealParameter param : fateProbabilitiesInput.get()) {
                 if(param.getDimension() != 2)
                     throw new IllegalArgumentException("Wrong number of elements in element of fateProbabilitiesInput." +
@@ -132,5 +133,46 @@ public class Parametrization extends CalculationNode {
         int idxFate = fate == Cell.Fate.D ? 0 : 1;
 
         return fateProbabilitiesInput.get().get(cellType).getArrayValue(idxFate) * (1 - lossProbability);
+    }
+    
+    public static void main(String[] args){
+        String tag1 = "lifetime";
+
+        DistributionForMeasurement distr1 = new DistributionForMeasurement();
+
+        distr1.initByName("measurementTag", tag1,
+                "parm1Distribution", new RealParameter("1.0 2.3"),
+                "parm2Distribution", new RealParameter("0.5 0.3"),
+                "zeroFraction", new RealParameter("0.01 0.01"),
+                "distributionType", "lognormal",
+                "estimateType", "max",
+                "isAppliedToRootCells", true);
+
+        distr1.initAndValidate();
+
+        String tag2 = "Sca1";
+
+        DistributionForMeasurement distr2 = new DistributionForMeasurement();
+
+        distr2.initByName("measurementTag", tag2,
+                "parm1Distribution", new RealParameter("1.0 2.3"),
+                "parm2Distribution", new RealParameter("0.5 0.3"),
+                "zeroFraction", new RealParameter("0.01 0.01"),
+                "distributionType", "lognormal",
+                "estimateType", "max",
+                "isAppliedToRootCells", true);
+
+        distr2.initAndValidate();
+
+        Parametrization parametrization = new Parametrization();
+
+        parametrization.initByName("distributions", distr1,
+                "distributions", distr2,
+                "transitionUponDivisionProbs", new RealParameter("0.2 0.25 0.55"),
+                "transitionUponDivisionProbs", new RealParameter("0.3 0.1 0.6"));
+
+        System.out.println("Done");
+
+
     }
 }

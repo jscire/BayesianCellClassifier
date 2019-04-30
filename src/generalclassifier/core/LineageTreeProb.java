@@ -9,6 +9,7 @@ import beast.evolution.tree.Node;
 import generalclassifier.lineagetree.Cell;
 import generalclassifier.lineagetree.LineageTree;
 import generalclassifier.parametrization.DistributionForMeasurement;
+import generalclassifier.parametrization.ExperimentalMeasurements;
 import generalclassifier.parametrization.Parametrization;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 
@@ -34,10 +35,13 @@ public class LineageTreeProb extends Distribution {
 
     public Input<Integer> treeIdxInput = new Input<>("treeIdx",
             "If provided, this is an index into the rootIsHSC boolean " +
-                    "parameter specifying which element corresponds to the root " +
-                    "HSC status.");
+                    "parameter specifying which element corresponds to the root HSC status. Default: 0",
+            0);
 
-    public Input<Boolean> rootTypeOnlyInput = new Input<>("rootTypeOnly", "If true, only the types of the root cells are inferred, the types of other cells are marginalized over. Default: true", true);
+    public Input<Boolean> rootTypeOnlyInput = new Input<>("rootTypeOnly",
+            "If true, only the types of the root cells are inferred," +
+                    " the types of other cells are marginalized over. Default: true",
+            true);
 
 
     LineageTree tree;
@@ -187,7 +191,7 @@ public class LineageTreeProb extends Distribution {
 
         for (DistributionForMeasurement d : parametrizationInput.get().getDistributions()) {
 
-            if(cell.isRootCell() && !d.isAppliedOnRootCells()) continue; // cell is root cell and measure is not taken into account for root cells
+            if(cell.isRootCell() && !d.isAppliedToRootCells()) continue; // cell is root cell and measure is not taken into account for root cells
 
             double measuredValue = cell.getValueMeasured(d.getMeasurementTag());
 
@@ -258,163 +262,78 @@ public class LineageTreeProb extends Distribution {
         return true;
     } //TODO implement real check, do not recalculate if nothing changed.
 
-    public static void main(String[] args) throws IOException {
-        //TODO update example
-        String fileName = "../Data/Examples/MinusInfinityLik4.csv";
+    public static void main(String[] args) {
+
+
         LineageTree tree =  new LineageTree();
-        tree.setInputValue("measuresCSVFile", fileName);
+
+        ExperimentalMeasurements measuresSca1 = new ExperimentalMeasurements();
+        measuresSca1.initByName("measurementTag", "Sca1",
+                "values", "1:534, 2:543624.534432, 4:00.32, 0007: 012.32174839");
+        tree.setInputValue("measurement", measuresSca1);
+
+        ExperimentalMeasurements measuresLifetime = new ExperimentalMeasurements();
+        measuresLifetime.initByName("measurementTag", "lifetime",
+                "values", "1:4, 3:02, 5:54, 6:47");
+        tree.setInputValue("measurement", measuresLifetime);
+
+        ExperimentalMeasurements measuresTMRM = new ExperimentalMeasurements();
+        measuresTMRM.initByName("measurementTag", "TMRM",
+                "values", "3:543.789, 2:43.278, 1:243.43, 9:123");
+        tree.setInputValue("measurement", measuresTMRM);
+
+        tree.setInputValue("cellsInTree", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
+        tree.setInputValue("lastGenerationOfInterest", 3);
 
         tree.initAndValidate();
 
-        System.out.println(tree.toString());
+        String tag1 = "lifetime";
 
-        LineageTreeProb probTree = new LineageTreeProb();
-        probTree.setInputValue("tree", tree);
+        DistributionForMeasurement distr1 = new DistributionForMeasurement();
 
-        List<RealParameter> fateProbabilities = new ArrayList<>();
-        fateProbabilities.add(new RealParameter("1.0 0. 0."));
-        fateProbabilities.add(new RealParameter("1.0 0. 0."));
-        fateProbabilities.add(new RealParameter("1.0 0. 0."));
+        distr1.initByName("measurementTag", tag1,
+                "parm1Distribution", new RealParameter("1.0 2.3"),
+                "parm2Distribution", new RealParameter("0.5 0.3"),
+                "zeroFraction", new RealParameter("0.01 0.01"),
+                "distributionType", "lognormal",
+                "estimateType", "max",
+                "isAppliedToRootCells", true);
 
-        List<RealParameter> scaleWeibull = new ArrayList<>();
-        scaleWeibull.add(new RealParameter("10 10"));
-        scaleWeibull.add(new RealParameter("10 10"));
-        scaleWeibull.add(new RealParameter("10 10"));
+        distr1.initAndValidate();
 
-        List<RealParameter> shapeWeibull = new ArrayList<>();
-        shapeWeibull.add(new RealParameter("1 1"));
-        shapeWeibull.add(new RealParameter("1 1"));
-        shapeWeibull.add(new RealParameter("1 1"));
+        String tag2 = "Sca1";
 
-        List<RealParameter> transitionUponDivisionProbs = new ArrayList<>();
-        transitionUponDivisionProbs.add(new RealParameter("0.3 0.1 0.1 0.15 0.15 0.2"));
-        transitionUponDivisionProbs.add(new RealParameter("0 0 0 1.0 0 0 "));
-        transitionUponDivisionProbs.add(new RealParameter("0 0 0 0 0 1.0 "));
+        DistributionForMeasurement distr2 = new DistributionForMeasurement();
 
+        distr2.initByName("measurementTag", tag2,
+                "parm1Distribution", new RealParameter("1.0 2.3"),
+                "parm2Distribution", new RealParameter("0.5 0.3"),
+                "zeroFraction", new RealParameter("0.01 0.01"),
+                "distributionType", "lognormal",
+                "estimateType", "max",
+                "isAppliedToRootCells", true);
 
-        RealParameter meanLogNormalAreaGrowthRateInput = new RealParameter("2.0 2.0 2.0");
-        RealParameter sdLogNormalAreaGrowthRateInput = new RealParameter("2.0 2.0 2.0");
-        RealParameter zeroFractionAreaGrowthRateInput = new RealParameter("0.1 0.1 0.1");
+        distr2.initAndValidate();
 
-        RealParameter meanNormalEccentricityInput = new RealParameter("0.5 .5 .5");
-        RealParameter sdNormalEccentricityInput = new RealParameter("0.3 0.3 .3");
+        Parametrization parametrization = new Parametrization();
 
-        RealParameter meanLogNormalInstantSpeedInput = new RealParameter("1. 1. 1.");
-        RealParameter sdLogNormalInstantSpeedInput = new RealParameter("1.0 1.0 1.");
-        RealParameter zeroFractionInstantSpeedInput = new RealParameter("0.1 0.1 0.1");
+        parametrization.initByName("distributions", distr1,
+                "distributions", distr2,
+                "transitionUponDivisionProbs", new RealParameter("0.2 0.25 0.55"),
+                "transitionUponDivisionProbs", new RealParameter("0.3 0.1 0.6"));
 
-        RealParameter meanLogNormalTMRMProductionRateInput = new RealParameter("3.0 3.0 3.0");
-        RealParameter sdLogNormalTMRMProductionRateInput = new RealParameter("2.0 2.0 2.0");
-        RealParameter zeroFractionTMRMProductionRateInput = new RealParameter("0.1 0.1 0.1");
+        LineageTreeProb treeProb  =new LineageTreeProb();
 
-        RealParameter meanLogNormalTMRMMaxRateInput = new RealParameter("2.0 2.0 2.0");
-        RealParameter sdLogNormalTMRMMaxRateInput = new RealParameter("1.0 1.0 1.0");
-        RealParameter zeroFractionTMRMMaxRateInput = new RealParameter("0.1 0.1 0.1");
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("0 1 0 0 0 1 1 1 1 1 1 1 1 1 1 1 0 1"));
 
-        RealParameter meanLogNormalROSProductionRateInput = new RealParameter("1.0 1.0 1.0");
-        RealParameter sdLogNormalROSProductionRateInput = new RealParameter("2.0 2.0 2.0");
-        RealParameter zeroFractionROSProductionRateInput = new RealParameter("0.1 0.1 0.1");
+        treeProb.initAndValidate();
 
-        RealParameter meanLogNormalCD71APCProductionRateInput = new RealParameter("5.0 5.0 5.0");
-        RealParameter sdLogNormalCD71APCProductionRateInput = new RealParameter("2.0 2.0 2.0");
-        RealParameter zeroFractionCD71APCProductionRateInput = new RealParameter("0.1 0.1 0.1");
+        double logP = treeProb.calculateLogP();
 
-        RealParameter meanLogNormalCD71PEProductionRateInput = new RealParameter("2.0 2.0 2.0");
-        RealParameter sdLogNormalCD71PEProductionRateInput = new RealParameter("2.0 2.0 2.0");
-        RealParameter zeroFractionCD71PEProductionRateInput = new RealParameter("0.1 0.1 0.1");
+        System.out.println(logP);
 
-        RealParameter meanLogNormalcMycGFPMaxRateInput = new RealParameter("1.0 1.0 1.0");
-        RealParameter sdLogNormalcMycGFPMaxRateInput = new RealParameter("2.0 2.0 2.0");
-        RealParameter zeroFractioncMycGFPMaxRateInput = new RealParameter("0.1 0.1 0.1");
-
-
-//        RealParameter meanNormalPerimeterGrowthRateInput = new RealParameter("0. 1.");
-//        RealParameter sdNormalPerimeterGrowthRateInput = new RealParameter("5.0 10.0");
-
-        probTree.setInputValue("transitionUponDivisionProbs", transitionUponDivisionProbs);
-        probTree.setInputValue("fateProbabilities", fateProbabilities);
-        probTree.setInputValue("scaleWeibull",scaleWeibull);
-        probTree.setInputValue("shapeWeibull",shapeWeibull);
-        probTree.setInputValue("lossProb", new RealParameter("0."));
-
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-        probTree.setInputValue("rootType", new IntegerParameter("2"));
-
-        probTree.setInputValue("meanAreaGrowthRate", meanLogNormalAreaGrowthRateInput);
-        probTree.setInputValue("sdAreaGrowthRate", sdLogNormalAreaGrowthRateInput);
-        probTree.setInputValue("zeroFractionAreaGrowthRate", zeroFractionAreaGrowthRateInput);
-
-        probTree.setInputValue("meanEccentricity", meanNormalEccentricityInput);
-        probTree.setInputValue("sdEccentricity", sdNormalEccentricityInput);
-
-        probTree.setInputValue("meanInstantSpeed", meanLogNormalInstantSpeedInput);
-        probTree.setInputValue("sdInstantSpeed", sdLogNormalInstantSpeedInput);
-        probTree.setInputValue("zeroFractionInstantSpeed", zeroFractionInstantSpeedInput);
-
-        probTree.setInputValue("meanTMRMProductionRate", meanLogNormalTMRMProductionRateInput);
-        probTree.setInputValue("sdTMRMProductionRate", sdLogNormalTMRMProductionRateInput);
-        probTree.setInputValue("zeroFractionTMRMProductionRate", zeroFractionROSProductionRateInput);
-
-        probTree.setInputValue("meanTMRMMaxRate", meanLogNormalTMRMMaxRateInput);
-        probTree.setInputValue("sdTMRMMaxRate", sdLogNormalTMRMMaxRateInput);
-        probTree.setInputValue("zeroFractionTMRMMaxRate", zeroFractionTMRMMaxRateInput);
-
-        probTree.setInputValue("meanROSProductionRate", meanLogNormalROSProductionRateInput);
-        probTree.setInputValue("sdROSProductionRate", sdLogNormalROSProductionRateInput);
-        probTree.setInputValue("zeroFractionROSProductionRate", zeroFractionROSProductionRateInput);
-
-        probTree.setInputValue("meanCD71APCProductionRate", meanLogNormalCD71APCProductionRateInput);
-        probTree.setInputValue("sdCD71APCProductionRate", sdLogNormalCD71APCProductionRateInput);
-        probTree.setInputValue("zeroFractionCD71APCProductionRate", zeroFractionCD71APCProductionRateInput);
-
-        probTree.setInputValue("meanCD71PEProductionRate", meanLogNormalCD71PEProductionRateInput);
-        probTree.setInputValue("sdCD71PEProductionRate", sdLogNormalCD71PEProductionRateInput);
-        probTree.setInputValue("zeroFractionCD71PEProductionRate", zeroFractionCD71PEProductionRateInput);
-
-        probTree.setInputValue("meancMycGFPMaxRate", meanLogNormalcMycGFPMaxRateInput);
-        probTree.setInputValue("sdcMycGFPMaxRate", sdLogNormalcMycGFPMaxRateInput);
-        probTree.setInputValue("zeroFractioncMycGFPMaxRate", zeroFractioncMycGFPMaxRateInput);
-
-//        probTree.setInputValue("",);
-//        probTree.setInputValue("",);
-//
-//        probTree.setInputValue("",);
-//        probTree.setInputValue("",);
-//
-//        probTree.setInputValue("",);
-//        probTree.setInputValue("",);
-//
-//        probTree.setInputValue("",);
-//        probTree.setInputValue("",);
-//
-//        probTree.setInputValue("",);
-//        probTree.setInputValue("",);
-//
-//        probTree.setInputValue("",);
-//        probTree.setInputValue("",);
-//
-//        probTree.setInputValue("",);
-//        probTree.setInputValue("",);
-//
-//        probTree.setInputValue("",);
-//        probTree.setInputValue("",);
-
-
-        //probTree.setInputValue("meanPerimeterGrowthRate", meanNormalPerimeterGrowthRateInput);
-//        probTree.setInputValue("sdPerimeterGrowthRate", sdNormalPerimeterGrowthRateInput);
-//        probTree.setInputValue("meanCD41ProductionRate", meanNormalCD41ProductionRateInput);
-//        probTree.setInputValue("sdCD41ProductionRate", sdNormalCD41ProductionRateInput);
-//
-//        probTree.setInputValue("meanFcgRIIIProductionRate", meanNormalFcgRIIIProductionRateInput);
-//        probTree.setInputValue("sdFcgRIIIProductionRate", sdNormalFcgRIIIProductionRateInput);
-
-        probTree.initAndValidate();
-        double logP;
-        logP = probTree.calculateLogP();
-
-        System.out.println("logP = " + logP);
-
-        System.out.println(Math.log(Double.MAX_VALUE));
     }
 
 

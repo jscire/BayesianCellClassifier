@@ -8,10 +8,10 @@ import java.util.HashMap;
 //TODO rename class
 public class ExperimentalMeasurements extends BEASTObject {
 
-    Input<String> tagInput = new Input<>("measurementTag", "Tag specifying the type of measurement.",
+    public Input<String> tagInput = new Input<>("measurementTag", "Tag specifying the type of measurement.",
             Input.Validate.REQUIRED);
 
-    Input<String> valuesInput = new Input<>("values", "Values format: " +
+    public Input<String> valuesInput = new Input<>("values", "Values format: " +
             "'..., N:XXXX.XX, N+1:YYYYY.YYY,...'" +
             " with N the cell number and XXXX.XXX the summary value for cell N. " +
             "If no value is given for a given cell, the cell is considered to have no observed " +
@@ -25,10 +25,12 @@ public class ExperimentalMeasurements extends BEASTObject {
     @Override
     public void initAndValidate() {
         measurementTag = tagInput.get();
+        measuredValues = new HashMap<>();
         parseMeasuresInput();
     }
 
     public void parseMeasuresInput(){
+        //TODO add check that all cell numbers are > 0
         //remove all whitespaces and split on commas
         String[] parts = valuesInput.get().replaceAll("\\s","").split(",");
         for(String s : parts) {
@@ -52,5 +54,14 @@ public class ExperimentalMeasurements extends BEASTObject {
 
     public HashMap<Integer, Double> getMeasuredValues(){
         return measuredValues;
+    }
+
+    public static void main(String[] args) {
+        String tag = "Sca1";
+        String values = "1:534, 2:543624.534432, 4:00.32, 0007: 012.32174839";
+
+        ExperimentalMeasurements measures = new ExperimentalMeasurements();
+        measures.initByName("measurementTag", tag, "values", values);
+        measures.initAndValidate();
     }
 }

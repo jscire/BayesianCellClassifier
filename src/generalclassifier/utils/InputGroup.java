@@ -3,6 +3,7 @@ package generalclassifier.utils;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 
+//TODO remove class (requires to remove stuff in Utils as well)
 public class InputGroup {
 
     public enum DistributionType {

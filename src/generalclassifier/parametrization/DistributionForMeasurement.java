@@ -1,6 +1,7 @@
 package generalclassifier.parametrization;
 
 import beast.core.CalculationNode;
+import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import generalclassifier.lineagetree.Cell;
@@ -56,7 +57,7 @@ public class DistributionForMeasurement extends CalculationNode {
             "mean",
             new String[]{"mean", "max", "min"});
 
-    public Input<Boolean> isAppliedOnRootCellsInput = new Input<>("isAppliedOnRootCells",
+    public Input<Boolean> isAppliedOnRootCellsInput = new Input<>("isAppliedToRootCells",
             "Default: true",
             true);
 
@@ -68,7 +69,7 @@ public class DistributionForMeasurement extends CalculationNode {
 
     boolean hasZeroFraction;
 
-    boolean isAppliedOnRootCells;
+    boolean isAppliedToRootCells;
 
     public int numberOfCellTypes;
 
@@ -127,9 +128,8 @@ public class DistributionForMeasurement extends CalculationNode {
 
         measurementTag = measurementTagInput.get();
 
-        isAppliedOnRootCells = isAppliedOnRootCellsInput.get();
+        isAppliedToRootCells = isAppliedOnRootCellsInput.get();
     }
-
 
     /**
      * For now, value is independent of cell fate (does not matter if divides or dies, even for lifetime)
@@ -251,10 +251,11 @@ public class DistributionForMeasurement extends CalculationNode {
         }
 
         if(hasZeroFraction) {
-            p /= 1 + zeroFractionInput.get().getArrayValue(cellType); // normalize to 1.
 
             if (measuredValue >= 0)
                 p += zeroFractionInput.get().getArrayValue(cellType);
+
+            p /= (1 + zeroFractionInput.get().getArrayValue(cellType)); // normalize to 1.
         }
 
         return p;
@@ -301,10 +302,10 @@ public class DistributionForMeasurement extends CalculationNode {
         }
 
         if(hasZeroFraction) {
-            p /= 1 + zeroFractionInput.get().getArrayValue(cellType); // normalize to 1.
-
             if (measuredValue == 0)
                 p += zeroFractionInput.get().getArrayValue(cellType);
+
+            p /= (1 + zeroFractionInput.get().getArrayValue(cellType)); // normalize to 1.
         }
 
         return p;
@@ -318,8 +319,27 @@ public class DistributionForMeasurement extends CalculationNode {
         return numberOfCellTypes;
     }
 
-    public boolean isAppliedOnRootCells(){
-        return isAppliedOnRootCells;
+    public boolean isAppliedToRootCells(){
+        return isAppliedToRootCells;
+    }
+
+    public static void main(String[] args) {
+        String tag = "lifetime";
+
+        DistributionForMeasurement distr = new DistributionForMeasurement();
+
+        distr.initByName("measurementTag", tag,
+        "parm1Distribution", new RealParameter("1.0 2.3"),
+        "parm2Distribution", new RealParameter("0.5 0.3"),
+        "zeroFraction", new RealParameter("0.01 0.01"),
+        "distributionType", "lognormal",
+        "estimateType", "max",
+        "isAppliedToRootCells", true);
+
+        distr.initAndValidate();
+
+        double p = distr.getProbability(3.8, 0, true, Cell.Fate.U);
+        System.out.println("Prob: " + p);
     }
 
 }

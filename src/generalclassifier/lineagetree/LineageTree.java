@@ -12,7 +12,8 @@ import java.util.*;
 public class LineageTree extends Tree {
 
     public Input<List<ExperimentalMeasurements>> measuresOnCellsInput = new Input<>("measurement",
-            "List of experimental measurements made on cells in the tree.");
+            "List of experimental measurements made on cells in the tree.",
+            new ArrayList<>());
 
     public Input<String> cellsInTreeInput = new Input<>("cellsInTree",
             "Comma separated list of labels of cells in tree. " +
@@ -31,13 +32,12 @@ public class LineageTree extends Tree {
 
     HashSet<String> uniqueMeasurementTags;
 
-    int numberOfCellsInTree;
 
     @Override
     public void initAndValidate() {
 
-
         String tag;
+        uniqueMeasurementTags = new HashSet<>();
 
         //check for duplication in measurement tags
         for(ExperimentalMeasurements measure : measuresOnCellsInput.get()) {
@@ -50,7 +50,7 @@ public class LineageTree extends Tree {
                 uniqueMeasurementTags.add(tag);
         }
 
-        //TODO add check fir correct formatting og the cellsInTree string
+        //TODO add check for correct formatting of the cellsInTree string (all cells number must be > 0 integers)
         String[] labelsOfCellsInTreeAsStrings = cellsInTreeInput.get().replaceAll("\\s","").split(",");
 
         labelsOfAllCellsInTree = new TreeSet<Integer>();
@@ -134,12 +134,26 @@ public class LineageTree extends Tree {
     public void restore() {}
 
     public static void main(String[] parms) {
-        //TODO update example to adapt to new code.
 
-//        String fileName = "../Data/Examples/toyFile.csv";
-        String fileName = "../Data/Examples/testFile_shortLife.csv";
         LineageTree tree =  new LineageTree();
-        tree.setInputValue("measuresCSVFile", fileName);
+
+        ExperimentalMeasurements measuresSca1 = new ExperimentalMeasurements();
+        measuresSca1.initByName("measurementTag", "Sca1",
+                "values", "1:534, 2:543624.534432, 4:00.32, 0007: 012.32174839");
+        tree.setInputValue("measurement", measuresSca1);
+
+        ExperimentalMeasurements measuresLifetime = new ExperimentalMeasurements();
+        measuresLifetime.initByName("measurementTag", "lifetime",
+                "values", "1:4, 3:02, 5:54, 6:47");
+        tree.setInputValue("measurement", measuresLifetime);
+
+        ExperimentalMeasurements measuresTMRM = new ExperimentalMeasurements();
+        measuresTMRM.initByName("measurementTag", "TMRM",
+                "values", "3:543.789, 2:43.278, 1:243.43, 9:123");
+        tree.setInputValue("measurement", measuresTMRM);
+
+        tree.setInputValue("cellsInTree", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
+        tree.setInputValue("lastGenerationOfInterest", 3);
 
         tree.initAndValidate();
 

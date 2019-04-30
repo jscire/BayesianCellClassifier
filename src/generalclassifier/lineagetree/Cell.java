@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Cell extends Node {
 
-    //TODO implement way to pass fate of cells as being A or L
+    //TODO implement way to pass fate of cells as being A or L, and take the fates into account in calculations
     // so far only fates D and U are implemented
 
     public enum Fate {
@@ -20,7 +20,7 @@ public class Cell extends Node {
     boolean isIncompletelyMeasured;
     int childrenNum;
 
-    HashMap<String, Double> experimentalMeasures;
+    HashMap<String, Double> experimentalMeasures = new HashMap<>();
 
     public Cell(int trackNumber) {
         this.trackNumber = trackNumber;
