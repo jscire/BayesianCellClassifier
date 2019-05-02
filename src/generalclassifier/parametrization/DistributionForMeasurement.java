@@ -67,7 +67,7 @@ public class DistributionForMeasurement extends CalculationNode {
 
     String measurementTag;
 
-    boolean hasZeroFraction;
+    boolean hasZeroFraction = false;
 
     boolean isAppliedToRootCells;
 
@@ -81,10 +81,20 @@ public class DistributionForMeasurement extends CalculationNode {
 
         numberOfCellTypes = parm1DistributionInput.get().getDimension();
 
-        hasZeroFraction = zeroFractionInput.get() != null;
+
+        // set hasZeroFraction to true if input zeroFraction is not null and if at least one of the values is not zero.
+        // we assume that only scaling operators and that the zero fractions will stay 0 if they start at 0.
+        if(zeroFractionInput.get() != null) {
+            for (int i = 0; i < zeroFractionInput.get().getDimension(); i++) {
+                if(zeroFractionInput.get().getArrayValue(i) != 0){
+                    hasZeroFraction = true;
+                    break;
+                }
+            }
+        }
 
         if(hasZeroFraction && zeroFractionInput.get().getDimension() != numberOfCellTypes)
-            throw new IllegalArgumentException("Invalid number of dimemsions in zero fraction." +
+            throw new IllegalArgumentException("Invalid number of dimensions in zero fraction." +
                     " It should correspond to the number of cell types.");
 
         switch(estimateTypeInput.get()) {

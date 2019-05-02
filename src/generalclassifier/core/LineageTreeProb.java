@@ -264,26 +264,85 @@ public class LineageTreeProb extends Distribution {
 
     public static void main(String[] args) {
 
+// first test commented out to test stuff further below, but it works as is
+//        LineageTree tree =  new LineageTree();
+//
+//        ExperimentalMeasurements measuresSca1 = new ExperimentalMeasurements();
+//        measuresSca1.initByName("measurementTag", "Sca1",
+//                "values", "1:534, 2:543624.534432, 4:00.32, 0007: 012.32174839");
+//        tree.setInputValue("measurement", measuresSca1);
+//
+//        ExperimentalMeasurements measuresLifetime = new ExperimentalMeasurements();
+//        measuresLifetime.initByName("measurementTag", "lifetime",
+//                "values", "1:4, 3:02, 5:54, 6:47");
+//        tree.setInputValue("measurement", measuresLifetime);
+//
+//        ExperimentalMeasurements measuresTMRM = new ExperimentalMeasurements();
+//        measuresTMRM.initByName("measurementTag", "TMRM",
+//                "values", "3:543.789, 2:43.278, 1:243.43, 9:123");
+//        tree.setInputValue("measurement", measuresTMRM);
+//
+//        tree.setInputValue("cellsInTree", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
+//        tree.setInputValue("lastGenerationOfInterest", 3);
+//
+//        tree.initAndValidate();
+//
+//        String tag1 = "lifetime";
+//
+//        DistributionForMeasurement distr1 = new DistributionForMeasurement();
+//
+//        distr1.initByName("measurementTag", tag1,
+//                "parm1Distribution", new RealParameter("1.0 2.3"),
+//                "parm2Distribution", new RealParameter("0.5 0.3"),
+//                "zeroFraction", new RealParameter("0.01 0.01"),
+//                "distributionType", "lognormal",
+//                "estimateType", "max",
+//                "isAppliedToRootCells", true);
+//
+//        distr1.initAndValidate();
+//
+//        String tag2 = "Sca1";
+//
+//        DistributionForMeasurement distr2 = new DistributionForMeasurement();
+//
+//        distr2.initByName("measurementTag", tag2,
+//                "parm1Distribution", new RealParameter("1.0 2.3"),
+//                "parm2Distribution", new RealParameter("0.5 0.3"),
+//                "zeroFraction", new RealParameter("0.01 0.01"),
+//                "distributionType", "lognormal",
+//                "estimateType", "max",
+//                "isAppliedToRootCells", true);
+//
+//        distr2.initAndValidate();
+//
+//        Parametrization parametrization = new Parametrization();
+//
+//        parametrization.initByName("distribution", distr1,
+//                "distribution", distr2,
+//                "transitionUponDivisionProbs", new RealParameter("0.2 0.25 0.55"),
+//                "transitionUponDivisionProbs", new RealParameter("0.3 0.1 0.6"));
+//
+//        LineageTreeProb treeProb  =new LineageTreeProb();
+//
+//        treeProb.setInputValue("tree", tree);
+//        treeProb.setInputValue("parametrization", parametrization);
+//        treeProb.setInputValue("cellType", new IntegerParameter("0 1 0 0 0 1 1 1 1 1 1 1 1 1 1 1 0 1"));
+//
+//        treeProb.initAndValidate();
+//
+//        double logP = treeProb.calculateLogP();
+//
+//        System.out.println(logP);
 
         LineageTree tree =  new LineageTree();
 
-        ExperimentalMeasurements measuresSca1 = new ExperimentalMeasurements();
-        measuresSca1.initByName("measurementTag", "Sca1",
-                "values", "1:534, 2:543624.534432, 4:00.32, 0007: 012.32174839");
-        tree.setInputValue("measurement", measuresSca1);
+        ExperimentalMeasurements measuresMot50 = new ExperimentalMeasurements();
+        measuresMot50.initByName("measurementTag", "mot_50",
+                "values", "1:0.5, 2:0.55, 3:0.45");
+        tree.setInputValue("measurement", measuresMot50);
 
-        ExperimentalMeasurements measuresLifetime = new ExperimentalMeasurements();
-        measuresLifetime.initByName("measurementTag", "lifetime",
-                "values", "1:4, 3:02, 5:54, 6:47");
-        tree.setInputValue("measurement", measuresLifetime);
-
-        ExperimentalMeasurements measuresTMRM = new ExperimentalMeasurements();
-        measuresTMRM.initByName("measurementTag", "TMRM",
-                "values", "3:543.789, 2:43.278, 1:243.43, 9:123");
-        tree.setInputValue("measurement", measuresTMRM);
-
-        tree.setInputValue("cellsInTree", "1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16");
-        tree.setInputValue("lastGenerationOfInterest", 3);
+        tree.setInputValue("cellsInTree", "1,2,3,4,5,6,7");
+        tree.setInputValue("lastGenerationOfInterest", 2);
 
         tree.initAndValidate();
 
@@ -291,42 +350,27 @@ public class LineageTreeProb extends Distribution {
 
         DistributionForMeasurement distr1 = new DistributionForMeasurement();
 
-        distr1.initByName("measurementTag", tag1,
-                "parm1Distribution", new RealParameter("1.0 2.3"),
-                "parm2Distribution", new RealParameter("0.5 0.3"),
-                "zeroFraction", new RealParameter("0.01 0.01"),
-                "distributionType", "lognormal",
-                "estimateType", "max",
+        distr1.initByName("measurementTag", "mot_50",
+                "parm1Distribution", new RealParameter("3.68 131"),
+                "parm2Distribution", new RealParameter("3.6 10.8"),
+                "distributionType", "beta",
+                "estimateType", "mean",
                 "isAppliedToRootCells", true);
 
         distr1.initAndValidate();
 
-        String tag2 = "Sca1";
-
-        DistributionForMeasurement distr2 = new DistributionForMeasurement();
-
-        distr2.initByName("measurementTag", tag2,
-                "parm1Distribution", new RealParameter("1.0 2.3"),
-                "parm2Distribution", new RealParameter("0.5 0.3"),
-                "zeroFraction", new RealParameter("0.01 0.01"),
-                "distributionType", "lognormal",
-                "estimateType", "max",
-                "isAppliedToRootCells", true);
-
-        distr2.initAndValidate();
-
         Parametrization parametrization = new Parametrization();
 
-        parametrization.initByName("distributions", distr1,
-                "distributions", distr2,
+        parametrization.initByName("distribution", distr1,
                 "transitionUponDivisionProbs", new RealParameter("0.2 0.25 0.55"),
-                "transitionUponDivisionProbs", new RealParameter("0.3 0.1 0.6"));
+                "transitionUponDivisionProbs", new RealParameter("0 0 1"));
 
         LineageTreeProb treeProb  =new LineageTreeProb();
 
         treeProb.setInputValue("tree", tree);
         treeProb.setInputValue("parametrization", parametrization);
-        treeProb.setInputValue("cellType", new IntegerParameter("0 1 0 0 0 1 1 1 1 1 1 1 1 1 1 1 0 1"));
+        treeProb.setInputValue("cellType", new IntegerParameter("0"));
+        treeProb.setInputValue("rootTypeOnly", "true");
 
         treeProb.initAndValidate();
 

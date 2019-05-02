@@ -213,10 +213,14 @@ public class Utils {
     }
 
     public static double getBetaDensity(double x, double alpha, double beta) {
+
         if(x <0 || x>1 || alpha <= 0 || beta <= 0)
             return 0;
-        else
-            return Math.pow(x, alpha-1)*Math.pow(1-x, beta-1)*Gamma.gamma(alpha + beta)/(Gamma.gamma(alpha) * Gamma.gamma(beta));
+        else {
+            double logBetaDensity = (alpha - 1) * Math.log(x) + (beta - 1) * Math.log(1 - x) - Beta.logBeta(alpha, beta);
+            return Math.exp(logBetaDensity);
+        }
+
     }
 
     public static double getBetaCumulativeDistribution(double x, double alpha, double beta) {
@@ -224,6 +228,19 @@ public class Utils {
             return 0;
         else
             return Beta.regularizedBeta(x, alpha, beta);
+    }
+
+
+    public static void main(String[] args){
+        double alpha = 80;
+        double beta = 80;
+        double gammaAlphaPlusBeta = Gamma.gamma(alpha + beta);
+
+        double betaValue = Beta.logBeta(alpha, beta);
+
+        System.out.println(betaValue);
+
+        System.out.println(gammaAlphaPlusBeta);
     }
 
 }

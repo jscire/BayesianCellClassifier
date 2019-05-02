@@ -13,7 +13,7 @@ import java.util.List;
 //TODO rename class
 public class Parametrization extends CalculationNode {
 
-    public Input<List<DistributionForMeasurement>> distributionsInput = new Input<>("distributions",
+    public Input<List<DistributionForMeasurement>> distributionsInput = new Input<>("distribution",
             "List of DistributionForMeasurement," +
                     "containing all the types of phenotypic measurements taken into account " +
                     "and the characteristics of the distribution they are modeled by.",
@@ -166,8 +166,8 @@ public class Parametrization extends CalculationNode {
 
         Parametrization parametrization = new Parametrization();
 
-        parametrization.initByName("distributions", distr1,
-                "distributions", distr2,
+        parametrization.initByName("distribution", distr1,
+                "distribution", distr2,
                 "transitionUponDivisionProbs", new RealParameter("0.2 0.25 0.55"),
                 "transitionUponDivisionProbs", new RealParameter("0.3 0.1 0.6"));
 
