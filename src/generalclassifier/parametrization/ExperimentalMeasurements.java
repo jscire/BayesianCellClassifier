@@ -37,7 +37,11 @@ public class ExperimentalMeasurements extends BEASTObject {
             if(s.contains(":")) {
                 try{
                     Integer cellNumber = Integer.parseInt(s.split(":")[0]);
-                    Double measuredValue = Double.parseDouble(s.split(":")[1]);
+                    Double measuredValue;
+                    if(s.split(":").length < 2) // missing value
+                        measuredValue = Double.NaN;
+                    else
+                        measuredValue = Double.parseDouble(s.split(":")[1]);
                     measuredValues.put(cellNumber, measuredValue);
                 }
                 catch(Exception e) {

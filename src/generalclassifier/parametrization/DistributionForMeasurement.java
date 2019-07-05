@@ -61,6 +61,7 @@ public class DistributionForMeasurement extends CalculationNode {
             "Default: true",
             true);
 
+
     DistributionType distributionType;
 
     EstimateType estimateType;
@@ -323,6 +324,31 @@ public class DistributionForMeasurement extends CalculationNode {
 
     public String getMeasurementTag(){
         return measurementTag;
+    }
+
+    public DistributionType getDistributionType() {
+        return distributionType;
+    }
+
+    public boolean getHasZeroFraction(){
+        return hasZeroFraction;
+    }
+
+    public double getZeroFraction(){
+        if (!hasZeroFraction) return 0.0;
+        return zeroFractionInput.get().getValue();
+    }
+
+    public double getParm1(int cellType){
+        if(cellType >= numberOfCellTypes)
+            throw new IllegalArgumentException("Invalid cell type (higher than number of cell types.");
+        return parm1DistributionInput.get().getArrayValue(cellType);
+    }
+
+    public double getParm2(int cellType){
+        if(cellType >= numberOfCellTypes)
+            throw new IllegalArgumentException("Invalid cell type (higher than number of cell types.");
+        return parm2DistributionInput.get().getArrayValue(cellType);
     }
 
     public int getNumberOfCellTypes(){

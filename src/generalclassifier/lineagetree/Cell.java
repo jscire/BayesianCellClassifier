@@ -1,9 +1,17 @@
 package generalclassifier.lineagetree;
 
+import beast.core.Distribution;
 import beast.evolution.tree.Node;
+import generalclassifier.parametrization.DistributionForMeasurement;
 import generalclassifier.parametrization.ExperimentalMeasurements;
+import generalclassifier.parametrization.Parametrization;
+import generalclassifier.utils.Utils;
 
+import java.text.DecimalFormat;
+import java.text.NumberFormat;
 import java.util.*;
+
+import static generalclassifier.lineagetree.Cell.Fate.*;
 
 public class Cell extends Node {
 
@@ -16,11 +24,13 @@ public class Cell extends Node {
     }
 
     Fate fate;
-    private final int trackNumber;
+    protected final int trackNumber;
     boolean isIncompletelyMeasured;
     int childrenNum;
+    NumberFormat numberFormat = new DecimalFormat("####0.000");
 
     HashMap<String, Double> experimentalMeasures = new HashMap<>();
+
 
     public Cell(int trackNumber) {
         this.trackNumber = trackNumber;
@@ -34,22 +44,22 @@ public class Cell extends Node {
     }
 
     public void setFate(Fate f) {
+        switch (f) {
+            case D:
+                /*
+                 * Set the cell as being a dividing cell.
+                 * If not root, set isIncompletelyMeasured to false
+                 * to mark that the cell has been measured over its entire lifetime
+                 */
+                if(!this.isRootCell()) isIncompletelyMeasured = false;
+                break;
+            default:
+        }
         this.fate = f;
     }
 
     public boolean isLostCell(){
         return fate == Fate.L;
-    }
-
-    /**
-     * Set the cell as being a dividing cell.
-     * If not root, set isIncompletelyMeasured to false
-     * to mark that the cell has been measured over its entire lifetime
-     */
-    public void setAsDivider(){
-        setFate(Fate.D);
-        if(!this.isRootCell())
-            isIncompletelyMeasured = false;
     }
 
     public int getTrackNumber(){
@@ -135,6 +145,15 @@ public class Cell extends Node {
 
         for (Cell child : (List<Cell>) (List) getChildren())
             child.getAllInternalNodes(internalNodes);
+    }
+
+    public String toCSVRecord(SortedSet<String> sortedTags){
+        String res = "";
+        res += trackNumber + "," + fate.toString();
+        for(String tag : sortedTags) {
+            res += "," + numberFormat.format(experimentalMeasures.get(tag));
+        }
+        return res;
     }
 
 }

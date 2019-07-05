@@ -1,5 +1,10 @@
 package generalclassifier.utils;
 
+import generalclassifier.parametrization.DistributionForMeasurement;
+import org.apache.commons.math3.distribution.BetaDistribution;
+import org.apache.commons.math3.distribution.GammaDistribution;
+import org.apache.commons.math3.distribution.LogNormalDistribution;
+import org.apache.commons.math3.distribution.NormalDistribution;
 import org.apache.commons.math3.special.Gamma;
 import org.apache.commons.math3.special.Beta;
 import org.apache.commons.math3.special.Erf;
@@ -228,6 +233,25 @@ public class Utils {
             return 0;
         else
             return Beta.regularizedBeta(x, alpha, beta);
+    }
+
+    public static double getRandomValueFromDistribution(DistributionForMeasurement.DistributionType distrType, double parm1, double parm2) {
+        switch (distrType) {
+            case NORMAL:
+                return new NormalDistribution(parm1, parm2).sample();
+            case LOGNORMAL:
+                return new LogNormalDistribution(parm1, parm2).sample();
+            case BETA:
+                return new BetaDistribution(parm1, parm2).sample();
+            case GAMMA_MEAN_SHAPE:
+                if(parm2 == 0)
+                    throw new IllegalArgumentException("Shape parameter of gamma distribution cannot be 0.");
+                double shape = parm2;
+                double scale = parm1/parm2;
+                return new GammaDistribution(shape, scale).sample();
+            default:
+                throw new IllegalArgumentException("Distribution type not implemented yet in simulation.");
+        }
     }
 
 

@@ -1,12 +1,11 @@
 package generalclassifier.core;
 
-import beast.core.Distribution;
-import beast.core.Input;
-import beast.core.State;
+import beast.core.*;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
 import generalclassifier.lineagetree.Cell;
+import generalclassifier.lineagetree.CellTree;
 import generalclassifier.lineagetree.LineageTree;
 import generalclassifier.parametrization.DistributionForMeasurement;
 import generalclassifier.parametrization.ExperimentalMeasurements;
@@ -19,7 +18,7 @@ import java.util.*;
 
 public class LineageTreeProb extends Distribution {
 
-    public Input<LineageTree> lineageTreeInput = new Input<>("tree",
+    public Input<CellTree> lineageTreeInput = new Input<>("tree",
             "Lineage tree.",
             Input.Validate.REQUIRED);
 
@@ -44,7 +43,7 @@ public class LineageTreeProb extends Distribution {
             true);
 
 
-    LineageTree tree;
+    CellTree tree;
 
     boolean sumOverDaughterCellTypes;
 
@@ -77,13 +76,11 @@ public class LineageTreeProb extends Distribution {
     public double calculateLogP() {
         logP = 0.0;
 
-        //for now prior is that frequency is equal for all types
-        //TODO allow for more flexibility
         try {
             double p = 0;
             double[] resultPruning = calculatePruningProb((Cell) tree.getRoot());
             for (int i = 0; i < numberOfCellTypes; i++) {
-                p += (resultPruning[i] * 1.0/ numberOfCellTypes);
+                p += (resultPruning[i] * parametrizationInput.get().getTypeFreq(i));
             }
             logP = Math.log(p);
         } catch (Exception e) {
@@ -150,6 +147,12 @@ public class LineageTreeProb extends Distribution {
                     }
                 }
             }
+            else if(child2Type > -1 && child1Type > -1) { // fixed type for both children
+                for (int i = 0; i < numberOfCellTypes; i++) {
+                        pruningProb[i] += parametrizationInput.get().getTransitionProbability(i, child1Type, child2Type) *
+                                pruningProbFirstChild[child1Type] * pruningProbSecondChild[child2Type];
+                }
+            }
             else {
                 throw new IllegalStateException("Invalid types for parentCell, child1 or child2.");
             }
@@ -173,6 +176,12 @@ public class LineageTreeProb extends Distribution {
                 for (int j = 0; j < numberOfCellTypes; j++) {
                     pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, j, child2Type) *
                             pruningProbFirstChild[j] * pruningProbSecondChild[child2Type];
+                }
+            }
+            else if(child2Type > -1 && child1Type > -1) { // fixed type for both children
+                for (int j = 0; j < numberOfCellTypes; j++) {
+                    pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, child1Type, child2Type) *
+                            pruningProbFirstChild[child1Type] * pruningProbSecondChild[child2Type];
                 }
             }
             else {
@@ -214,8 +223,10 @@ public class LineageTreeProb extends Distribution {
      */
     private int getFixedCellType(Cell cell){
         try {
-            if(!sumOverDaughterCellTypes)
-                return cellTypeInput.get().getValue(treeIdxInput.get() * cell.getTrackNumber());
+            if(!sumOverDaughterCellTypes) {
+                return cellTypeInput.get().getValue(treeIdxInput.get() + cell.getTrackNumber() - 1); // track numbers start at 1, so we substract 1
+            }
+
             else if(cell.getTrackNumber() == 1) // cell is root cell
                 return cellTypeInput.get().getValue(treeIdxInput.get());
             else return -1;
@@ -259,8 +270,39 @@ public class LineageTreeProb extends Distribution {
 
     @Override
     protected boolean requiresRecalculation() {
-        return true;
-    } //TODO implement real check, do not recalculate if nothing changed.
+        try {
+            if (cellTypeInput.get().somethingIsDirty()) {
+                if (sumOverDaughterCellTypes) {
+                    if (cellTypeInput.get().isDirty(treeIdxInput.get()))
+//                        System.out.println(treeIdxInput.get());
+                        return true;
+                    //TODO can we add "else return false"? we would need to know for sure that cellTypeInput is the only dirty element
+                } else {
+                    for (int cellLabel :  lineageTreeInput.get().getLabelsOfCellsOfInterest()) {
+                        if (cellTypeInput.get().isDirty(treeIdxInput.get() + cellLabel - 1))
+                            return true;
+                    }
+                }
+            }
+
+            for (BEASTInterface beastObject : listActiveBEASTObjects()) {
+                if (beastObject == cellTypeInput.get()) continue;
+
+                if (beastObject instanceof StateNode && ((StateNode) beastObject).somethingIsDirty()) {
+                    return true;
+                }
+
+                if (beastObject instanceof CalculationNode && ((CalculationNode) beastObject).isDirtyCalculation()) {
+                    return true;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return false;
+
+    }
 
     public static void main(String[] args) {
 

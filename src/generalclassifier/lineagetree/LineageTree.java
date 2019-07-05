@@ -9,7 +9,7 @@ import generalclassifier.parametrization.ExperimentalMeasurements;
 import java.io.IOException;
 import java.util.*;
 
-public class LineageTree extends Tree {
+public class LineageTree extends CellTree {
 
     public Input<List<ExperimentalMeasurements>> measuresOnCellsInput = new Input<>("measurement",
             "List of experimental measurements made on cells in the tree.",
@@ -18,26 +18,21 @@ public class LineageTree extends Tree {
     public Input<String> cellsInTreeInput = new Input<>("cellsInTree",
             "Comma separated list of labels of cells in tree. " +
             "Cells must be numbered following the convention: root cell is '1'," +
-                    " the daughters of a cell 'n' are '2n' and '2n+1'. ", Input.Validate.REQUIRED);
+                    " the daughters of a cell 'n' are '2n' and '2n+1'. ");
 
-    //TODO ask about convention for numbering generations
-    public Input<Integer> lastGenerationOfInterestInput = new Input<>("lastGenerationOfInterest",
-            "Root cell is considered to be at generation 1." +
-                    "If not specified, all cells in 'cellsInTree' will be used in the analysis." +
-                    "The point of having more cells in cellsInTree than what the lastGenerationOfInterest imposes" +
-                    " is to provide information what cells do at the end of their lifetime: do they divide or not?.",
-            Input.Validate.REQUIRED);
+    //TODO ongoing work, continue
+    public Input<Boolean> isLastgenerationCompleteInput = new Input<>("isLastGenerationComplete",
+            "Have the cells in the last generation of interest been tracked for their entire lifespan?" +
+                    "", Boolean.TRUE );
 
     SortedSet<Integer> labelsOfAllCellsInTree;
-
-    HashSet<String> uniqueMeasurementTags;
 
 
     @Override
     public void initAndValidate() {
 
         String tag;
-        uniqueMeasurementTags = new HashSet<>();
+        uniqueMeasurementTags = new TreeSet<>();
 
         //check for duplication in measurement tags
         for(ExperimentalMeasurements measure : measuresOnCellsInput.get()) {
@@ -50,16 +45,30 @@ public class LineageTree extends Tree {
                 uniqueMeasurementTags.add(tag);
         }
 
-        //TODO add check for correct formatting of the cellsInTree string (all cells number must be > 0 integers)
-        String[] labelsOfCellsInTreeAsStrings = cellsInTreeInput.get().replaceAll("\\s","").split(",");
+        if(cellsInTreeInput.get() != null) {
+            //TODO add check for correct formatting of the cellsInTree string (all cell numbers must be > 0 integers)
+            String[] labelsOfCellsInTreeAsStrings = cellsInTreeInput.get().replaceAll("\\s","").split(",");
 
-        labelsOfAllCellsInTree = new TreeSet<Integer>();
+            labelsOfAllCellsInTree = new TreeSet<>();
 
-        for(String s : labelsOfCellsInTreeAsStrings) {
-            labelsOfAllCellsInTree.add(Integer.parseInt(s));
+            for(String s : labelsOfCellsInTreeAsStrings) {
+                labelsOfAllCellsInTree.add(Integer.parseInt(s));
+            }
+        }
+        else {
+            labelsOfAllCellsInTree = new TreeSet<>();
+            for (int i = 1; i < Math.pow(2, lastGenerationOfInterestInput.get()); i++) {
+                labelsOfAllCellsInTree.add(i);
+            }
         }
 
         Map<Integer, Cell> cellsOfInterest =  buildAllCellsOfInterest();
+
+        labelsOfCellsOfInterest = new TreeSet<Integer>();
+
+        for(Integer i : cellsOfInterest.keySet()) {
+            labelsOfCellsOfInterest.add(i);
+        }
 
         Cell rootCell = buildTreeAndGetRoot(1, cellsOfInterest);
         rootCell.labelNodesInTree();
@@ -104,7 +113,7 @@ public class LineageTree extends Tree {
         Cell rootCell = cellsOfInterest.get(rootKey);
 
         if(labelsOfAllCellsInTree.contains(2*rootKey) || labelsOfAllCellsInTree.contains(2*rootKey + 1))
-            rootCell.setAsDivider();
+            rootCell.setFate(Cell.Fate.D);
 
         if(cellsOfInterest.containsKey(2*rootKey)) {
             Cell child1 = buildTreeAndGetRoot(2*rootKey, cellsOfInterest);
@@ -120,10 +129,12 @@ public class LineageTree extends Tree {
         return rootCell;
     }
 
-    //TODO implement proper toString method to at least print the cell tracknumbers in the metadata.
-    @Override
-    public String toString() {
+    public String toCSV() {
         return super.toString();
+    }
+
+    public SortedSet<Integer> getLabelsOfCellsOfInterest(){
+        return labelsOfCellsOfInterest;
     }
 
 

@@ -5,10 +5,7 @@ import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import generalclassifier.lineagetree.Cell;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 
 //TODO rename class
 public class Parametrization extends CalculationNode {
@@ -37,19 +34,24 @@ public class Parametrization extends CalculationNode {
                     "Default: 1 for dividing, 0 for apoptosing for all types",
             new ArrayList<RealParameter>());
 
+    public Input<RealParameter> typeFrequenciesInput = new Input<>("typeFrequencies",
+            "Default: 1/numberOfCellTypes for each type.");
+
     public Input<RealParameter> lossProbInput = new Input<>("lossProb",
             "Probability of losing any given cell. Default: 0",
             new RealParameter("0"));
 
     public int numberOfCellTypes;
 
-    HashSet<String> uniqueMeasurementTags;
+    public final double ERRORMARGIN = 1e-3;
+
+    SortedSet<String> uniqueMeasurementTags;
 
     @Override
     public void initAndValidate() {
 
         String tag;
-        uniqueMeasurementTags = new HashSet<>();
+        uniqueMeasurementTags = new TreeSet<>();
 
         numberOfCellTypes = -1;
 
@@ -74,6 +76,7 @@ public class Parametrization extends CalculationNode {
             throw new IllegalArgumentException("Size of list of transitionUponDivisionProbs should " +
                     "correspond to the number of cell types");
 
+        //TODO add check that all transitionUponDivisions elements sum up to 1 with an error margin.
         for (RealParameter param : transitionUponDivisionProbsInput.get()) {
             if(param.getDimension() != (numberOfCellTypes + 1) * numberOfCellTypes / 2.0)
                 throw new IllegalArgumentException("Wrong number of elements in an element of transitionUponDivisionProbs." +
@@ -95,6 +98,26 @@ public class Parametrization extends CalculationNode {
             }
         }
 
+        if(typeFrequenciesInput.get() == null) {
+            double defaultFrequency = 1.0/numberOfCellTypes;
+            String freqInputVal = "";
+            for (int i = 0; i < numberOfCellTypes; i++) {
+                freqInputVal += (defaultFrequency + " ");
+            }
+            this.setInputValue("typeFrequencies", new RealParameter(freqInputVal));
+        }
+        else if (typeFrequenciesInput.get().getDimension() != numberOfCellTypes) {
+            throw new IllegalArgumentException("Wrong number of dimensions in typeFrequenciesInput.");
+        }
+        else {
+            double totalFreq = 0;
+            for (int i = 0; i < numberOfCellTypes; i++) {
+                totalFreq += typeFrequenciesInput.get().getArrayValue(i);
+            }
+            if(Math.abs(1-totalFreq) > ERRORMARGIN)
+                throw new IllegalArgumentException("Type frequencies do not sum to 1.");
+        }
+
         if(lossProbInput.get() != null && lossProbInput.get().getDimension() != 1)
             throw new IllegalArgumentException("lossProb must be of dimension 1.");
     }
@@ -103,7 +126,7 @@ public class Parametrization extends CalculationNode {
         return distributionsInput.get();
     }
 
-    public double getTransitionProbability(int typeParent, int typeChild1, int typeChild2){
+    public double getTransitionProbability(int typeMother, int typeChild1, int typeChild2){
 
         if(typeChild1 > typeChild2) {
             int temp = typeChild2;
@@ -113,7 +136,20 @@ public class Parametrization extends CalculationNode {
 
         int indexInFlattenedArray = numberOfCellTypes * typeChild1 + typeChild2 - typeChild1 * (typeChild1+1)/2;
 
-        return transitionUponDivisionProbsInput.get().get(typeParent).getArrayValue(indexInFlattenedArray);
+        return transitionUponDivisionProbsInput.get().get(typeMother).getArrayValue(indexInFlattenedArray);
+    }
+    
+    public double[] getTransitionProbabilitiesForMotherType(int typeMother){
+
+        double[] probs = new double[transitionUponDivisionProbsInput.get().get(typeMother).getDimension()];
+        for (int i = 0; i < probs.length; i++) {
+            probs[i] = transitionUponDivisionProbsInput.get().get(typeMother).getArrayValue(i);
+        }
+        return probs;
+    }
+
+    public SortedSet<String> getMeasurementTags(){
+        return uniqueMeasurementTags;
     }
 
     public double getLossProbability() {
@@ -133,6 +169,22 @@ public class Parametrization extends CalculationNode {
         int idxFate = fate == Cell.Fate.D ? 0 : 1;
 
         return fateProbabilitiesInput.get().get(cellType).getArrayValue(idxFate) * (1 - lossProbability);
+    }
+
+    public double[] getFateProbability(int cellType) {
+        double[] probs = new double[fateProbabilitiesInput.get().get(cellType).getDimension()];
+        for (int i = 0; i < probs.length; i++) {
+            probs[i] = fateProbabilitiesInput.get().get(cellType).getArrayValue(i);
+        }
+        return probs;
+    }
+
+    public double getTypeFreq(int type){
+        return typeFrequenciesInput.get().getArrayValue(type);
+    }
+
+    public int getNumberOfCellTypes() {
+        return numberOfCellTypes;
     }
     
     public static void main(String[] args){
