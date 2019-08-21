@@ -1,329 +1,379 @@
 package test;
 
-import beast.core.parameter.BooleanParameter;
+import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
+import generalclassifier.core.LineageTreeProb;
 import generalclassifier.lineagetree.LineageTree;
+import generalclassifier.parametrization.DistributionForMeasurement;
+import generalclassifier.parametrization.ExperimentalMeasurements;
+import generalclassifier.parametrization.Parametrization;
 import junit.framework.TestCase;
 import org.junit.Test;
 
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 
 public class LikelihoodTests extends TestCase{
 
-    //TODO obsolete tests remake unit tests
-    //TODO rework on all the tests are we don't take newick inputs anymore
-    //TODO the reference values are modified compared to the SCclassify tests. Check if it makes sense.
-    // The prob is multiplied by .5 at the root to reflect the expected purity of the pop and by .5 at each (non lost) leaf to reflect the naked expectancy we have on each cell being a certain type (not sure about that part)
-    // I left the + k log(0.5) so that it's easily changeable later. //TODO remove
 
-//    @Test
-//    /**
-//     * Reference values come from calculations "by hand" in R
-//     */
-//    public void testBasicLikelihood() throws Exception{
-//        LineageTree tree = new LineageTree();
-//        LineageTreeProb probTree = new LineageTreeProb();
-//
-//        List<RealParameter> fateProbabilities = new ArrayList<>();
-//        fateProbabilities.add(new RealParameter("0.4 0.4 0.2"));
-//        fateProbabilities.add(new RealParameter("0.3 0.3 0.4"));
-//
-//        List<RealParameter> scaleWeibull = new ArrayList<>();
-//        scaleWeibull.add(new RealParameter("2 2"));
-//        scaleWeibull.add(new RealParameter("3 3"));
-//
-//        List<RealParameter> shapeWeibull = new ArrayList<>();
-//        shapeWeibull.add(new RealParameter("1 1"));
-//        shapeWeibull.add(new RealParameter("1 1"));
-//
-//        List<RealParameter> probsTransitionUponDivision = new ArrayList<>();
-//        probsTransitionUponDivision.add(new RealParameter("0.5 0.3 0.2"));
-//        probsTransitionUponDivision.add(new RealParameter("0 0 1.0"));
-//
-//        probTree.setInputValue("probsOfTransitionUponDivision", probsTransitionUponDivision);
-//        probTree.setInputValue("fateProbabilities", fateProbabilities);
-//        probTree.setInputValue("scaleWeibull",scaleWeibull);
-//        probTree.setInputValue("shapeWeibull",shapeWeibull);
-//        probTree.setInputValue("lossProb", new RealParameter("0.1"));
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//
-//        double logP;
-//
-//        // Basic tree: 1A:34;
-//        tree.setInputValue("newick", "1A:34;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -18.7148 + 2*Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -13.74128 + 2*Math.log(0.5), 1e-4);
-//
-//
-//        // Basic tree: 1N:26;
-//        tree.setInputValue("newick", "1N:26;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -1.714789 + 2*Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -1.021393 + 2*Math.log(0.5), 1e-4);
-//
-//
-//        // Basic tree: 1L:22;
-//        tree.setInputValue("newick", "1L:22;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -2.302585 + Math.log(0.5), 1e-4);
-//
-//        // Tree with 2 leaves: (2L:4,3N:3)1D:2;
-//        tree.setInputValue("newick", "(2L:4,3N:3)1D:2;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -5.611862 + 2*Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -5.959421 + 2*Math.log(0.5), 1e-4);
-//
-//        // Tree with 2 leaves: (2A:4,3N:3)1D:2;
-//        tree.setInputValue("newick", "(2A:4,3N:3)1D:2;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -7.034257 + 3*Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -7.398115 + 3* Math.log(0.5), 1e-4);
-//
-//        // Tree with 4 leaves: ((4A:7,5A:2)2D:1,(6D:6,7A:9)3D:3)1D:4;
-//        tree.setInputValue("newick", "((4A:7,5A:2)2D:1,(6D:6,7A:9)3D:3)1D:4;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -26.78519 + 5* Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -27.52229 + 5* Math.log(0.5), 1e-4);
-//
-//        // Tree with 4 leaves: ((4L:7,5A:2)2D:1,(6N:6,7L:9)3D:3)1D:4;
-//        tree.setInputValue("newick", "((4L:7,5A:2)2D:1,(6N:6,7L:9)3D:3)1D:4;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -17.32192 + 3*Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -18.40712 + 3*Math.log(0.5), 1e-4);
-//    }
+    @Test
+    /**
+     * Reference values come from R calculations ('by hand')
+     */
+    public void testBasicLikelihood_1() throws Exception {
+        ////////////////////////////////// Tree with 1 cell, 1 normal measure
+        LineageTree tree = new LineageTree();
+
+        LineageTreeProb treeProb = new LineageTreeProb();
+
+        DistributionForMeasurement distr_measure1 = new DistributionForMeasurement();
+
+        distr_measure1.initByName("measurementTag", "measure_1",
+                "parm1Distribution", new RealParameter("0.5 -0.5"),
+                "parm2Distribution", new RealParameter("1.0 1.0"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", true);
+        distr_measure1.initAndValidate();
+
+        Parametrization parametrization = new Parametrization();
+
+        parametrization.initByName("distribution", distr_measure1,
+                "transitionUponDivisionProbs", new RealParameter("0.5 0.4 0.1"),
+                "transitionUponDivisionProbs", new RealParameter("0 0 1"));
+
+        ExperimentalMeasurements measure_1 = new ExperimentalMeasurements();
+        measure_1.initByName("measurementTag", "measure_1", "values", "1:1.0");
+        tree.setInputValue("measurement", measure_1);
+
+        tree.setInputValue("cellsInTree", "1");
+        tree.setInputValue("cellsAreFullyTracked", "true");
+
+        tree.initAndValidate();
+
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("0"));
+        treeProb.setInputValue("rootTypeOnly", "true");
+
+        treeProb.initAndValidate();
+
+        double logP = treeProb.calculateLogP();
+
+        assertEquals(logP, -1.737086, 1e-4);
+    }
+
+    @Test
+    /**
+     * Reference values come from R calculations ('by hand')
+     */
+    public void testBasicLikelihood_2() throws Exception {
+
+        /// Tree with 1 cell, 3 normal measures including lifetime and one measure excluded from root
+        LineageTree tree = new LineageTree();
+
+        LineageTreeProb treeProb = new LineageTreeProb();
+
+        ExperimentalMeasurements lifetime = new ExperimentalMeasurements();
+        lifetime.initByName("measurementTag", "lifetime", "values", "1:-0.5");
+        ExperimentalMeasurements measure_1 = new ExperimentalMeasurements();
+        measure_1.initByName("measurementTag", "measure_1", "values", "1:0.1");
+        ExperimentalMeasurements measure_2 = new ExperimentalMeasurements();
+        measure_2.initByName("measurementTag", "measure_2", "values", "1:1.3");
+
+        List<ExperimentalMeasurements> experimentalMeasurements = new LinkedList<>();
+        experimentalMeasurements.add(lifetime);
+        experimentalMeasurements.add(measure_1);
+        experimentalMeasurements.add(measure_2);
+
+        DistributionForMeasurement distr_lifetime = new DistributionForMeasurement();
+
+        distr_lifetime.initByName("measurementTag", "lifetime",
+                "parm1Distribution", new RealParameter("0.1 0.1"),
+                "parm2Distribution", new RealParameter("1.0 0.9"),
+                "distributionType", "normal",
+                "estimateType", "max",
+                "isAppliedToRootCells", true);
+        distr_lifetime.initAndValidate();
+
+        DistributionForMeasurement distr_measure1 = new DistributionForMeasurement();
+
+        distr_measure1.initByName("measurementTag", "measure_1",
+                "parm1Distribution", new RealParameter("-0.4 -0.5"),
+                "parm2Distribution", new RealParameter("0.4 0.3"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", true);
+        distr_measure1.initAndValidate();
+
+        DistributionForMeasurement distr_measure2 = new DistributionForMeasurement();
+
+        distr_measure2.initByName("measurementTag", "measure_2",
+                "parm1Distribution", new RealParameter("-0.9 -0.9"),
+                "parm2Distribution", new RealParameter("0.6 0.5"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", false);
+        distr_measure2.initAndValidate();
+
+        List<DistributionForMeasurement> distributions = new LinkedList<>();
+        distributions.add(distr_lifetime);
+        distributions.add(distr_measure1);
+        distributions.add(distr_measure2);
+
+        Parametrization parametrization  = new Parametrization();
+
+        parametrization.initByName("distribution", distributions,
+                "transitionUponDivisionProbs", new RealParameter("0.5 0.4 0.1"),
+                "transitionUponDivisionProbs", new RealParameter("0 0 1"));
+
+        tree.setInputValue("measurement", experimentalMeasurements);
+
+        tree.setInputValue("cellsInTree", "1");
+        tree.setInputValue("cellsAreFullyTracked", "true");
+
+        tree.initAndValidate();
+
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("1"));
+        treeProb.setInputValue("rootTypeOnly", "true");
+
+        treeProb.initAndValidate();
+
+        double logP = treeProb.calculateLogP();
+        assertEquals(logP, -2.699124, 1e-4);
+
+        ///// not fully tracked
+
+        tree.setInputValue("cellsInTree", "1");
+        tree.setInputValue("cellsAreFullyTracked", "false");
+
+        tree.initAndValidate();
+
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("1"));
+        treeProb.setInputValue("rootTypeOnly", "true");
+
+        treeProb.initAndValidate();
+
+        logP = treeProb.calculateLogP();
+        assertEquals(logP, -0.9841582, 1e-4);
+    }
 
 
-//    @Test
-//    /**
-//     * Reference values come from calculations "by hand" in R
-//     */
-//    public void testLikelihoodWithIntegrationOverTransitionTime() throws Exception{
-//
-//        LineageTree tree = new LineageTree();
-//        LineageTreeProb probTree = new LineageTreeProb();
-//
-//        List<RealParameter> fateProbabilities = new ArrayList<>();
-//        fateProbabilities.add(new RealParameter("0.6 0.2 0.1 0.1"));
-//        fateProbabilities.add(new RealParameter("0.3 0.3 0.4"));
-//
-//        List<RealParameter> scaleWeibull = new ArrayList<>();
-//        scaleWeibull.add(new RealParameter("2 2.2 2.5"));
-//        scaleWeibull.add(new RealParameter("3 3.1"));
-//
-//        List<RealParameter> shapeWeibull = new ArrayList<>();
-//        shapeWeibull.add(new RealParameter("1 1.5 1.3"));
-//        shapeWeibull.add(new RealParameter("1 1.2"));
-//
-//        List<RealParameter> probsTransitionUponDivision = new ArrayList<>();
-//        probsTransitionUponDivision.add(new RealParameter("0.5 0.3 0.2"));
-//        probsTransitionUponDivision.add(new RealParameter("0 0 1.0"));
-//
-//        probTree.setInputValue("probsOfTransitionUponDivision", probsTransitionUponDivision);
-//        probTree.setInputValue("fateProbabilities", fateProbabilities);
-//        probTree.setInputValue("scaleWeibull",scaleWeibull);
-//        probTree.setInputValue("shapeWeibull",shapeWeibull);
-//        probTree.setInputValue("lossProb", new RealParameter("0.1"));
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.setInputValue("allowedTransitions", new BooleanParameter("1 0"));
-//
-//        double logP;
-//
-//        // Basic tree: 1A:2;
-//        tree.setInputValue("newick", "1A:2;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -2.975158 + 2*Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -2.937085 + 2*Math.log(0.5), 1e-4);
-//
-//        // Basic tree: 1D:4.5
-//
-//        tree.setInputValue("newick", "1D:4.5;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP,  -3.53223 + 2*Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -3.907946 + 2*Math.log(0.5), 1e-4);
-//
-//
-//        // Basic tree: 1N:3;
-//        tree.setInputValue("newick", "1N:3;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -1.241888 + 2*Math.log(0.5), 1e-4);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -0.5752535 + 2*Math.log(0.5), 1e-4);
-//
-//
-//
-//        // Basic tree: 1L:22;
-//        tree.setInputValue("newick", "1L:22;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -2.302585 + Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -2.302585 + Math.log(0.5), 1e-4);
-//
-//        // Small tree: (2D:4,3N:3)1D:2;
-//        tree.setInputValue("newick", "(2D:4,3N:3)1D:2;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -6.401941 + 3*Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -7.391145 + 3*Math.log(0.5), 1e-4);
-//
-//
-//        // Small tree: (2A:5,3L:6)1D:3
-//        tree.setInputValue("newick", "(2A:5,3L:6)1D:3;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -9.274919 + 2 * Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -9.648058 + 2 * Math.log(0.5), 1e-4);
-//
-//        // Bigger tree: ((4D:7,5N:2)2D:1,(6D:6,7A:9)3D:3)1D:4
-//        tree.setInputValue("newick", "((4D:7,5N:2)2D:1,(6D:6,7A:9)3D:3)1D:4;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -23.66497 + 5*Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -25.11163 + 5*Math.log(0.5), 1e-4);
-//
-//        // Bigger tree: ((4L:7,5A:2)2D:1,(6L:6,7N:9)3D:3)1D:4
-//        tree.setInputValue("newick", "((4L:7,5A:2)2D:1,(6L:6,7N:9)3D:3)1D:4;");
-//        tree.initAndValidate();
-//        probTree.setInputValue("tree", tree);
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("true"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -16.63671 + 3 * Math.log(0.5), 1e-4);
-//
-//        probTree.setInputValue("rootIsHSC", new BooleanParameter("false"));
-//        probTree.initAndValidate();
-//        logP = probTree.calculateLogP();
-//
-//        assertEquals(logP, -18.39805 + 3 * Math.log(0.5), 1e-4);
-//    }
+    @Test
+    /**
+     * Reference values come from R calculations ('by hand')
+     */
+    public void testBasicLikelihood_3() throws Exception {
+
+        /// Tree with 3 cells, 4 normal measures including lifetime
+        /// one measure excluded from root
+        /// one measure only for roots
+
+        LineageTree tree = new LineageTree();
+
+        LineageTreeProb treeProb = new LineageTreeProb();
+
+        ExperimentalMeasurements lifetime = new ExperimentalMeasurements();
+        lifetime.initByName("measurementTag", "lifetime", "values", "1:-2.3,2:1.1,3:0.1");
+        ExperimentalMeasurements measure_1 = new ExperimentalMeasurements();
+        measure_1.initByName("measurementTag", "measure_1", "values", "1:0.1,2:0.5,3:-0.3");
+        ExperimentalMeasurements measure_2 = new ExperimentalMeasurements();
+        measure_2.initByName("measurementTag", "measure_2", "values", "1:1.3,2:2.1,3:-0.1");
+        ExperimentalMeasurements measure_3 = new ExperimentalMeasurements();
+        measure_3.initByName("measurementTag", "measure_3", "values", "1:-0.1,2:0.5,3:-1.1");
+        ExperimentalMeasurements measure_4 = new ExperimentalMeasurements();
+        measure_4.initByName("measurementTag", "measure_4", "values", "1:-0.6,2:0.2,3:0.3");
+
+        List<ExperimentalMeasurements> experimentalMeasurements = new LinkedList<>();
+        experimentalMeasurements.add(lifetime);
+        experimentalMeasurements.add(measure_1);
+        experimentalMeasurements.add(measure_2);
+        experimentalMeasurements.add(measure_3);
+        experimentalMeasurements.add(measure_4);
+
+        DistributionForMeasurement distr_lifetime = new DistributionForMeasurement();
+
+        distr_lifetime.initByName("measurementTag", "lifetime",
+                "parm1Distribution", new RealParameter("0.1 0.4"),
+                "parm2Distribution", new RealParameter("1.0 0.9"),
+                "distributionType", "normal",
+                "estimateType", "max",
+                "isAppliedToRootCells", true);
+        distr_lifetime.initAndValidate();
+
+        DistributionForMeasurement distr_measure1 = new DistributionForMeasurement();
+
+        distr_measure1.initByName("measurementTag", "measure_1",
+                "parm1Distribution", new RealParameter("-0.4 -0.1"),
+                "parm2Distribution", new RealParameter("0.4 0.3"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", true);
+        distr_measure1.initAndValidate();
+
+        DistributionForMeasurement distr_measure2 = new DistributionForMeasurement();
+
+        distr_measure2.initByName("measurementTag", "measure_2",
+                "parm1Distribution", new RealParameter("-0.9 -0.3"),
+                "parm2Distribution", new RealParameter("0.6 0.5"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", false);
+        distr_measure2.initAndValidate();
+
+        DistributionForMeasurement distr_measure3 = new DistributionForMeasurement();
+
+        distr_measure3.initByName("measurementTag", "measure_3",
+                "parm1Distribution", new RealParameter("-0.5 -0.2"),
+                "parm2Distribution", new RealParameter("0.5 0.8"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", true);
+        distr_measure3.initAndValidate();
+
+        DistributionForMeasurement distr_measure4 = new DistributionForMeasurement();
+
+        distr_measure4.initByName("measurementTag", "measure_4",
+                "parm1Distribution", new RealParameter("1.1 -0.5"),
+                "parm2Distribution", new RealParameter("2.0 1.5"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", true,
+                "isAppliedToRootCellsOnly", true);
+        distr_measure4.initAndValidate();
+
+        List<DistributionForMeasurement> distributions = new LinkedList<>();
+        distributions.add(distr_lifetime);
+        distributions.add(distr_measure1);
+        distributions.add(distr_measure2);
+        distributions.add(distr_measure3);
+        distributions.add(distr_measure4);
+
+        Parametrization parametrization  = new Parametrization();
+
+        parametrization.initByName("distribution", distributions,
+                "transitionUponDivisionProbs", new RealParameter("0.5 0.4 0.1"),
+                "transitionUponDivisionProbs", new RealParameter("0 0 1"));
+
+        tree.setInputValue("measurement", experimentalMeasurements);
+
+        tree.setInputValue("cellsInTree", "1,2,3");
+        tree.setInputValue("cellsAreFullyTracked", "true");
+
+        tree.initAndValidate();
+
+        //// celltypes 0,0,0
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("0 0 0"));
+        treeProb.setInputValue("rootTypeOnly", "false");
+
+        treeProb.initAndValidate();
+
+        double logP = treeProb.calculateLogP();
+        assertEquals(logP, -26.97992, 1e-4);
+
+
+        //// celltypes 1,1,1
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("1 1 1"));
+        treeProb.setInputValue("rootTypeOnly", "false");
+
+        treeProb.initAndValidate();
+
+        logP = treeProb.calculateLogP();
+        assertEquals(logP, -20.75805, 1e-4);
+
+        //// celltypes 0,1,0
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("0 1 0"));
+        treeProb.setInputValue("rootTypeOnly", "false");
+
+        treeProb.initAndValidate();
+
+        logP = treeProb.calculateLogP();
+        assertEquals(logP, -24.46488, 1e-4);
+
+        //// celltypes 1,0,1
+        parametrization  = new Parametrization();
+
+        parametrization.initByName("distribution", distributions,
+                "transitionUponDivisionProbs", new RealParameter("0.5 0.4 0.1"),
+                "transitionUponDivisionProbs", new RealParameter("0.3 0.2 0.5"));
+
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("1 0 1"));
+        treeProb.setInputValue("rootTypeOnly", "false");
+
+        treeProb.initAndValidate();
+
+        logP = treeProb.calculateLogP();
+        assertEquals(logP, -26.49197, 1e-4);
+
+        //// cells are not fully tracked
+        parametrization  = new Parametrization();
+
+        parametrization.initByName("distribution", distributions,
+                "transitionUponDivisionProbs", new RealParameter("0.5 0.4 0.1"),
+                "transitionUponDivisionProbs", new RealParameter("0.3 0.2 0.5"));
+
+        tree.setInputValue("cellsAreFullyTracked", "false");
+        tree.initAndValidate();
+
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("1 0 1"));
+        treeProb.setInputValue("rootTypeOnly", "false");
+
+        treeProb.initAndValidate();
+
+        logP = treeProb.calculateLogP();
+        assertEquals(logP, -7.266675, 1e-4);
+
+        //// root type only, root type 1
+        parametrization  = new Parametrization();
+
+        parametrization.initByName("distribution", distributions,
+                "transitionUponDivisionProbs", new RealParameter("0.5 0.4 0.1"),
+                "transitionUponDivisionProbs", new RealParameter("0.3 0.2 0.5"));
+
+        tree.setInputValue("cellsAreFullyTracked", "true");
+        tree.initAndValidate();
+
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("1 0 1"));
+        treeProb.setInputValue("rootTypeOnly", "true");
+
+        treeProb.initAndValidate();
+        logP = treeProb.calculateLogP();
+        assertEquals(logP, -21.3472, 1e-4);
+
+        //// root type only, root type 0
+        parametrization  = new Parametrization();
+
+        parametrization.initByName("distribution", distributions,
+                "transitionUponDivisionProbs", new RealParameter("0.5 0.4 0.1"),
+                "transitionUponDivisionProbs", new RealParameter("0.3 0.2 0.5"));
+
+        tree.setInputValue("cellsAreFullyTracked", "true");
+        tree.initAndValidate();
+
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("0 0 1"));
+        treeProb.setInputValue("rootTypeOnly", "true");
+
+        treeProb.initAndValidate();
+        logP = treeProb.calculateLogP();
+        assertEquals(logP, -23.67036, 1e-4);
+    }
 }

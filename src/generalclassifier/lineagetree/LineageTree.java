@@ -2,11 +2,8 @@ package generalclassifier.lineagetree;
 
 import beast.core.Input;
 import beast.evolution.tree.Node;
-import beast.evolution.tree.Tree;
-import beast.util.TreeParser;
 import generalclassifier.parametrization.ExperimentalMeasurements;
 
-import java.io.IOException;
 import java.util.*;
 
 public class LineageTree extends CellTree {
@@ -18,12 +15,13 @@ public class LineageTree extends CellTree {
     public Input<String> cellsInTreeInput = new Input<>("cellsInTree",
             "Comma separated list of labels of cells in tree. " +
             "Cells must be numbered following the convention: root cell is '1'," +
-                    " the daughters of a cell 'n' are '2n' and '2n+1'. ");
+                    " the daughters of a cell 'n' are '2n' and '2n+1'. ",
+            Input.Validate.REQUIRED);
 
-    //TODO ongoing work, continue
-    public Input<Boolean> isLastgenerationCompleteInput = new Input<>("isLastGenerationComplete",
-            "Have the cells in the last generation of interest been tracked for their entire lifespan?" +
-                    "", Boolean.TRUE );
+    public Input<Boolean> cellsAreFullyTrackedInput = new Input<>("cellsAreFullyTracked",
+            "Have the cells (besides the root) in all generations up to the last generation of interest been tracked for their entire lifespan? " +
+                    "Default: false.",
+            Boolean.FALSE );
 
     SortedSet<Integer> labelsOfAllCellsInTree;
 
@@ -45,32 +43,18 @@ public class LineageTree extends CellTree {
                 uniqueMeasurementTags.add(tag);
         }
 
-        if(cellsInTreeInput.get() != null) {
-            //TODO add check for correct formatting of the cellsInTree string (all cell numbers must be > 0 integers)
-            String[] labelsOfCellsInTreeAsStrings = cellsInTreeInput.get().replaceAll("\\s","").split(",");
+        //TODO add check for correct formatting of the cellsInTree string (all cell numbers must be > 0 integers)
+        String[] labelsOfCellsInTreeAsStrings = cellsInTreeInput.get().replaceAll("\\s","").split(",");
 
-            labelsOfAllCellsInTree = new TreeSet<>();
+        labelsOfAllCellsInTree = new TreeSet<>();
 
-            for(String s : labelsOfCellsInTreeAsStrings) {
-                labelsOfAllCellsInTree.add(Integer.parseInt(s));
-            }
-        }
-        else {
-            labelsOfAllCellsInTree = new TreeSet<>();
-            for (int i = 1; i < Math.pow(2, lastGenerationOfInterestInput.get()); i++) {
-                labelsOfAllCellsInTree.add(i);
-            }
+        for(String s : labelsOfCellsInTreeAsStrings) {
+            labelsOfAllCellsInTree.add(Integer.parseInt(s));
         }
 
-        Map<Integer, Cell> cellsOfInterest =  buildAllCellsOfInterest();
+        Map<Integer, Cell> allCells =  buildAllCells();
 
-        labelsOfCellsOfInterest = new TreeSet<Integer>();
-
-        for(Integer i : cellsOfInterest.keySet()) {
-            labelsOfCellsOfInterest.add(i);
-        }
-
-        Cell rootCell = buildTreeAndGetRoot(1, cellsOfInterest);
+        Cell rootCell = buildTreeAndGetRoot(1, allCells);
         rootCell.labelNodesInTree();
 
         setRoot(rootCell);
@@ -87,14 +71,12 @@ public class LineageTree extends CellTree {
         return null;
     }
 
-    public Map<Integer, Cell> buildAllCellsOfInterest() {
-
-        int maxCellNumber = (int) Math.pow(2, lastGenerationOfInterestInput.get()) -1;
+    public Map<Integer, Cell> buildAllCells() {
 
         Map<Integer, Cell> cells  = new HashMap<>();
 
         for(Integer cellLabel : labelsOfAllCellsInTree) {
-            if (cellLabel > maxCellNumber || cells.containsKey(cellLabel))
+            if (cells.containsKey(cellLabel))
                 continue;
 
             Cell newCell = new Cell(cellLabel);
@@ -112,7 +94,7 @@ public class LineageTree extends CellTree {
 
         Cell rootCell = cellsOfInterest.get(rootKey);
 
-        if(labelsOfAllCellsInTree.contains(2*rootKey) || labelsOfAllCellsInTree.contains(2*rootKey + 1))
+        if(labelsOfAllCellsInTree.contains(2*rootKey) || labelsOfAllCellsInTree.contains(2*rootKey + 1) || cellsAreFullyTrackedInput.get())
             rootCell.setFate(Cell.Fate.D);
 
         if(cellsOfInterest.containsKey(2*rootKey)) {
@@ -133,10 +115,9 @@ public class LineageTree extends CellTree {
         return super.toString();
     }
 
-    public SortedSet<Integer> getLabelsOfCellsOfInterest(){
-        return labelsOfCellsOfInterest;
+    public SortedSet<Integer> getLabelsOfAllCellsInTree(){
+        return labelsOfAllCellsInTree;
     }
-
 
     //LineageTrees are not treated as StateNodes, so we override the store/restore with empty methods.
     @Override

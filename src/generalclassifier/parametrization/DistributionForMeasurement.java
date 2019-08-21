@@ -1,7 +1,6 @@
 package generalclassifier.parametrization;
 
 import beast.core.CalculationNode;
-import beast.core.Distribution;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import generalclassifier.lineagetree.Cell;
@@ -57,9 +56,13 @@ public class DistributionForMeasurement extends CalculationNode {
             "mean",
             new String[]{"mean", "max", "min"});
 
-    public Input<Boolean> isAppliedOnRootCellsInput = new Input<>("isAppliedToRootCells",
+    public Input<Boolean> isAppliedToRootCellsInput = new Input<>("isAppliedToRootCells",
             "Default: true",
             true);
+
+    public Input<Boolean> isAppliedToRootCellsOnlyInput = new Input<>("isAppliedToRootCellsOnly",
+            "Default: false",
+            false);
 
 
     DistributionType distributionType;
@@ -71,6 +74,8 @@ public class DistributionForMeasurement extends CalculationNode {
     boolean hasZeroFraction = false;
 
     boolean isAppliedToRootCells;
+
+    boolean isAppliedToRootCellsOnly;
 
     public int numberOfCellTypes;
 
@@ -139,10 +144,17 @@ public class DistributionForMeasurement extends CalculationNode {
 
         measurementTag = measurementTagInput.get();
 
-        isAppliedToRootCells = isAppliedOnRootCellsInput.get();
+        isAppliedToRootCells = isAppliedToRootCellsInput.get();
+
+        isAppliedToRootCellsOnly = isAppliedToRootCellsOnlyInput.get();
+
+        if(!isAppliedToRootCells && isAppliedToRootCellsOnly)
+            throw new IllegalArgumentException("If measure is not applied to root cells, it cannot be applied to root cells only.");
     }
 
     /**
+     * Probability density of measured values given distribution parameters.
+     * We first check that the measure applies to the cell before doing the calculation.
      * For now, value is independent of cell fate (does not matter if divides or dies, even for lifetime)
      * However, we do take into account the added uncertainty when the end of the cell life is not observed (Fate.U)
      * @param measuredValue
@@ -151,14 +163,28 @@ public class DistributionForMeasurement extends CalculationNode {
      * @param cellFate
      * @return
      */
-    public double getProbability(double measuredValue, int cellType, boolean isIncompleteObservation, Cell.Fate cellFate) {
+    public double getProbability(double measuredValue, int cellType, boolean isIncompleteObservation, Cell.Fate cellFate, boolean isRootCell) {
 
-        if(cellType >= numberOfCellTypes)
+        if(cellType >= numberOfCellTypes || cellType < 0)
             throw new IllegalArgumentException("Incorrect cell type. Cell type must be >= 0 and < numberOfCellTypes");
+
+        if(Double.isNaN(measuredValue)) // no information available for this measure
+            return 1.0;
+
+        if(isRootCell && !isAppliedToRootCells) // measure not applied to root cells
+            return 1.0;
+
+        if(!isRootCell && isAppliedToRootCellsOnly) // measure only applied to root cells
+            return 1.0;
 
         switch(estimateType) {
             case MEAN:
-                return getProbabilityDensity(measuredValue, cellType);
+                if(cellFate == Cell.Fate.U || (isIncompleteObservation && !isRootCell))
+                    // here not 1.0 if isIncompleteObservation because we do not want to discard all the data on root cells
+                    // which divide (they have isIncompletelyMeasured=True but Cell.Fate.D)
+                    return 1.0; // we ignore the information given if not measured until end of life of cell
+                else
+                    return getProbabilityDensity(measuredValue, cellType);
             case MAX:
                 if(isIncompleteObservation || cellFate == Cell.Fate.U)
                     return getOppositeCumulativeDistribution(measuredValue, cellType);
@@ -355,10 +381,6 @@ public class DistributionForMeasurement extends CalculationNode {
         return numberOfCellTypes;
     }
 
-    public boolean isAppliedToRootCells(){
-        return isAppliedToRootCells;
-    }
-
     public static void main(String[] args) {
         String tag = "lifetime";
 
@@ -374,7 +396,7 @@ public class DistributionForMeasurement extends CalculationNode {
 
         distr.initAndValidate();
 
-        double p = distr.getProbability(3.8, 0, true, Cell.Fate.U);
+        double p = distr.getProbability(3.8, 0, true, Cell.Fate.U, true);
         System.out.println("Prob: " + p);
     }
 

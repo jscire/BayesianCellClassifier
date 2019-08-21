@@ -126,6 +126,14 @@ public class Parametrization extends CalculationNode {
         return distributionsInput.get();
     }
 
+    /**
+     * Returns the value in transitionUponDivisionProbsInput corresponding to the type triplet.
+     * Adds a 0.5 factor if type of child 1 is different to child 2
+     * @param typeMother
+     * @param typeChild1
+     * @param typeChild2
+     * @return
+     */
     public double getTransitionProbability(int typeMother, int typeChild1, int typeChild2){
 
         if(typeChild1 > typeChild2) {
@@ -136,7 +144,13 @@ public class Parametrization extends CalculationNode {
 
         int indexInFlattenedArray = numberOfCellTypes * typeChild1 + typeChild2 - typeChild1 * (typeChild1+1)/2;
 
-        return transitionUponDivisionProbsInput.get().get(typeMother).getArrayValue(indexInFlattenedArray);
+        double valueInputArray = transitionUponDivisionProbsInput.get().get(typeMother).getArrayValue(indexInFlattenedArray);
+
+        if(typeChild1 != typeChild2)
+            return valueInputArray * 0.5; // 1/2 factor because 2 possibilities with child1 type j and child1 type k.
+        else
+            return valueInputArray;
+
     }
     
     public double[] getTransitionProbabilitiesForMotherType(int typeMother){

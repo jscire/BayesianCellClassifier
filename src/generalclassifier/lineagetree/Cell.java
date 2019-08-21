@@ -1,17 +1,14 @@
 package generalclassifier.lineagetree;
 
-import beast.core.Distribution;
 import beast.evolution.tree.Node;
-import generalclassifier.parametrization.DistributionForMeasurement;
 import generalclassifier.parametrization.ExperimentalMeasurements;
-import generalclassifier.parametrization.Parametrization;
-import generalclassifier.utils.Utils;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
-import java.util.*;
-
-import static generalclassifier.lineagetree.Cell.Fate.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.SortedSet;
 
 public class Cell extends Node {
 
@@ -51,11 +48,19 @@ public class Cell extends Node {
                  * If not root, set isIncompletelyMeasured to false
                  * to mark that the cell has been measured over its entire lifetime
                  */
-                if(!this.isRootCell()) isIncompletelyMeasured = false;
+                if(!this.isRootCell()) this.setCompletelyMeasured();
                 break;
             default:
         }
         this.fate = f;
+    }
+
+    public void setCompletelyMeasured(){
+        this.isIncompletelyMeasured = false;
+    }
+
+    public boolean getIsCompletelyMeasured(){
+        return !isIncompletelyMeasured;
     }
 
     public boolean isLostCell(){
@@ -64,6 +69,10 @@ public class Cell extends Node {
 
     public int getTrackNumber(){
         return this.trackNumber;
+    }
+
+    public int getCellGeneration() {
+        return (int) Math.floor(Math.log(this.trackNumber)/Math.log(2)) + 1;
     }
 
     public boolean isRootCell(){

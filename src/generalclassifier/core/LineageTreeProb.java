@@ -12,8 +12,8 @@ import generalclassifier.parametrization.ExperimentalMeasurements;
 import generalclassifier.parametrization.Parametrization;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 
-import java.io.IOException;
-import java.util.*;
+import java.util.List;
+import java.util.Random;
 
 
 public class LineageTreeProb extends Distribution {
@@ -40,7 +40,7 @@ public class LineageTreeProb extends Distribution {
     public Input<Boolean> rootTypeOnlyInput = new Input<>("rootTypeOnly",
             "If true, only the types of the root cells are inferred," +
                     " the types of other cells are marginalized over. Default: true",
-            true);
+            false);
 
 
     CellTree tree;
@@ -59,11 +59,6 @@ public class LineageTreeProb extends Distribution {
         tree = lineageTreeInput.get();
 
         numberOfCellTypes = parametrizationInput.get().numberOfCellTypes;
-
-        //TODO remove when tested with more than 2 types.
-        if(numberOfCellTypes != 2)
-            throw new IllegalStateException("Number of types is not two. Such a configuration is not tested yet.");
-
 
         //TODO add check that cellTypeInput contains only values between 0 and numberOfCellTypes -1
 
@@ -156,6 +151,10 @@ public class LineageTreeProb extends Distribution {
             else {
                 throw new IllegalStateException("Invalid types for parentCell, child1 or child2.");
             }
+
+            for (int i = 0; i < numberOfCellTypes; i++) {
+                pruningProb[i] *= getCellProbability(node, i);
+            }
         }
         else { // fixed type for parent cell
             if(child1Type == -1 && child2Type == -1) { // non-fixed type for either children
@@ -179,14 +178,15 @@ public class LineageTreeProb extends Distribution {
                 }
             }
             else if(child2Type > -1 && child1Type > -1) { // fixed type for both children
-                for (int j = 0; j < numberOfCellTypes; j++) {
                     pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, child1Type, child2Type) *
                             pruningProbFirstChild[child1Type] * pruningProbSecondChild[child2Type];
-                }
             }
             else {
                 throw new IllegalStateException("Invalid types for child1 or child2.");
             }
+            //TODO remove
+            double d = getCellProbability(node, nodeType);
+            pruningProb[nodeType] *= getCellProbability(node, nodeType);
         }
 
         return pruningProb;
@@ -200,13 +200,9 @@ public class LineageTreeProb extends Distribution {
 
         for (DistributionForMeasurement d : parametrizationInput.get().getDistributions()) {
 
-            if(cell.isRootCell() && !d.isAppliedToRootCells()) continue; // cell is root cell and measure is not taken into account for root cells
-
             double measuredValue = cell.getValueMeasured(d.getMeasurementTag());
 
-            if(Double.isNaN(measuredValue)) continue; // no data on this cell for this particular measure
-
-            p *= d.getProbability(measuredValue, cellType, cell.getIsIncompletelyMeasured(), cell.getFate());
+            p *= d.getProbability(measuredValue, cellType, cell.getIsIncompletelyMeasured(), cell.getFate(), cell.isRootCell());
         }
 
         p *= parametrizationInput.get().getFateProbability(cell.getFate(), cellType);
@@ -278,7 +274,7 @@ public class LineageTreeProb extends Distribution {
                         return true;
                     //TODO can we add "else return false"? we would need to know for sure that cellTypeInput is the only dirty element
                 } else {
-                    for (int cellLabel :  lineageTreeInput.get().getLabelsOfCellsOfInterest()) {
+                    for (int cellLabel :  lineageTreeInput.get().getLabelsOfAllCellsInTree()) {
                         if (cellTypeInput.get().isDirty(treeIdxInput.get() + cellLabel - 1))
                             return true;
                     }

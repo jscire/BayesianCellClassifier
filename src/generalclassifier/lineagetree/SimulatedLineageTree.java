@@ -14,6 +14,10 @@ public class SimulatedLineageTree extends CellTree {
             "",
             Input.Validate.REQUIRED);
 
+    public Input<Integer> lastGenerationInput = new Input<>("lastGeneration",
+            "",
+            Input.Validate.REQUIRED);
+
     public Input<String> fileNameInput = new Input<>(
             "fileName",
             "Name of file to save Newick representation of tree to.");
@@ -21,7 +25,7 @@ public class SimulatedLineageTree extends CellTree {
     //TODO add possibility to log simulated tree into a csv file containing all the simulated info.
     @Override
     public void initAndValidate() {
-        if(lastGenerationOfInterestInput.get() < 1)
+        if(lastGenerationInput.get() < 1)
             throw new IllegalArgumentException("lastGenerationOfInterest must be at least 1.");
 
         uniqueMeasurementTags = parametrizationInput.get().getMeasurementTags();
@@ -29,8 +33,7 @@ public class SimulatedLineageTree extends CellTree {
         this.simulate();
         initArrays();
 
-        // in simulated tree, for now, all the cells are cells of interest.
-        labelsOfCellsOfInterest = buildSetOfCellLabels((Cell) this.getRoot());
+        labelsOfAllCellsInTree = buildSetOfCellLabels((SimulatedCell) this.getRoot());
 
         super.initAndValidate();
     }
@@ -39,7 +42,7 @@ public class SimulatedLineageTree extends CellTree {
 
         int rootType = drawRootCellType();
         SimulatedCell rootCell = new SimulatedCell(1, rootType);
-        rootCell.simulateCell(parametrizationInput.get(), lastGenerationOfInterestInput.get());
+        rootCell.simulateCell(parametrizationInput.get(), lastGenerationInput.get());
         rootCell.labelNodesInTree();
         setRoot(rootCell);
     }
@@ -68,10 +71,6 @@ public class SimulatedLineageTree extends CellTree {
         return res + "";
     }
 
-    public SortedSet<Integer> getLabelsOfCellsOfInterest(){
-        return labelsOfCellsOfInterest;
-    }
-
     public SortedSet<Integer> buildSetOfCellLabels(Cell cell){
         SortedSet<Integer> resultSubTree = new TreeSet<>();
         resultSubTree.add(cell.getTrackNumber());
@@ -85,6 +84,10 @@ public class SimulatedLineageTree extends CellTree {
             return resultSubTree;
         }
     }
+
+    public SortedSet<Integer> getLabelsOfAllCellsInTree(){
+        return labelsOfAllCellsInTree;
+    };
 
     public static void main(String[] parms) {
 

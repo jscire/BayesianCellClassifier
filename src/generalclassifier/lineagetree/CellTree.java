@@ -15,16 +15,11 @@ import java.util.TreeMap;
 
 public abstract class CellTree extends Tree {
 
-    //TODO ask about convention for numbering generations
-    public Input<Integer> lastGenerationOfInterestInput = new Input<>("lastGenerationOfInterest",
-            "Default: 3." +
-                    "Root cell is considered to be at generation 1.", 3);
-
     public Input<String> filePathInput = new Input<>("filePath", "File to write tree as a csv file in.");
 
     SortedSet<String> uniqueMeasurementTags;
 
-    SortedSet<Integer> labelsOfCellsOfInterest;
+    SortedSet<Integer> labelsOfAllCellsInTree;
 
     @Override
     public void initAndValidate() {
@@ -57,6 +52,8 @@ public abstract class CellTree extends Tree {
         }
     }
 
+    abstract public SortedSet<Integer> getLabelsOfAllCellsInTree();
+
     public String getHeaderOfCSV(){
         String res="TrackNumber,Fate";
         for(String tag : uniqueMeasurementTags) {
@@ -65,5 +62,4 @@ public abstract class CellTree extends Tree {
         return res + "";
     }
 
-    public abstract SortedSet<Integer> getLabelsOfCellsOfInterest();
 }
