@@ -210,13 +210,6 @@ public class Utils {
         return - 1.0/2 * Math.log(2*Math.PI*sigma*sigma) - (x - mu)*(x-mu)/(2*sigma*sigma);
     }
 
-    public static double getNormalLogDensityForTypeAndInput(double x, int nodeType, InputGroup input) {
-        double mu = input.getMean().get().getArrayValue(nodeType);
-        double sigma = input.getStandardDev().get().getArrayValue(nodeType);
-
-        return getNormalLogDensity(x, mu, sigma);
-    }
-
     public static double getBetaDensity(double x, double alpha, double beta) {
 
         if(x <0 || x>1 || alpha <= 0 || beta <= 0)
