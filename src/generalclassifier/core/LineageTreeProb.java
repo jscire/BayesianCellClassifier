@@ -12,7 +12,9 @@ import generalclassifier.parametrization.ExperimentalMeasurements;
 import generalclassifier.parametrization.Parametrization;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 
@@ -43,20 +45,18 @@ public class LineageTreeProb extends Distribution {
             false);
 
 
-    CellTree tree;
+    Map<Integer, Double[]> storedPruningProb;
 
     boolean sumOverDaughterCellTypes;
 
     int numberOfCellTypes;
 
     // TrapezoidIntegrator numericalIntegrator = new TrapezoidIntegrator(1e-6, 1e-6, 1, 60);
-    IterativeLegendreGaussIntegrator numericalIntegrator = new IterativeLegendreGaussIntegrator(2, 1e-6, 1e-6);
+    public IterativeLegendreGaussIntegrator numericalIntegrator = new IterativeLegendreGaussIntegrator(2, 1e-6, 1e-6);
 
 
     @Override
     public void initAndValidate() {
-
-        tree = lineageTreeInput.get();
 
         numberOfCellTypes = parametrizationInput.get().numberOfCellTypes;
 
@@ -65,6 +65,8 @@ public class LineageTreeProb extends Distribution {
         //TODO implement check that treeIdxInput is long enough to get value
 
         sumOverDaughterCellTypes = rootTypeOnlyInput.get().booleanValue();
+
+        storedPruningProb  =new HashMap<>();
     }
 
     @Override
@@ -73,7 +75,7 @@ public class LineageTreeProb extends Distribution {
 
         try {
             double p = 0;
-            double[] resultPruning = calculatePruningProb((Cell) tree.getRoot());
+            double[] resultPruning = calculatePruningProb((Cell) lineageTreeInput.get().getRoot(), false);
             for (int i = 0; i < numberOfCellTypes; i++) {
                 p += (resultPruning[i] * parametrizationInput.get().getTypeFreq(i));
             }
@@ -85,11 +87,12 @@ public class LineageTreeProb extends Distribution {
         return logP;
     }
 
-    public double[] calculatePruningProb(Cell node) { // here nodeType refers to the type of the node at the beginning of the branch
+
+    public double[] calculatePruningProb(Cell node, boolean storeIntermediateResults) { // here nodeType refers to the type of the node at the beginning of the branch
 
         double[] pruningProb = new double[numberOfCellTypes];
 
-        int nodeType = getFixedCellType(node);
+        int nodeType = getFixedCellType(node.getTrackNumber());
 
         if(node.isLeaf()) {
             if(nodeType == -1) { // leaf type is not fixed
@@ -100,20 +103,29 @@ public class LineageTreeProb extends Distribution {
             else { // leaf type is fixed to nodeType
                 pruningProb[nodeType] = getCellProbability(node, nodeType);
             }
+
+            if(storeIntermediateResults) {
+                Double[] pruningProbToStore = new Double[numberOfCellTypes];
+                for (int i = 0; i < pruningProbToStore.length; i++) {
+                    pruningProbToStore[i] = pruningProb[i];
+                }
+                storedPruningProb.put(node.getTrackNumber(), pruningProbToStore);
+            }
+
             return pruningProb;
         }
 
         Cell child1 = (Cell) node.getChild(0);
         Cell child2 = (Cell) node.getChild(1);
 
-        int child1Type = getFixedCellType(child1);
-        int child2Type = getFixedCellType(child2);
+        int child1Type = getFixedCellType(child1.getTrackNumber());
+        int child2Type = getFixedCellType(child2.getTrackNumber());
 
         double[] pruningProbFirstChild;
         double[] pruningProbSecondChild;
 
-        pruningProbFirstChild = calculatePruningProb(child1);
-        pruningProbSecondChild = calculatePruningProb(child2);
+        pruningProbFirstChild = calculatePruningProb(child1, storeIntermediateResults);
+        pruningProbSecondChild = calculatePruningProb(child2, storeIntermediateResults);
 
         if(nodeType == -1) { // non-fixed type for parent cell
             if(child1Type == -1 && child2Type == -1) { // non-fixed type for either children
@@ -184,9 +196,15 @@ public class LineageTreeProb extends Distribution {
             else {
                 throw new IllegalStateException("Invalid types for child1 or child2.");
             }
-            //TODO remove
-            double d = getCellProbability(node, nodeType);
             pruningProb[nodeType] *= getCellProbability(node, nodeType);
+        }
+
+        if(storeIntermediateResults) {
+            Double[] pruningProbToStore = new Double[numberOfCellTypes];
+            for (int i = 0; i < pruningProbToStore.length; i++) {
+                pruningProbToStore[i] = pruningProb[i];
+            }
+            storedPruningProb.put(node.getTrackNumber(), pruningProbToStore);
         }
 
         return pruningProb;
@@ -214,16 +232,16 @@ public class LineageTreeProb extends Distribution {
      * Return the fixed cell type at beginning of tree edge
      * returns -1 if type of cell is not fixed
      * !!! The type of the root must always be fixed !!!! (with the current code, but not necessary to keep it that way)
-     * @param cell
+     * @param trackNumber
      * @return
      */
-    private int getFixedCellType(Cell cell){
+    public int getFixedCellType(int trackNumber){
         try {
             if(!sumOverDaughterCellTypes) {
-                return cellTypeInput.get().getValue(treeIdxInput.get() + cell.getTrackNumber() - 1); // track numbers start at 1, so we substract 1
+                return cellTypeInput.get().getValue(treeIdxInput.get() + trackNumber - 1); // track numbers start at 1, so we substract 1
             }
 
-            else if(cell.getTrackNumber() == 1) // cell is root cell
+            else if(trackNumber == 1) // cell is root cell
                 return cellTypeInput.get().getValue(treeIdxInput.get());
             else return -1;
         }
@@ -231,6 +249,12 @@ public class LineageTreeProb extends Distribution {
             throw new IllegalStateException("Attempting to get the type of a cell but failed.");
         }
 
+    }
+
+    public Map<Integer, Double[]> updateStoredPruningProb(){
+        storedPruningProb.clear(); // restart with empty hashmap.
+        calculatePruningProb((Cell) lineageTreeInput.get().getRoot(), true);
+        return storedPruningProb;
     }
 
     public String getTreeID() {
@@ -242,7 +266,7 @@ public class LineageTreeProb extends Distribution {
     public String getCorrespondanceLabelsToNodeArray() {
 
         String result = "";
-        for (Node node : tree.getNodesAsArray()) {
+        for (Node node : lineageTreeInput.get().getNodesAsArray()) {
             int newNodeNumber = Integer.parseInt(node.getID().substring(0, 1));
             result += newNodeNumber;
         }
@@ -263,6 +287,8 @@ public class LineageTreeProb extends Distribution {
     public void sample(State state, Random random) {
         throw new RuntimeException("Not implemented.");
     }
+
+
 
     @Override
     protected boolean requiresRecalculation() {
