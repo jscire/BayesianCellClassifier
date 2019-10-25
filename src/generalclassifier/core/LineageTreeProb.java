@@ -32,16 +32,26 @@ public class LineageTreeProb extends Distribution {
             "Each number corresponds to the type of a cell. The index of a cell type is its tracknumber times the index of its tree." +
                     "The cell type defined here refers to the type at the beginning of the tree edge that carries the cell." +
                     "This is important if type transitions are to be allowed along tree edges." +
-                    "It is not the case yet.");
+                    "It is not the case yet. Default: '-1'",
+            new IntegerParameter("-1"));
 
     public Input<Integer> treeIdxInput = new Input<>("treeIdx",
             "If provided, this is an index into the rootIsHSC boolean " +
                     "parameter specifying which element corresponds to the root HSC status. Default: 0",
             0);
 
+    //TODO remove
     public Input<Boolean> rootTypeOnlyInput = new Input<>("rootTypeOnly",
             "If true, only the types of the root cells are inferred," +
                     " the types of other cells are marginalized over. Default: true",
+            false);
+
+    // We add "isOfKnownType" so that the fraction of trees with fixed cell types (e.g. known MPPs in the HSC/MPP data),
+    // does not have an effect on the type frequencies in the unclassified trees.
+    public Input<Boolean> isOfKnownTypeInput = new Input<>("isOfKnownType",
+            "If true, the tree belongs to a culture batch with known type. " +
+                    "Then the frequency parameter is set to 1. " +
+                    "(Applies to all types, but only matters for true cell type as other types have probability zero.)",
             false);
 
 
@@ -76,9 +86,23 @@ public class LineageTreeProb extends Distribution {
         try {
             double p = 0;
             double[] resultPruning = calculatePruningProb((Cell) lineageTreeInput.get().getRoot(), false);
-            for (int i = 0; i < numberOfCellTypes; i++) {
-                p += (resultPruning[i] * parametrizationInput.get().getTypeFreq(i));
+
+            if(isOfKnownTypeInput.get()) {
+                boolean flag = false;
+                for (int i = 0; i < numberOfCellTypes; i++) {
+                    if(resultPruning[i] > 0 && flag)
+                        throw new IllegalStateException("Cells in tree are of known type but the root can take more than one type with non-zero probability.");
+                    else if(resultPruning[i] > 0) {
+                        flag = true;
+                        p += resultPruning[i];
+                    }
+                }
             }
+            else {
+                for (int i = 0; i < numberOfCellTypes; i++)
+                    p += (resultPruning[i] * parametrizationInput.get().getTypeFreq(i));
+            }
+
             logP = Math.log(p);
         } catch (Exception e) {
             e.printStackTrace();
@@ -238,11 +262,15 @@ public class LineageTreeProb extends Distribution {
     public int getFixedCellType(int trackNumber){
         try {
             if(!sumOverDaughterCellTypes) {
-                return cellTypeInput.get().getValue(treeIdxInput.get() + trackNumber - 1); // track numbers start at 1, so we substract 1
+                if(treeIdxInput.get() + trackNumber - 1 >= cellTypeInput.get().getDimension())
+                    return -1;
+                else
+                    return cellTypeInput.get().getValue(treeIdxInput.get() + trackNumber - 1); // track numbers start at 1, so we substract 1
             }
 
             else if(trackNumber == 1) // cell is root cell
                 return cellTypeInput.get().getValue(treeIdxInput.get());
+
             else return -1;
         }
         catch (Exception e) {

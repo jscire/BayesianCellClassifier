@@ -95,9 +95,7 @@ public class SimulatedCell extends Cell {
         // if here, cell divides
 
         // check if we are at the max generation
-        double value= Math.floor(Math.log(2*this.trackNumber)/Math.log(2.0));
-        if(Math.floor(Math.log(2*this.trackNumber)/Math.log(2.0)) >= maxGenerationNumber)
-            return;
+        if(Math.floor(Math.log(2*this.trackNumber)/Math.log(2.0)) >= maxGenerationNumber) return;
 
         // draw daughters types
         int[] daughterTypes  = drawDaughterCellTypes(parametrization, cellType);

@@ -194,7 +194,7 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
         int treeIdx = lineageTreeProbInput.get().treeIdxInput.get();
 
         for (Integer label : lineageTreeInput.get().getLabelsOfAllCellsInTree()) {
-            out.print("cellType" + treeIdx + "_" + label + "\t");
+            out.print(getID() + "_" + label + "\t");
         }
     }
 

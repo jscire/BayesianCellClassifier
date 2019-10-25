@@ -18,11 +18,6 @@ public class SimulatedLineageTree extends CellTree {
             "",
             Input.Validate.REQUIRED);
 
-    public Input<String> fileNameInput = new Input<>(
-            "fileName",
-            "Name of file to save Newick representation of tree to.");
-
-    //TODO add possibility to log simulated tree into a csv file containing all the simulated info.
     @Override
     public void initAndValidate() {
         if(lastGenerationInput.get() < 1)

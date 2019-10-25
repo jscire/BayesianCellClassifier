@@ -148,8 +148,8 @@ public class DistributionForMeasurement extends CalculationNode {
 
         isAppliedToRootCellsOnly = isAppliedToRootCellsOnlyInput.get();
 
-        if(!isAppliedToRootCells && isAppliedToRootCellsOnly)
-            throw new IllegalArgumentException("If measure is not applied to root cells, it cannot be applied to root cells only.");
+//        if(!isAppliedToRootCells && isAppliedToRootCellsOnly)
+//            throw new IllegalArgumentException("If measure is not applied to root cells, it cannot be applied to root cells only.");
     }
 
     /**
