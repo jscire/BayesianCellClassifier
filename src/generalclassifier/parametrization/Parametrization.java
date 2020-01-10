@@ -5,7 +5,10 @@ import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import generalclassifier.lineagetree.Cell;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 //TODO rename class
 public class Parametrization extends CalculationNode {
@@ -24,7 +27,10 @@ public class Parametrization extends CalculationNode {
                     "We assume here that the daughter cells are not ordered and " +
                     "so that the arrays are symmetric before being truncated (the triangle below the diagonal is removed)." +
                     "This renumbering is equivalent to flattening this truncated array by rows." +
-                    "Note that all vectors in this list must have elements which sum up to 1.",
+                    "Note that all vectors in this list must have elements which sum up to 1." +
+                    "If generation-specific transition probs are allowed " +
+                    "(haveGenerationSpecificTransitionProbs set to TRUE)" +
+                    "all first-generation transition probs are input first and then second-generation transition probs and so on.",
             new ArrayList<RealParameter>(), Input.Validate.REQUIRED);
 
     public Input<List<RealParameter>> fateProbabilitiesInput = new Input<>("fateProbabilities",
@@ -40,6 +46,9 @@ public class Parametrization extends CalculationNode {
     public Input<RealParameter> lossProbInput = new Input<>("lossProb",
             "Probability of losing any given cell. Default: 0",
             new RealParameter("0"));
+
+    public Input<Boolean> haveGenerationSpecificTransitionProbsInput = new Input<>("haveGenerationSpecificTransitionProbs",
+            "Default: false", false);
 
     public int numberOfCellTypes;
 
@@ -71,10 +80,19 @@ public class Parametrization extends CalculationNode {
             else if(numberOfCellTypes != distr.getNumberOfCellTypes())
                 throw new IllegalArgumentException("All distributions must have the same number of cell types");
         }
-        
-        if(transitionUponDivisionProbsInput.get().size() != numberOfCellTypes)
-            throw new IllegalArgumentException("Size of list of transitionUponDivisionProbs should " +
-                    "correspond to the number of cell types");
+
+        // if generation-specific transition probs are allowed, check that number of vectors of transition probs is a multiple of the number of types
+        if(haveGenerationSpecificTransitionProbsInput.get()) {
+            if(transitionUponDivisionProbsInput.get().size() % numberOfCellTypes != 0)
+                throw new IllegalArgumentException("Size of list of transitionUponDivisionProbs should " +
+                        "correspond to a multiple of the number of cell types");
+        } else {
+            // check that number of vectors of transition probs is equal to the number of cell types
+            if(transitionUponDivisionProbsInput.get().size() != numberOfCellTypes)
+                throw new IllegalArgumentException("Size of list of transitionUponDivisionProbs should " +
+                        "correspond to the number of cell types");
+        }
+
 
         //TODO add check that all transitionUponDivisions elements sum up to 1 with an error margin.
         for (RealParameter param : transitionUponDivisionProbsInput.get()) {
@@ -134,7 +152,7 @@ public class Parametrization extends CalculationNode {
      * @param typeChild2
      * @return
      */
-    public double getTransitionProbability(int typeMother, int typeChild1, int typeChild2){
+    public double getTransitionProbability(int typeMother, int typeChild1, int typeChild2, int generationMother){
 
         if(typeChild1 > typeChild2) {
             int temp = typeChild2;
@@ -144,7 +162,14 @@ public class Parametrization extends CalculationNode {
 
         int indexInFlattenedArray = numberOfCellTypes * typeChild1 + typeChild2 - typeChild1 * (typeChild1+1)/2;
 
-        double valueInputArray = transitionUponDivisionProbsInput.get().get(typeMother).getArrayValue(indexInFlattenedArray);
+        double valueInputArray;
+        if(haveGenerationSpecificTransitionProbsInput.get()) {
+            // we get the (typeMother + numberOfCellTypes * (generationMother-1))th vector of transition probabilities.
+            // we take (generationMother-1) because the root cell is, by convention, at generation number 1.
+            valueInputArray = transitionUponDivisionProbsInput.get().get(typeMother + numberOfCellTypes * (generationMother-1) ).getArrayValue(indexInFlattenedArray);
+        } else {
+            valueInputArray = transitionUponDivisionProbsInput.get().get(typeMother).getArrayValue(indexInFlattenedArray);
+        }
 
         if(typeChild1 != typeChild2)
             return valueInputArray * 0.5; // 1/2 factor because 2 possibilities with child1 type j and child1 type k.

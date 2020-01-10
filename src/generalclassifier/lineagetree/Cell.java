@@ -71,8 +71,9 @@ public class Cell extends Node {
         return this.trackNumber;
     }
 
-    public int getCellGeneration() {
-        return (int) Math.floor(Math.log(this.trackNumber)/Math.log(2)) + 1;
+    public static int getCellGeneration(int trackNumber) {
+        //by convention, we set the root cell to be at generation number 1.
+        return (int) Math.floor(Math.log(trackNumber)/Math.log(2)) + 1;
     }
 
     public boolean isRootCell(){

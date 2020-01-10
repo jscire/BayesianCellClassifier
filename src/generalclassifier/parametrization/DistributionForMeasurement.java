@@ -179,12 +179,13 @@ public class DistributionForMeasurement extends CalculationNode {
 
         switch(estimateType) {
             case MEAN:
-                if(cellFate == Cell.Fate.U || (isIncompleteObservation && !isRootCell))
-                    // here not 1.0 if isIncompleteObservation because we do not want to discard all the data on root cells
-                    // which divide (they have isIncompletelyMeasured=True but Cell.Fate.D)
-                    return 1.0; // we ignore the information given if not measured until end of life of cell
-                else
-                    return getProbabilityDensity(measuredValue, cellType);
+//                if(cellFate == Cell.Fate.U || (isIncompleteObservation && !isRootCell))
+//                    // here not 1.0 if isIncompleteObservation because we do not want to discard all the data on root cells
+//                    // which divide (they have isIncompletelyMeasured=True but Cell.Fate.D)
+//                    return 1.0; // we ignore the information given if not measured until end of life of cell
+//                else
+//                    return getProbabilityDensity(measuredValue, cellType);
+                return getProbabilityDensity(measuredValue, cellType);
             case MAX:
                 if(isIncompleteObservation || cellFate == Cell.Fate.U)
                     return getOppositeCumulativeDistribution(measuredValue, cellType);

@@ -4,6 +4,7 @@ import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Loggable;
 import generalclassifier.core.LineageTreeProb;
+import generalclassifier.lineagetree.Cell;
 import generalclassifier.lineagetree.CellTree;
 import generalclassifier.parametrization.Parametrization;
 import generalclassifier.utils.Pair;
@@ -71,13 +72,14 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
 
         int child1TrackNumber = 2 * motherTrackNumber;
         int child2TrackNumber = 2 * motherTrackNumber + 1;
+        int motherGeneration = Cell.getCellGeneration(motherTrackNumber);
 
         // check that motherCells has two daughters.
         // if it does, draw types of two daughters.
         if(lineageTreeInput.get().getLabelsOfAllCellsInTree().contains(child1TrackNumber) &&
                 lineageTreeInput.get().getLabelsOfAllCellsInTree().contains(child2TrackNumber)) {
 
-            Pair drawnTypes = drawSisterTypes(child1TrackNumber, child2TrackNumber, motherType);
+            Pair drawnTypes = drawSisterTypes(child1TrackNumber, child2TrackNumber, motherType, motherGeneration);
 
             // store drawn types into mappedCellTypes
             mappedCellTypes.put(child1TrackNumber, drawnTypes.getFirstInt());
@@ -118,7 +120,7 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
         return -1;
     }
 
-    Pair drawSisterTypes(int child1TrackNumber, int child2TrackNumber, int motherType){
+    Pair drawSisterTypes(int child1TrackNumber, int child2TrackNumber, int motherType, int motherGeneration){
 
         int child1Type = lineageTreeProbInput.get().getFixedCellType(child1TrackNumber);
         int child2Type = lineageTreeProbInput.get().getFixedCellType(child2TrackNumber);
@@ -136,7 +138,7 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
 
                     Double typeProb = storedPruningProb.get(child1TrackNumber)[j] *
                             storedPruningProb.get(child2TrackNumber)[k] *
-                            parametrizationInput.get().getTransitionProbability(motherType, j, k);
+                            parametrizationInput.get().getTransitionProbability(motherType, j, k, motherGeneration);
 
                     intermediateProbs.put(new Pair(j,k), typeProb);
 
@@ -149,7 +151,7 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
             for (int k = 0; k < numberOfCellTypes; k++) {
                 Double typeProb = storedPruningProb.get(child1TrackNumber)[child1Type] *
                         storedPruningProb.get(child2TrackNumber)[k] *
-                        parametrizationInput.get().getTransitionProbability(motherType, child1Type, k);
+                        parametrizationInput.get().getTransitionProbability(motherType, child1Type, k, motherGeneration);
 
                 intermediateProbs.put(new Pair(child1Type,k), typeProb);
 
@@ -162,7 +164,7 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
 
                 Double typeProb = storedPruningProb.get(child1TrackNumber)[j] *
                         storedPruningProb.get(child2TrackNumber)[child2Type] *
-                        parametrizationInput.get().getTransitionProbability(motherType, j, child2Type);
+                        parametrizationInput.get().getTransitionProbability(motherType, j, child2Type, motherGeneration);
 
                 intermediateProbs.put(new Pair(j, child2Type), typeProb);
 
@@ -209,6 +211,19 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
     @Override
     public void close(final PrintStream out) {
         // nothing to do
+    }
+
+    // useful for testing
+    public String printMapping(boolean paintAgain){
+
+        if(paintAgain)
+            paintTree();
+
+        String result = "";
+        for (Integer label : lineageTreeInput.get().getLabelsOfAllCellsInTree()) {
+            result += mappedCellTypes.get(label) + "\t";
+        }
+        return result;
     }
 
 }

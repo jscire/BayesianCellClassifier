@@ -117,6 +117,7 @@ public class LineageTreeProb extends Distribution {
         double[] pruningProb = new double[numberOfCellTypes];
 
         int nodeType = getFixedCellType(node.getTrackNumber());
+        int parentGeneration = Cell.getCellGeneration(node.getTrackNumber());
 
         if(node.isLeaf()) {
             if(nodeType == -1) { // leaf type is not fixed
@@ -156,7 +157,7 @@ public class LineageTreeProb extends Distribution {
                 for (int i = 0; i < numberOfCellTypes; i++) {
                     for (int j = 0; j < numberOfCellTypes; j++) {
                         for (int k = 0; k < numberOfCellTypes; k++) {
-                            pruningProb[i] += parametrizationInput.get().getTransitionProbability(i, j, k) *
+                            pruningProb[i] += parametrizationInput.get().getTransitionProbability(i, j, k, parentGeneration) *
                                     pruningProbFirstChild[j] * pruningProbSecondChild[k];
                         }
                     }
@@ -165,7 +166,7 @@ public class LineageTreeProb extends Distribution {
             else if(child1Type > -1 && child2Type == -1) { // fixed type for just one of the two children
                 for (int i = 0; i < numberOfCellTypes; i++) {
                     for (int k = 0; k < numberOfCellTypes; k++) {
-                        pruningProb[i] += parametrizationInput.get().getTransitionProbability(i, child1Type, k) *
+                        pruningProb[i] += parametrizationInput.get().getTransitionProbability(i, child1Type, k, parentGeneration) *
                                 pruningProbFirstChild[child1Type] * pruningProbSecondChild[k];
                     }
                 }
@@ -173,14 +174,14 @@ public class LineageTreeProb extends Distribution {
             else if(child2Type > -1 && child1Type == -1) { // fixed type for just the other children
                 for (int i = 0; i < numberOfCellTypes; i++) {
                     for (int j = 0; j < numberOfCellTypes; j++) {
-                        pruningProb[i] += parametrizationInput.get().getTransitionProbability(i, j, child2Type) *
+                        pruningProb[i] += parametrizationInput.get().getTransitionProbability(i, j, child2Type, parentGeneration) *
                                 pruningProbFirstChild[j] * pruningProbSecondChild[child2Type];
                     }
                 }
             }
             else if(child2Type > -1 && child1Type > -1) { // fixed type for both children
                 for (int i = 0; i < numberOfCellTypes; i++) {
-                        pruningProb[i] += parametrizationInput.get().getTransitionProbability(i, child1Type, child2Type) *
+                        pruningProb[i] += parametrizationInput.get().getTransitionProbability(i, child1Type, child2Type, parentGeneration) *
                                 pruningProbFirstChild[child1Type] * pruningProbSecondChild[child2Type];
                 }
             }
@@ -196,25 +197,25 @@ public class LineageTreeProb extends Distribution {
             if(child1Type == -1 && child2Type == -1) { // non-fixed type for either children
                 for (int j = 0; j < numberOfCellTypes; j++) {
                     for (int k = 0; k < numberOfCellTypes; k++) {
-                        pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, j, k) *
+                        pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, j, k, parentGeneration) *
                                 pruningProbFirstChild[j] * pruningProbSecondChild[k];
                     }
                 }
             }
             else if(child1Type > -1 && child2Type == -1) { // fixed type for just one of the two children
                 for (int k = 0; k < numberOfCellTypes; k++) {
-                    pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, child1Type, k) *
+                    pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, child1Type, k, parentGeneration) *
                             pruningProbFirstChild[child1Type] * pruningProbSecondChild[k];
                 }
             }
             else if(child2Type > -1 && child1Type == -1) { // fixed type for just the other children
                 for (int j = 0; j < numberOfCellTypes; j++) {
-                    pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, j, child2Type) *
+                    pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, j, child2Type, parentGeneration) *
                             pruningProbFirstChild[j] * pruningProbSecondChild[child2Type];
                 }
             }
             else if(child2Type > -1 && child1Type > -1) { // fixed type for both children
-                    pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, child1Type, child2Type) *
+                    pruningProb[nodeType] += parametrizationInput.get().getTransitionProbability(nodeType, child1Type, child2Type, parentGeneration) *
                             pruningProbFirstChild[child1Type] * pruningProbSecondChild[child2Type];
             }
             else {

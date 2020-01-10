@@ -4,6 +4,7 @@ import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import generalclassifier.core.LineageTreeProb;
 import generalclassifier.lineagetree.LineageTree;
+import generalclassifier.mapping.LineageTreeMapping;
 import generalclassifier.parametrization.DistributionForMeasurement;
 import generalclassifier.parametrization.ExperimentalMeasurements;
 import generalclassifier.parametrization.Parametrization;
@@ -375,5 +376,123 @@ public class LikelihoodTests extends TestCase{
         treeProb.initAndValidate();
         logP = treeProb.calculateLogP();
         assertEquals(logP, -23.67036, 1e-4);
+    }
+
+    @Test
+    /**
+     * Reference values from package itself, to check internal consistency
+     */
+    public void testBasicLikelihood_4() throws Exception {
+
+        /// Tree with 7 cells, 3 normal measures, one is lifetime (incomplete for root and tips)
+
+        LineageTree tree = new LineageTree();
+
+        LineageTreeProb treeProb = new LineageTreeProb();
+
+        ExperimentalMeasurements lifetime = new ExperimentalMeasurements();
+        lifetime.initByName("measurementTag", "lifetime", "values", "1:-2.3,2:1.1,3:0.1,4:-0.5,5:-0.8,6:-0.2,7:-0.3");
+        ExperimentalMeasurements measure_1 = new ExperimentalMeasurements();
+        measure_1.initByName("measurementTag", "measure_1", "values", "1:0.1,2:0.5,3:-0.3,4:0.89,5:-0.1,6:-1.3,7:1.5");
+        ExperimentalMeasurements measure_2 = new ExperimentalMeasurements();
+        measure_2.initByName("measurementTag", "measure_2", "values", "1:1.3,2:2.1,3:-0.1,4:-0.45,5:0.59,6:-2.5,7:0.4");
+        ExperimentalMeasurements measure_3 = new ExperimentalMeasurements();
+        measure_3.initByName("measurementTag", "measure_3", "values", "1:-0.1,2:0.5,3:-1.1,4:-0.2,5:0.8,6:1.2,7:0.33");
+
+        List<ExperimentalMeasurements> experimentalMeasurements = new LinkedList<>();
+        experimentalMeasurements.add(lifetime);
+        experimentalMeasurements.add(measure_1);
+        experimentalMeasurements.add(measure_2);
+        experimentalMeasurements.add(measure_3);
+
+        DistributionForMeasurement distr_lifetime = new DistributionForMeasurement();
+
+        distr_lifetime.initByName("measurementTag", "lifetime",
+                "parm1Distribution", new RealParameter("0.1 0.4"),
+                "parm2Distribution", new RealParameter("1.0 0.9"),
+                "distributionType", "normal",
+                "estimateType", "max",
+                "isAppliedToRootCells", true);
+        distr_lifetime.initAndValidate();
+
+        DistributionForMeasurement distr_measure1 = new DistributionForMeasurement();
+
+        distr_measure1.initByName("measurementTag", "measure_1",
+                "parm1Distribution", new RealParameter("-0.4 -0.1"),
+                "parm2Distribution", new RealParameter("0.4 0.3"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", true);
+        distr_measure1.initAndValidate();
+
+        DistributionForMeasurement distr_measure2 = new DistributionForMeasurement();
+
+        distr_measure2.initByName("measurementTag", "measure_2",
+                "parm1Distribution", new RealParameter("-0.9 0.3"),
+                "parm2Distribution", new RealParameter("0.6 0.5"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", false);
+        distr_measure2.initAndValidate();
+
+        DistributionForMeasurement distr_measure3 = new DistributionForMeasurement();
+
+        distr_measure3.initByName("measurementTag", "measure_3",
+                "parm1Distribution", new RealParameter("-0.5 0.7"),
+                "parm2Distribution", new RealParameter("0.5 0.8"),
+                "distributionType", "normal",
+                "estimateType", "mean",
+                "isAppliedToRootCells", true);
+        distr_measure3.initAndValidate();
+
+
+        List<DistributionForMeasurement> distributions = new LinkedList<>();
+        distributions.add(distr_lifetime);
+        distributions.add(distr_measure1);
+        distributions.add(distr_measure2);
+        distributions.add(distr_measure3);
+
+        Parametrization parametrization = new Parametrization();
+
+        parametrization.initByName("distribution", distributions,
+                "haveGenerationSpecificTransitionProbs", true,
+                "transitionUponDivisionProbs", new RealParameter("0.8 0.1 0.1"),
+                "transitionUponDivisionProbs", new RealParameter("0 0 1"),
+                "transitionUponDivisionProbs", new RealParameter("0.2 0.1 0.7"),
+                "transitionUponDivisionProbs", new RealParameter("0 0 1"));
+
+        tree.setInputValue("measurement", experimentalMeasurements);
+
+        tree.setInputValue("cellsInTree", "1,2,3,4,5,6,7");
+        tree.setInputValue("cellsAreFullyTracked", "false");
+
+        tree.initAndValidate();
+
+        //// celltypes 0,0,0,0,1,1,1
+        treeProb.setInputValue("tree", tree);
+        treeProb.setInputValue("parametrization", parametrization);
+        treeProb.setInputValue("cellType", new IntegerParameter("0 0 0 0 1 1 1"));
+        treeProb.setInputValue("rootTypeOnly", "false");
+
+        treeProb.initAndValidate();
+
+        double logP = treeProb.calculateLogP();
+        assertEquals(logP, -75.45081537472011, 1e-4);
+
+
+        //mapping
+        treeProb.setInputValue("cellType", new IntegerParameter("-1 -1 -1 -1 -1 -1 -1"));
+        treeProb.initAndValidate();
+
+        LineageTreeMapping mapping = new LineageTreeMapping();
+
+        mapping.setInputValue("lineageTreeProb", treeProb);
+        mapping.setInputValue("tree", tree);
+        mapping.setInputValue("parametrization", parametrization);
+
+        mapping.initAndValidate();
+        for (int i = 0; i < 10; i++) {
+            System.out.println(mapping.printMapping(true));
+        }
     }
 }
