@@ -50,6 +50,10 @@ public class Parametrization extends CalculationNode {
     public Input<Boolean> haveGenerationSpecificTransitionProbsInput = new Input<>("haveGenerationSpecificTransitionProbs",
             "Default: false", false);
 
+    public Input<Boolean> ignoreKinshipInfoInput = new Input<>("ignoreKinshipInfo",
+            "If set to true, transition probabilities correspond to the probabilities of random draws" +
+                    "for states distributed following type frequencies. Default: false", false);
+
     public int numberOfCellTypes;
 
     public final double ERRORMARGIN = 1e-3;
@@ -80,7 +84,6 @@ public class Parametrization extends CalculationNode {
             else if(numberOfCellTypes != distr.getNumberOfCellTypes())
                 throw new IllegalArgumentException("All distributions must have the same number of cell types");
         }
-
         // if generation-specific transition probs are allowed, check that number of vectors of transition probs is a multiple of the number of types
         if(haveGenerationSpecificTransitionProbsInput.get()) {
             if(transitionUponDivisionProbsInput.get().size() % numberOfCellTypes != 0)
@@ -152,7 +155,19 @@ public class Parametrization extends CalculationNode {
      * @param typeChild2
      * @return
      */
-    public double getTransitionProbability(int typeMother, int typeChild1, int typeChild2, int generationMother){
+    public double getTransitionProbability(int typeMother, int typeChild1, int typeChild2, int generationMother, boolean isTreeOfKnowType){
+
+        if(ignoreKinshipInfoInput.get()) {
+            // if kinship is ignored the transition probability is just the probability of randomly drawing
+            // two cells of type typeChild1 and typeChild2 from the overall population
+
+            // in the case where the entire tree is of know type, this transition prob is fixed to 1.
+            // (The frequency of the known type is 1 in that case)
+            if(isTreeOfKnowType)
+                return 1;
+            else
+                return(typeFrequenciesInput.get().getArrayValue(typeChild1) * typeFrequenciesInput.get().getArrayValue(typeChild2));
+        }
 
         if(typeChild1 > typeChild2) {
             int temp = typeChild2;

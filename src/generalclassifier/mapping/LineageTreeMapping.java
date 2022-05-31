@@ -138,7 +138,7 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
 
                     Double typeProb = storedPruningProb.get(child1TrackNumber)[j] *
                             storedPruningProb.get(child2TrackNumber)[k] *
-                            parametrizationInput.get().getTransitionProbability(motherType, j, k, motherGeneration);
+                            parametrizationInput.get().getTransitionProbability(motherType, j, k, motherGeneration, lineageTreeProbInput.get().isOfKnownTypeInput.get());
 
                     intermediateProbs.put(new Pair(j,k), typeProb);
 
@@ -151,7 +151,7 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
             for (int k = 0; k < numberOfCellTypes; k++) {
                 Double typeProb = storedPruningProb.get(child1TrackNumber)[child1Type] *
                         storedPruningProb.get(child2TrackNumber)[k] *
-                        parametrizationInput.get().getTransitionProbability(motherType, child1Type, k, motherGeneration);
+                        parametrizationInput.get().getTransitionProbability(motherType, child1Type, k, motherGeneration, lineageTreeProbInput.get().isOfKnownTypeInput.get());
 
                 intermediateProbs.put(new Pair(child1Type,k), typeProb);
 
@@ -164,7 +164,7 @@ public class LineageTreeMapping extends CalculationNode implements Loggable {
 
                 Double typeProb = storedPruningProb.get(child1TrackNumber)[j] *
                         storedPruningProb.get(child2TrackNumber)[child2Type] *
-                        parametrizationInput.get().getTransitionProbability(motherType, j, child2Type, motherGeneration);
+                        parametrizationInput.get().getTransitionProbability(motherType, j, child2Type, motherGeneration, lineageTreeProbInput.get().isOfKnownTypeInput.get());
 
                 intermediateProbs.put(new Pair(j, child2Type), typeProb);
 

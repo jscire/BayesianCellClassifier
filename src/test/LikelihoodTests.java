@@ -91,7 +91,7 @@ public class LikelihoodTests extends TestCase{
         DistributionForMeasurement distr_lifetime = new DistributionForMeasurement();
 
         distr_lifetime.initByName("measurementTag", "lifetime",
-                "parm1Distribution", new RealParameter("0.1 0.1"),
+                "parm1Distribution", new RealParameter("-0.5 0.5"),
                 "parm2Distribution", new RealParameter("1.0 0.9"),
                 "distributionType", "normal",
                 "estimateType", "max",
@@ -132,8 +132,6 @@ public class LikelihoodTests extends TestCase{
         tree.setInputValue("measurement", experimentalMeasurements);
 
         tree.setInputValue("cellsInTree", "1");
-        tree.setInputValue("cellsAreFullyTracked", "true");
-
         tree.initAndValidate();
 
         treeProb.setInputValue("tree", tree);
@@ -144,24 +142,15 @@ public class LikelihoodTests extends TestCase{
         treeProb.initAndValidate();
 
         double logP = treeProb.calculateLogP();
-        assertEquals(logP, -2.699124, 1e-4);
+        assertEquals( -2.551129, logP, 1e-4);
 
-        ///// not fully tracked
-
-        tree.setInputValue("cellsInTree", "1");
-        tree.setInputValue("cellsAreFullyTracked", "false");
-
-        tree.initAndValidate();
-
-        treeProb.setInputValue("tree", tree);
-        treeProb.setInputValue("parametrization", parametrization);
-        treeProb.setInputValue("cellType", new IntegerParameter("1"));
+        treeProb.setInputValue("cellType", new IntegerParameter("0"));
         treeProb.setInputValue("rootTypeOnly", "true");
 
         treeProb.initAndValidate();
 
         logP = treeProb.calculateLogP();
-        assertEquals(logP, -0.9841582, 1e-4);
+        assertEquals(-2.170192, logP, 1e-4);
     }
 
 
@@ -337,7 +326,7 @@ public class LikelihoodTests extends TestCase{
         treeProb.initAndValidate();
 
         logP = treeProb.calculateLogP();
-        assertEquals(logP, -7.266675, 1e-4);
+        assertEquals(logP, -26.50606, 1e-4);
 
         //// root type only, root type 1
         parametrization  = new Parametrization();

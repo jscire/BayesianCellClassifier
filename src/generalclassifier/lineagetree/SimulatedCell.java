@@ -43,7 +43,7 @@ public class SimulatedCell extends Cell {
 
         for(DistributionForMeasurement distribution : distributionsForMeasures) {
 
-            if(distribution.getHasZeroFraction() && Math.random() < distribution.getZeroFraction()) {
+            if(distribution.getHasZeroFraction() && Math.random() < distribution.getZeroFraction(cellType)) {
                 // is simulated value zero?
                 experimentalMeasures.put(distribution.getMeasurementTag(), 0.0);
             }

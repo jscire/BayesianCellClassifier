@@ -361,9 +361,9 @@ public class DistributionForMeasurement extends CalculationNode {
         return hasZeroFraction;
     }
 
-    public double getZeroFraction(){
+    public double getZeroFraction(int cellType){
         if (!hasZeroFraction) return 0.0;
-        return zeroFractionInput.get().getValue();
+        return zeroFractionInput.get().getArrayValue(cellType);
     }
 
     public double getParm1(int cellType){
