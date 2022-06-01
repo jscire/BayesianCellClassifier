@@ -1,6 +1,7 @@
 package generalclassifier.parametrization;
 
 import beast.core.CalculationNode;
+import beast.core.Function;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
 import generalclassifier.lineagetree.Cell;
@@ -25,15 +26,15 @@ public class DistributionForMeasurement extends CalculationNode {
     }
 
 
-    public Input<RealParameter> parm1DistributionInput = new Input<>("parm1Distribution",
+    public Input<Function> parm1DistributionInput = new Input<>("parm1Distribution",
             "First parameter of the distribution.",
             Input.Validate.REQUIRED);
 
-    public Input<RealParameter> parm2DistributionInput = new Input<>("parm2Distribution",
+    public Input<Function> parm2DistributionInput = new Input<>("parm2Distribution",
             "Second parameter of the distribution.",
             Input.Validate.REQUIRED);
 
-    public Input<RealParameter> zeroFractionInput = new Input<>("zeroFraction", "Optional. " +
+    public Input<Function> zeroFractionInput = new Input<>("zeroFraction", "Optional. " +
             "Probability mass associated with point value 0. " +
             "Useful when using distributions that exclude negative values, but measurements show negative values. " +
             "These negative values can be approximated as being 0, and a zeroFraction specified.");
