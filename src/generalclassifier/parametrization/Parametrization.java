@@ -2,6 +2,7 @@ package generalclassifier.parametrization;
 
 import beast.core.CalculationNode;
 import beast.core.Input;
+import beast.core.parameter.BooleanParameter;
 import beast.core.parameter.RealParameter;
 import generalclassifier.lineagetree.Cell;
 
@@ -50,9 +51,9 @@ public class Parametrization extends CalculationNode {
     public Input<Boolean> haveGenerationSpecificTransitionProbsInput = new Input<>("haveGenerationSpecificTransitionProbs",
             "Default: false", false);
 
-    public Input<Boolean> ignoreKinshipInfoInput = new Input<>("ignoreKinshipInfo",
+    public Input<BooleanParameter> ignoreKinshipInfoInput = new Input<>("ignoreKinshipInfo",
             "If set to true, transition probabilities correspond to the probabilities of random draws" +
-                    "for states distributed following type frequencies. Default: false", false);
+                    "for states distributed following type frequencies. Default: false", new BooleanParameter("false"));
 
     public int numberOfCellTypes;
 
@@ -157,7 +158,7 @@ public class Parametrization extends CalculationNode {
      */
     public double getTransitionProbability(int typeMother, int typeChild1, int typeChild2, int generationMother, boolean isTreeOfKnowType){
 
-        if(ignoreKinshipInfoInput.get()) {
+        if(ignoreKinshipInfoInput.get().getValue()) {
             // if kinship is ignored the transition probability is just the probability of randomly drawing
             // two cells of type typeChild1 and typeChild2 from the overall population
 
