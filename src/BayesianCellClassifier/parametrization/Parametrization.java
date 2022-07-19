@@ -1,10 +1,10 @@
-package generalclassifier.parametrization;
+package BayesianCellClassifier.parametrization;
 
 import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.parameter.BooleanParameter;
 import beast.core.parameter.RealParameter;
-import generalclassifier.lineagetree.Cell;
+import BayesianCellClassifier.lineagetree.Cell;
 
 import java.util.ArrayList;
 import java.util.List;

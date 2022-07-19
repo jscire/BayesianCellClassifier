@@ -1,11 +1,11 @@
-package generalclassifier.parametrization;
+package BayesianCellClassifier.parametrization;
 
 import beast.core.CalculationNode;
 import beast.core.Function;
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
-import generalclassifier.lineagetree.Cell;
-import generalclassifier.utils.Utils;
+import BayesianCellClassifier.lineagetree.Cell;
+import BayesianCellClassifier.utils.Utils;
 
 //TODO change name of class
 public class DistributionForMeasurement extends CalculationNode {

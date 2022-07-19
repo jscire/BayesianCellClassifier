@@ -1,4 +1,4 @@
-package generalclassifier.parametrization;
+package BayesianCellClassifier.parametrization;
 
 import beast.core.BEASTObject;
 import beast.core.Input;

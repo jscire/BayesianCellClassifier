@@ -1,8 +1,8 @@
-package generalclassifier.lineagetree;
+package BayesianCellClassifier.lineagetree;
 
-import generalclassifier.parametrization.DistributionForMeasurement;
-import generalclassifier.parametrization.Parametrization;
-import generalclassifier.utils.Utils;
+import BayesianCellClassifier.parametrization.DistributionForMeasurement;
+import BayesianCellClassifier.parametrization.Parametrization;
+import BayesianCellClassifier.utils.Utils;
 
 import java.util.HashMap;
 import java.util.List;

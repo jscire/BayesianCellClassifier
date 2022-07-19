@@ -1,9 +1,9 @@
-package generalclassifier.lineagetree;
+package BayesianCellClassifier.lineagetree;
 
 import beast.core.Input;
 import beast.core.parameter.RealParameter;
-import generalclassifier.parametrization.DistributionForMeasurement;
-import generalclassifier.parametrization.Parametrization;
+import BayesianCellClassifier.parametrization.DistributionForMeasurement;
+import BayesianCellClassifier.parametrization.Parametrization;
 
 import java.util.SortedSet;
 import java.util.TreeSet;

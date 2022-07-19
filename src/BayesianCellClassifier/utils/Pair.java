@@ -1,4 +1,4 @@
-package generalclassifier.utils;
+package BayesianCellClassifier.utils;
 
 public class Pair {
 

@@ -1,7 +1,7 @@
-package generalclassifier.lineagetree;
+package BayesianCellClassifier.lineagetree;
 
 import beast.evolution.tree.Node;
-import generalclassifier.parametrization.ExperimentalMeasurements;
+import BayesianCellClassifier.parametrization.ExperimentalMeasurements;
 
 import java.text.DecimalFormat;
 import java.text.NumberFormat;

@@ -1,6 +1,6 @@
-package generalclassifier.utils;
+package BayesianCellClassifier.utils;
 
-import generalclassifier.parametrization.DistributionForMeasurement;
+import BayesianCellClassifier.parametrization.DistributionForMeasurement;
 import org.apache.commons.math3.distribution.BetaDistribution;
 import org.apache.commons.math3.distribution.GammaDistribution;
 import org.apache.commons.math3.distribution.LogNormalDistribution;

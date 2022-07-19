@@ -1,13 +1,13 @@
-package generalclassifier.mapping;
+package BayesianCellClassifier.mapping;
 
 import beast.core.CalculationNode;
 import beast.core.Input;
 import beast.core.Loggable;
-import generalclassifier.core.LineageTreeProb;
-import generalclassifier.lineagetree.Cell;
-import generalclassifier.lineagetree.CellTree;
-import generalclassifier.parametrization.Parametrization;
-import generalclassifier.utils.Pair;
+import BayesianCellClassifier.core.LineageTreeProb;
+import BayesianCellClassifier.lineagetree.Cell;
+import BayesianCellClassifier.lineagetree.CellTree;
+import BayesianCellClassifier.parametrization.Parametrization;
+import BayesianCellClassifier.utils.Pair;
 
 import java.io.PrintStream;
 import java.util.*;

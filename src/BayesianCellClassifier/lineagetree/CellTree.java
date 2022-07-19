@@ -1,4 +1,4 @@
-package generalclassifier.lineagetree;
+package BayesianCellClassifier.lineagetree;
 
 import beast.core.Input;
 import beast.evolution.tree.Node;

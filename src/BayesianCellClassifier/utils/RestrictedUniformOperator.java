@@ -1,4 +1,4 @@
-package generalclassifier.utils;
+package BayesianCellClassifier.utils;
 
 import beast.core.Description;
 import beast.core.Input;

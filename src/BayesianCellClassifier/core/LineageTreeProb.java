@@ -1,15 +1,15 @@
-package generalclassifier.core;
+package BayesianCellClassifier.core;
 
 import beast.core.*;
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
 import beast.evolution.tree.Node;
-import generalclassifier.lineagetree.Cell;
-import generalclassifier.lineagetree.CellTree;
-import generalclassifier.lineagetree.LineageTree;
-import generalclassifier.parametrization.DistributionForMeasurement;
-import generalclassifier.parametrization.ExperimentalMeasurements;
-import generalclassifier.parametrization.Parametrization;
+import BayesianCellClassifier.lineagetree.Cell;
+import BayesianCellClassifier.lineagetree.CellTree;
+import BayesianCellClassifier.lineagetree.LineageTree;
+import BayesianCellClassifier.parametrization.DistributionForMeasurement;
+import BayesianCellClassifier.parametrization.ExperimentalMeasurements;
+import BayesianCellClassifier.parametrization.Parametrization;
 import org.apache.commons.math3.analysis.integration.IterativeLegendreGaussIntegrator;
 
 import java.util.HashMap;

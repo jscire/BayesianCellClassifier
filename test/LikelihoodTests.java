@@ -2,12 +2,12 @@ package test;
 
 import beast.core.parameter.IntegerParameter;
 import beast.core.parameter.RealParameter;
-import generalclassifier.core.LineageTreeProb;
-import generalclassifier.lineagetree.LineageTree;
-import generalclassifier.mapping.LineageTreeMapping;
-import generalclassifier.parametrization.DistributionForMeasurement;
-import generalclassifier.parametrization.ExperimentalMeasurements;
-import generalclassifier.parametrization.Parametrization;
+import BayesianCellClassifier.core.LineageTreeProb;
+import BayesianCellClassifier.lineagetree.LineageTree;
+import BayesianCellClassifier.mapping.LineageTreeMapping;
+import BayesianCellClassifier.parametrization.DistributionForMeasurement;
+import BayesianCellClassifier.parametrization.ExperimentalMeasurements;
+import BayesianCellClassifier.parametrization.Parametrization;
 import junit.framework.TestCase;
 import org.junit.Test;
 
